@@ -37,10 +37,20 @@ public class Content {
         }
     }
 
+    public class Thumbnail{
+        public List<InnerThumbnail> thumbnails;
+        public class InnerThumbnail{
+            String url;
+            int width;
+            int height;
+        }
+    }
+
     public class VideoRenderer{
         public Title title;
         public LengthText lengthText;
         public NavigationEndpoint navigationEndpoint;
         public OwnerText ownerText;
+        public Thumbnail thumbnail;
     }
 }

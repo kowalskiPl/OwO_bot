@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class YouTubeRequestResultParser {
 
@@ -19,7 +20,6 @@ public class YouTubeRequestResultParser {
 
     public static List<YouTubeVideo> getVideoUrlFromSearch(Document document) {
         Element body = document.body();
-        System.out.println(body.childrenSize());
         String html = body.html();
         Matcher m = searchContentJsonPattern.matcher(html);
         List<YouTubeVideo> videoResults = new ArrayList<>();
@@ -43,6 +43,6 @@ public class YouTubeRequestResultParser {
                 }
             });
         }
-        return videoResults;
+        return videoResults.stream().limit(10).collect(Collectors.toList());
     }
 }

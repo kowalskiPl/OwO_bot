@@ -25,8 +25,8 @@ public class Main {
                 .enableCache(CacheFlag.VOICE_STATE);
 
         // sharding setup
-        for (int i = 0; i < 10; i++) {
-            builder.useSharding(i, 10);
+        for (int i = 0; i < 3; i++) {
+            builder.useSharding(i, 3);
             try {
                 builder.build();
             } catch (LoginException e) {
