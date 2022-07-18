@@ -30,3 +30,8 @@ jobs:
         with:
           name: build-reports
           path: build/reports/
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Package
+          path: build/libs
