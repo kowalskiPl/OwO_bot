@@ -13,7 +13,7 @@ jobs:
       - uses: khan/pull-request-comment-trigger@v1.1.0
         id: check
         with:
-          trigger: '@deploy'
+          trigger: 'deploy'
           reaction: rocket
       - name: Checkout project sources
         uses: actions/checkout@v2
