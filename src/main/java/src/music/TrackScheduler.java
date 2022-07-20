@@ -48,7 +48,7 @@ public class TrackScheduler extends AudioEventAdapter {
             linkedTextChannel.sendMessage("Added playlist: " + name + " to queue").queue();
         } else {
             for (int i = 1; i < tracks.size(); i++) {
-                queue.offer(tracks.get(1));
+                queue.offer(tracks.get(i));
             }
             linkedTextChannel.sendMessage("Now playing playlist: " + name + " to queue").queue();
         }
