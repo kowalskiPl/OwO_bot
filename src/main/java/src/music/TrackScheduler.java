@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -39,6 +40,18 @@ public class TrackScheduler extends AudioEventAdapter {
             linkedTextChannel.sendMessage("Added: " + track.getInfo().title + " to queue").queue();
         } else
             linkedTextChannel.sendMessage("Now playing: " + track.getInfo().title).queue();
+    }
+
+    public void enqueue(List<AudioTrack> tracks, String name) {
+        if (!player.startTrack(tracks.get(0), true)) {
+            tracks.forEach(queue::offer);
+            linkedTextChannel.sendMessage("Added playlist: " + name + " to queue").queue();
+        } else {
+            for (int i = 1; i < tracks.size(); i++) {
+                queue.offer(tracks.get(1));
+            }
+            linkedTextChannel.sendMessage("Now playing playlist: " + name + " to queue").queue();
+        }
     }
 
     public void nextTrack() {
