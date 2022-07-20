@@ -130,7 +130,7 @@ public class MusicListenerAdapter extends ListenerAdapter {
                 musicManager.setTextChannel(channel);
                 String name = playlist.getName();
                 try {
-                    play(member, guild, musicManager, playlist.getTracks());
+                    play(member, guild, musicManager, playlist.getTracks(), name);
                 } catch (UserNotInVoiceChannelException e) {
                     log.warn("Failed to acquire user channel");
                     channel.sendMessage("Are you in the voice channel?").queue();
