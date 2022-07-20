@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import src.exception.UserNotInVoiceChannelException;
+import src.model.AudioTrackRequest;
 import src.model.YouTubeVideo;
 import src.music.GuildMusicManager;
 import src.youtube.YouTubeSearch;
@@ -118,7 +119,7 @@ public class MusicListenerAdapter extends ListenerAdapter {
             public void trackLoaded(AudioTrack track) {
                 try {
                     musicManager.setTextChannel(channel);
-                    play(member, guild, musicManager, track);
+                    play(member, guild, musicManager, track, channel);
                 } catch (UserNotInVoiceChannelException e) {
                     log.warn("Failed to acquire user channel");
                     channel.sendMessage("Are you in the voice channel?").queue();
@@ -134,7 +135,7 @@ public class MusicListenerAdapter extends ListenerAdapter {
                 }
 
                 try {
-                    play(member, guild, musicManager, firstTrack);
+                    play(member, guild, musicManager, firstTrack, channel);
                 } catch (UserNotInVoiceChannelException e) {
                     log.warn("Failed to acquire user channel");
                     channel.sendMessage("Are you in the voice channel?").queue();
@@ -156,8 +157,11 @@ public class MusicListenerAdapter extends ListenerAdapter {
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
         log.info("Pressed button Id: " + event.getButton().getId());
-        String buttonId = event.getButton().getId();
-        handleTrackSelectionButtonPress(event);
+
+        if (trackButtonsIds.containsKey(event.getButton().getId())){
+            handleTrackSelectionButtonPress(event);
+        }
+
         event.getMessage().delete().queue();
         super.onButtonInteraction(event);
     }
@@ -207,10 +211,10 @@ public class MusicListenerAdapter extends ListenerAdapter {
         }
     }
 
-    private void play(Member member, Guild guild, GuildMusicManager musicManager, AudioTrack track) throws UserNotInVoiceChannelException {
+    private void play(Member member, Guild guild, GuildMusicManager musicManager, AudioTrack track, MessageChannel channel) throws UserNotInVoiceChannelException {
         connectToVoiceChannel(member, guild.getAudioManager());
 
-        musicManager.scheduler.enqueue(track);
+        musicManager.scheduler.enqueue(new AudioTrackRequest(track, channel, member));
     }
 
     private static void connectToVoiceChannel(Member member, AudioManager audioManager) throws UserNotInVoiceChannelException {
