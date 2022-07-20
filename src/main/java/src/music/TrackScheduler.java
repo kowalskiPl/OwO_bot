@@ -6,6 +6,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Channel;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -20,6 +21,7 @@ import java.awt.*;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -55,6 +57,18 @@ public class TrackScheduler extends AudioEventAdapter {
             linkedTextChannel.sendMessage("Added: " + audioTrackRequest.audioTrack.getInfo().title + " to queue").queue();
         } else
             linkedTextChannel.sendMessage("Now playing: " + audioTrackRequest.audioTrack.getInfo().title).queue();
+    }
+
+    public void enqueue(List<AudioTrack> tracks, String name, MessageChannel channel, Member member) {
+        if (!player.startTrack(tracks.get(0), true)) {
+            tracks.forEach(track -> queue.offer(new AudioTrackRequest(track, channel, member)));
+            linkedTextChannel.sendMessage("Added playlist: " + name + " to queue").queue();
+        } else {
+            for (int i = 1; i < tracks.size(); i++) {
+                queue.offer(new AudioTrackRequest(tracks.get(i), channel, member));
+            }
+            linkedTextChannel.sendMessage("Now playing playlist: " + name + " to queue").queue();
+        }
     }
 
     public void nextTrack() {
