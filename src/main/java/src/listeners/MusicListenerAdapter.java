@@ -127,14 +127,10 @@ public class MusicListenerAdapter extends ListenerAdapter {
 
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
-                AudioTrack firstTrack = playlist.getSelectedTrack();
                 musicManager.setTextChannel(channel);
-                if (firstTrack == null) {
-                    firstTrack = playlist.getTracks().get(0);
-                }
-
+                String name = playlist.getName();
                 try {
-                    play(member, guild, musicManager, firstTrack);
+                    play(member, guild, musicManager, playlist.getTracks(), name);
                 } catch (UserNotInVoiceChannelException e) {
                     log.warn("Failed to acquire user channel");
                     channel.sendMessage("Are you in the voice channel?").queue();
@@ -211,6 +207,12 @@ public class MusicListenerAdapter extends ListenerAdapter {
         connectToVoiceChannel(member, guild.getAudioManager());
 
         musicManager.scheduler.enqueue(track);
+    }
+
+    private void play(Member member, Guild guild, GuildMusicManager musicManager, List<AudioTrack> tracks, String name) throws UserNotInVoiceChannelException {
+        connectToVoiceChannel(member, guild.getAudioManager());
+
+        musicManager.scheduler.enqueue(tracks, name);
     }
 
     private static void connectToVoiceChannel(Member member, AudioManager audioManager) throws UserNotInVoiceChannelException {
