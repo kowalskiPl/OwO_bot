@@ -77,7 +77,6 @@ public class TrackScheduler extends AudioEventAdapter {
             player.startTrack(track.audioTrack, false);
             track.channel.sendMessage("Now playing: " + track.audioTrack.getInfo().title).queue();
         }
-
     }
 
     public void pause() {
