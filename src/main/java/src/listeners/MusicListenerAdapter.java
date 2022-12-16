@@ -118,7 +118,6 @@ public class MusicListenerAdapter extends ListenerAdapter {
             @Override
             public void trackLoaded(AudioTrack track) {
                 try {
-                    musicManager.setTextChannel(channel);
                     play(member, guild, musicManager, track, channel);
                 } catch (UserNotInVoiceChannelException e) {
                     log.warn("Failed to acquire user channel");
@@ -128,7 +127,6 @@ public class MusicListenerAdapter extends ListenerAdapter {
 
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
-                musicManager.setTextChannel(channel);
                 String name = playlist.getName();
                 try {
                     play(member, guild, musicManager, playlist.getTracks(), name, channel);
@@ -154,7 +152,7 @@ public class MusicListenerAdapter extends ListenerAdapter {
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
         log.info("Pressed button Id: " + event.getButton().getId());
 
-        if (trackButtonsIds.containsKey(event.getButton().getId())){
+        if (trackButtonsIds.containsKey(event.getButton().getId())) {
             handleTrackSelectionButtonPress(event);
         }
 

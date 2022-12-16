@@ -2,9 +2,8 @@ package src.music;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
-import net.dv8tion.jda.api.entities.Channel;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import src.model.YouTubeVideo;
+import src.utilities.listener.MessageSender;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -23,6 +22,7 @@ public class GuildMusicManager {
         scheduler = new TrackScheduler(player);
         player.addListener(scheduler);
         recentSearchResults = new LinkedHashMap<>();
+        scheduler.addListener(new MessageSender());
     }
 
     public AudioPlayerTaskSendHandler getSendHandler(){
@@ -33,10 +33,6 @@ public class GuildMusicManager {
         for (int i = 0; i < videoList.size(); i++){
             recentSearchResults.put(i, videoList.get(i));
         }
-    }
-
-    public void setTextChannel(MessageChannel channel) {
-        scheduler.setLinkedTextChannel(channel);
     }
 
     public YouTubeVideo getVideoAndClearSearchResults(int searchIndex) {
