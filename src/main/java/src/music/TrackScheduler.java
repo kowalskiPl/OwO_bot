@@ -82,6 +82,12 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
             player.startTrack(track.audioTrack, false);
             sendEvent(new ModifyMusicMessageEvent(track, this));
         }
+
+        if (track == null){
+            sendEvent(new DeleteMessageEvent(currentEmbedLocation, currentEmbedMessageId, 0, this));
+            currentEmbedLocation = null;
+            currentEmbedMessageId = 0;
+        }
     }
 
     public void pause() {
@@ -97,6 +103,8 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
         queue.clear();
         player.setPaused(false);
         sendEvent(new DeleteMessageEvent(currentEmbedLocation, currentEmbedMessageId, 0, this));
+        currentEmbedLocation = null;
+        currentEmbedMessageId = 0;
     }
 
     public AudioTrack getCurrentTrack() {
