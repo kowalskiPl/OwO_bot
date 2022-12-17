@@ -65,7 +65,7 @@ public class MusicListenerAdapter extends ListenerAdapter {
         var musicManager = guildMusicManagers.get(guildId);
 
         if (musicManager == null) {
-            musicManager = new GuildMusicManager(playerManager);
+            musicManager = new GuildMusicManager(playerManager, guildId);
             guildMusicManagers.put(guildId, musicManager);
         }
 
