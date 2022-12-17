@@ -1,23 +1,17 @@
 package src.listeners;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.JDAInfo;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.ErrorResponse;
-import net.dv8tion.jda.internal.JDAImpl;
+import src.events.*;
 import src.events.Event;
-import src.events.Listener;
-import src.events.ModifyMusicMessageEvent;
-import src.events.SendMusicMessageEvent;
 import src.model.AudioTrackRequest;
 import src.music.TrackScheduler;
+import src.utilities.SimpleTimeConverter;
 
 import java.awt.*;
-import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -48,12 +42,26 @@ public class MusicEmbedMessageSender implements Listener {
 //                var guild = modifyMusicMessageEvent.getAudioTrackRequest().channel.getJDA().getGuildById(guildId);
             }
         }
+
+        if (event instanceof PlayerPauseEvent pauseEvent) {
+            if (pauseEvent.getSender() instanceof TrackScheduler scheduler) {
+                String pause = pauseEvent.isPaused() ? "Pause" : "Iz paused";
+                pauseEvent
+                        .getMessageChannel()
+                        .retrieveMessageById(scheduler.getEmbedMessageId())
+                        .queue(message -> message.editMessageEmbeds(message.getEmbeds().get(0)).setActionRows(ActionRow.of(Button.secondary("Pause", pause),
+                                Button.secondary("Next", "Next"),
+                                Button.secondary("Previous", "Previous"),
+                                Button.secondary("Stop", "Stop"))).queue());
+            }
+        }
     }
 
     private EmbedBuilder constructEmbedPlayerMessage(AudioTrackRequest request) {
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setTitle("Now playing: " + request.audioTrack.getInfo().title)
+        builder.setTitle("Now playing: \n" + request.audioTrack.getInfo().title)
                 .setColor(Color.BLUE)
+                .addField("Total length", SimpleTimeConverter.getTimeStringFromLong(request.audioTrack.getInfo().length), false)
                 .addField("Requester", request.requester.getEffectiveName(), false)
                 .addField("Author", request.audioTrack.getInfo().author, false);
         return builder;
@@ -65,8 +73,10 @@ public class MusicEmbedMessageSender implements Listener {
         channel.sendMessageEmbeds(builder.build())
                 .setActionRows(
                         ActionRow.of(Button.secondary("Pause", "Pause"),
-                                Button.secondary("Next", "Next"))
+                                Button.secondary("Next", "Next"),
+                                Button.secondary("Previous", "Previous"),
+                                Button.secondary("Stop", "Stop"))
                 )
-                .queue(message -> scheduler.setEmbedMessageId(message.getIdLong()), new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
+                .queue(message -> scheduler.setEmbedMessageId(message.getIdLong()).setCurrentEmbedLocation(request.channel), new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
     }
 }

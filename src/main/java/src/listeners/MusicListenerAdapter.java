@@ -40,6 +40,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MusicListenerAdapter extends ListenerAdapter {
 
@@ -90,19 +91,21 @@ public class MusicListenerAdapter extends ListenerAdapter {
 
         String[] arr = content.split(" ", 2);
 
-
+        AtomicBoolean handled = new AtomicBoolean(false);
         switch (arr[0]) {
-            case "!play" -> handlePlayCommand(event, arr[1]);
-            case "!pause" -> handlePauseCommand(event);
-            case "!skip" -> handleSkipCommand(event);
-            case "!stop" -> handleStopCommand(event);
-            case "!disconnect", "!leave" -> handleDisconnectCommand(event);
+            case "!play" -> handlePlayCommand(event, arr[1], handled);
+            case "!pause" -> handlePauseCommand(event, handled);
+            case "!skip" -> handleSkipCommand(event, handled);
+            case "!stop" -> handleStopCommand(event, handled);
+            case "!disconnect", "!leave" -> handleDisconnectCommand(event, handled);
         }
+        if (handled.get())
+            message.delete().delay(Duration.ofSeconds(2)).queue();
 
         super.onMessageReceived(event);
     }
 
-    private void handlePlayCommand(MessageReceivedEvent event, String songName) {
+    private void handlePlayCommand(MessageReceivedEvent event, String songName, AtomicBoolean handled) {
         GuildMusicManager musicManager = getGuildAudioPlayer(event.getGuild());
         var channel = event.getChannel();
 
@@ -111,6 +114,8 @@ public class MusicListenerAdapter extends ListenerAdapter {
         } else {
             processSearchPlayRequest(event, songName, musicManager, channel);
         }
+
+        handled.set(true);
     }
 
     private void processUrlPlayRequest(Member member, Guild guild, String songName, GuildMusicManager musicManager, MessageChannel channel) {
@@ -155,8 +160,7 @@ public class MusicListenerAdapter extends ListenerAdapter {
         if (trackButtonsIds.containsKey(event.getButton().getId())) {
             handleTrackSelectionButtonPress(event);
         }
-
-        event.getMessage().delete().queue();
+        handleEmbedPlayerButtonPress(event);
         super.onButtonInteraction(event);
     }
 
@@ -203,6 +207,19 @@ public class MusicListenerAdapter extends ListenerAdapter {
             var url = "https://www.youtube.com" + video.watchUrl;
             processUrlPlayRequest(event.getMember(), event.getGuild(), url, musicManager, event.getChannel());
         }
+        event.getMessage().delete().queue();
+    }
+
+    private void handleEmbedPlayerButtonPress(ButtonInteractionEvent event) {
+        var id = event.getButton().getId();
+        if ("Pause".equals(id)){
+            AudioManager audioManager = event.getGuild().getAudioManager();
+            if (audioManager.isConnected()) {
+                GuildMusicManager musicManager = getGuildAudioPlayer(event.getGuild());
+                musicManager.scheduler.pause();
+            }
+            event.deferEdit().queue();
+        }
     }
 
     private void play(Member member, Guild guild, GuildMusicManager musicManager, AudioTrack track, MessageChannel channel) throws UserNotInVoiceChannelException {
@@ -233,15 +250,16 @@ public class MusicListenerAdapter extends ListenerAdapter {
         }
     }
 
-    private void handlePauseCommand(MessageReceivedEvent event) {
+    private void handlePauseCommand(MessageReceivedEvent event, AtomicBoolean handled) {
         AudioManager audioManager = event.getGuild().getAudioManager();
         if (audioManager.isConnected()) {
             GuildMusicManager musicManager = getGuildAudioPlayer(event.getGuild());
             musicManager.scheduler.pause();
         }
+        handled.set(true);
     }
 
-    private void handleStopCommand(MessageReceivedEvent event) {
+    private void handleStopCommand(MessageReceivedEvent event, AtomicBoolean handled) {
         AudioManager audioManager = event.getGuild().getAudioManager();
         if (audioManager.isConnected()) {
             GuildMusicManager musicManager = getGuildAudioPlayer(event.getGuild());
@@ -249,17 +267,19 @@ public class MusicListenerAdapter extends ListenerAdapter {
             var channel = event.getChannel();
             channel.sendMessage("Stopped playing, queue cleared").queue();
         }
+        handled.set(true);
     }
 
-    private void handleSkipCommand(MessageReceivedEvent event) {
+    private void handleSkipCommand(MessageReceivedEvent event, AtomicBoolean handled) {
         AudioManager audioManager = event.getGuild().getAudioManager();
         if (audioManager.isConnected()) {
             GuildMusicManager musicManager = getGuildAudioPlayer(event.getGuild());
             musicManager.scheduler.nextTrack();
         }
+        handled.set(true);
     }
 
-    private void handleDisconnectCommand(MessageReceivedEvent event) {
+    private void handleDisconnectCommand(MessageReceivedEvent event, AtomicBoolean handled) {
         AudioManager audioManager = event.getGuild().getAudioManager();
         if (audioManager.isConnected()) {
             audioManager.closeAudioConnection();
@@ -268,5 +288,6 @@ public class MusicListenerAdapter extends ListenerAdapter {
         musicManager.scheduler.stop();
         var channel = event.getChannel();
         channel.sendMessage("Disconnected, cleared queue").queue();
+        handled.set(true);
     }
 }

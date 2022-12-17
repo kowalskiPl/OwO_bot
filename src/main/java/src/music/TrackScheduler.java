@@ -28,6 +28,7 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
     private final BlockingQueue<AudioTrackRequest> queue;
     private final List<Listener> listeners;
     private long embedMessageId;
+    private MessageChannel currentEmbedLocation;
     private final long guildId;
 
     private static final Logger log = LoggerFactory.getLogger(TrackScheduler.class);
@@ -39,8 +40,9 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
         this.guildId = guildId;
     }
 
-    public void setEmbedMessageId(long embedMessage) {
+    public TrackScheduler setEmbedMessageId(long embedMessage) {
         this.embedMessageId = embedMessage;
+        return this;
     }
 
     public long getEmbedMessageId() {
@@ -51,24 +53,30 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
         return guildId;
     }
 
+    public TrackScheduler setCurrentEmbedLocation(MessageChannel currentEmbedLocation) {
+        this.currentEmbedLocation = currentEmbedLocation;
+        return this;
+    }
+
     public void enqueue(AudioTrackRequest audioTrackRequest) {
+//        sendEvent(new DeleteMessageEvent(audioTrackRequest.channel, audioTrackRequest.channel.getLatestMessageIdLong(), 0, this));
         if (!player.startTrack(audioTrackRequest.audioTrack, true)) {// check if the player is free and play the track if so, else enqueue
             queue.offer(audioTrackRequest);
-            sendMessageEvent(constructMessageSendEvent(audioTrackRequest.channel, "Added: " + audioTrackRequest.audioTrack.getInfo().title + " to queue", 10));
+            sendEvent(new SendMessageEvent(audioTrackRequest.channel, "Added: " + audioTrackRequest.audioTrack.getInfo().title + " to queue",10, this));
         } else {
-            sendEmbedMessageEvent(new SendMusicMessageEvent(audioTrackRequest, this));
+            sendEvent(new SendMusicMessageEvent(audioTrackRequest, this));
         }
     }
 
     public void enqueue(List<AudioTrack> tracks, String name, MessageChannel channel, Member member) {
         if (!player.startTrack(tracks.get(0), true)) {
             tracks.forEach(track -> queue.offer(new AudioTrackRequest(track, channel, member)));
-            sendMessageEvent(constructMessageSendEvent(channel, "Added playlist: " + name + " to queue", 10));
+            sendEvent(new SendMessageEvent(channel, "Added playlist: " + name + " to queue", 10, this));
         } else {
             for (int i = 1; i < tracks.size(); i++) {
                 queue.offer(new AudioTrackRequest(tracks.get(i), channel, member));
             }
-            sendMessageEvent(constructMessageSendEvent(channel, "Now playing playlist: " + name));
+            sendEvent(new SendMessageEvent(channel, "Now playing playlist: " + name, this));
         }
     }
 
@@ -76,7 +84,7 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
         var track = queue.poll();
         if (track != null) {
             player.startTrack(track.audioTrack, false);
-            sendModifyEmbedEvent(new ModifyMusicMessageEvent(track, this));
+            sendEvent(new ModifyMusicMessageEvent(track, this));
         }
     }
 
@@ -84,12 +92,14 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
         AudioTrack track = player.getPlayingTrack();
         if (track != null) {
             player.setPaused(!player.isPaused());
+            sendEvent(new PlayerPauseEvent(currentEmbedLocation, !player.isPaused(), this));
         }
     }
 
     public void stop() {
         player.stopTrack();
         queue.clear();
+        sendEvent(new DeleteMessageEvent(currentEmbedLocation, embedMessageId, 0, this));
     }
 
     public AudioTrack getCurrentTrack() {
@@ -119,24 +129,8 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
         this.listeners.forEach(listener -> listener.onEventReceived(event));
     }
 
-    private SendMessageEvent constructMessageSendEvent(MessageChannel channel, String message) {
-        return new SendMessageEvent(channel, message, this);
-    }
-
-    private SendMessageEvent constructMessageSendEvent(MessageChannel channel, String message, int delay) {
-        return new SendMessageEvent(channel, message, delay, this);
-    }
-
-    private void sendMessageEvent(SendMessageEvent event) {
-        log.debug("Event sent: " + event.getClass());
-        notifyListeners(event);
-    }
-
-    private void sendEmbedMessageEvent(SendMusicMessageEvent event) {
-        notifyListeners(event);
-    }
-
-    private void sendModifyEmbedEvent(ModifyMusicMessageEvent event) {
+    private void sendEvent(Event event){
+        log.info("Sending event: " + event.getClass());
         notifyListeners(event);
     }
 }
