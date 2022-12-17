@@ -5,6 +5,8 @@ import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.ErrorResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import src.events.*;
 import src.events.Event;
 import src.model.AudioTrackRequest;
@@ -16,6 +18,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class MusicEmbedMessageSender implements Listener {
+
+    private static final Logger log = LoggerFactory.getLogger(MusicEmbedMessageSender.class);
 
     private static final Map<String, String> emojiMap = new LinkedHashMap<>(Map.of(
             "Pause", "U+23F8\t",
@@ -33,26 +37,29 @@ public class MusicEmbedMessageSender implements Listener {
 
         if (event instanceof ModifyMusicMessageEvent modifyMusicMessageEvent) {
             if (modifyMusicMessageEvent.getSender() instanceof TrackScheduler scheduler) {
-
-                modifyMusicMessageEvent.getAudioTrackRequest().channel.retrieveMessageById(scheduler.getEmbedMessageId())
-                        .queue(message -> message.editMessageEmbeds(constructEmbedPlayerMessage(modifyMusicMessageEvent.getAudioTrackRequest()).build()).queue(),
-                                new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
-                //TODO: error handling when different channels were used
-//                var guildId = scheduler.getGuildId();
-//                var guild = modifyMusicMessageEvent.getAudioTrackRequest().channel.getJDA().getGuildById(guildId);
+                var channel = modifyMusicMessageEvent.getAudioTrackRequest().channel;
+                if (channel.getIdLong() != scheduler.getCurrentEmbedLocation().getIdLong()) {
+                    scheduler.getCurrentEmbedLocation().deleteMessageById(scheduler.getCurrentEmbedMessageId()).queue();
+                    sendEmbedPlayerMessage(modifyMusicMessageEvent.getAudioTrackRequest(), scheduler);
+                } else {
+                    channel.retrieveMessageById(scheduler.getCurrentEmbedMessageId())
+                            .queue(message -> message
+                                    .editMessageEmbeds(constructEmbedPlayerMessage(modifyMusicMessageEvent.getAudioTrackRequest()).build())
+                                    .queue(), new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
+                }
             }
         }
 
         if (event instanceof PlayerPauseEvent pauseEvent) {
             if (pauseEvent.getSender() instanceof TrackScheduler scheduler) {
-                String pause = pauseEvent.isPaused() ? "Pause" : "Iz paused";
+                String pause = pauseEvent.isPaused() ? "Pause" : "Resume";
                 pauseEvent
                         .getMessageChannel()
-                        .retrieveMessageById(scheduler.getEmbedMessageId())
+                        .retrieveMessageById(scheduler.getCurrentEmbedMessageId())
                         .queue(message -> message.editMessageEmbeds(message.getEmbeds().get(0)).setActionRows(ActionRow.of(Button.secondary("Pause", pause),
                                 Button.secondary("Next", "Next"),
-                                Button.secondary("Previous", "Previous"),
-                                Button.secondary("Stop", "Stop"))).queue());
+                                Button.secondary("Stop", "Stop"),
+                                Button.secondary("Leave", "Leave"))).queue());
             }
         }
     }
@@ -62,8 +69,8 @@ public class MusicEmbedMessageSender implements Listener {
         builder.setTitle("Now playing: \n" + request.audioTrack.getInfo().title)
                 .setColor(Color.BLUE)
                 .addField("Total length", SimpleTimeConverter.getTimeStringFromLong(request.audioTrack.getInfo().length), false)
-                .addField("Requester", request.requester.getEffectiveName(), false)
-                .addField("Author", request.audioTrack.getInfo().author, false);
+                .addField("Author", request.audioTrack.getInfo().author, false)
+                .addField("Requester", request.requester.getEffectiveName(), false);
         return builder;
     }
 
@@ -74,9 +81,9 @@ public class MusicEmbedMessageSender implements Listener {
                 .setActionRows(
                         ActionRow.of(Button.secondary("Pause", "Pause"),
                                 Button.secondary("Next", "Next"),
-                                Button.secondary("Previous", "Previous"),
-                                Button.secondary("Stop", "Stop"))
+                                Button.secondary("Stop", "Stop"),
+                                Button.secondary("Leave", "Leave"))
                 )
-                .queue(message -> scheduler.setEmbedMessageId(message.getIdLong()).setCurrentEmbedLocation(request.channel), new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
+                .queue(message -> scheduler.setCurrentEmbedMessageId(message.getIdLong()).setCurrentEmbedLocation(request.channel), new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
     }
 }

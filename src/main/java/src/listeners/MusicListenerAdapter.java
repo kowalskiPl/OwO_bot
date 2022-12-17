@@ -17,8 +17,6 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.requests.ErrorResponse;
-import net.dv8tion.jda.internal.utils.tuple.ImmutablePair;
-import net.dv8tion.jda.internal.utils.tuple.Pair;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -32,14 +30,10 @@ import src.youtube.YouTubeSearch;
 import java.awt.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.chrono.ChronoLocalDate;
-import java.time.temporal.TemporalAccessor;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MusicListenerAdapter extends ListenerAdapter {
@@ -212,14 +206,43 @@ public class MusicListenerAdapter extends ListenerAdapter {
 
     private void handleEmbedPlayerButtonPress(ButtonInteractionEvent event) {
         var id = event.getButton().getId();
-        if ("Pause".equals(id)){
-            AudioManager audioManager = event.getGuild().getAudioManager();
+        boolean handled = false;
+        AudioManager audioManager = event.getGuild().getAudioManager();
+
+        if ("Pause".equals(id)) {
             if (audioManager.isConnected()) {
                 GuildMusicManager musicManager = getGuildAudioPlayer(event.getGuild());
                 musicManager.scheduler.pause();
             }
-            event.deferEdit().queue();
+            handled = true;
         }
+
+        if ("Stop".equals(id)) {
+            if (audioManager.isConnected()) {
+                GuildMusicManager musicManager = getGuildAudioPlayer(event.getGuild());
+                musicManager.scheduler.stop();
+            }
+            handled = true;
+        }
+
+        if ("Leave".equals(id)) {
+            if (audioManager.isConnected()) {
+                audioManager.closeAudioConnection();
+            }
+            GuildMusicManager musicManager = getGuildAudioPlayer(event.getGuild());
+            musicManager.scheduler.stop();
+            handled = true;
+        }
+
+        if ("Next".equals(id)){
+            if (audioManager.isConnected()) {
+                GuildMusicManager musicManager = getGuildAudioPlayer(event.getGuild());
+                musicManager.scheduler.nextTrack();
+            }
+            handled = true;
+        }
+
+        event.deferEdit().queue();
     }
 
     private void play(Member member, Guild guild, GuildMusicManager musicManager, AudioTrack track, MessageChannel channel) throws UserNotInVoiceChannelException {

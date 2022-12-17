@@ -4,22 +4,15 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import src.events.*;
 import src.events.Event;
 import src.model.AudioTrackRequest;
 
-import java.awt.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -27,7 +20,7 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
     private final AudioPlayer player;
     private final BlockingQueue<AudioTrackRequest> queue;
     private final List<Listener> listeners;
-    private long embedMessageId;
+    private long currentEmbedMessageId;
     private MessageChannel currentEmbedLocation;
     private final long guildId;
 
@@ -40,13 +33,13 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
         this.guildId = guildId;
     }
 
-    public TrackScheduler setEmbedMessageId(long embedMessage) {
-        this.embedMessageId = embedMessage;
+    public TrackScheduler setCurrentEmbedMessageId(long embedMessage) {
+        this.currentEmbedMessageId = embedMessage;
         return this;
     }
 
-    public long getEmbedMessageId() {
-        return embedMessageId;
+    public long getCurrentEmbedMessageId() {
+        return currentEmbedMessageId;
     }
 
     public long getGuildId() {
@@ -58,8 +51,11 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
         return this;
     }
 
+    public MessageChannel getCurrentEmbedLocation() {
+        return currentEmbedLocation;
+    }
+
     public void enqueue(AudioTrackRequest audioTrackRequest) {
-//        sendEvent(new DeleteMessageEvent(audioTrackRequest.channel, audioTrackRequest.channel.getLatestMessageIdLong(), 0, this));
         if (!player.startTrack(audioTrackRequest.audioTrack, true)) {// check if the player is free and play the track if so, else enqueue
             queue.offer(audioTrackRequest);
             sendEvent(new SendMessageEvent(audioTrackRequest.channel, "Added: " + audioTrackRequest.audioTrack.getInfo().title + " to queue",10, this));
@@ -71,7 +67,7 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
     public void enqueue(List<AudioTrack> tracks, String name, MessageChannel channel, Member member) {
         if (!player.startTrack(tracks.get(0), true)) {
             tracks.forEach(track -> queue.offer(new AudioTrackRequest(track, channel, member)));
-            sendEvent(new SendMessageEvent(channel, "Added playlist: " + name + " to queue", 10, this));
+            sendEvent(new SendMessageEvent(channel, "Added playlist: " + name + " to queue", 5, this));
         } else {
             for (int i = 1; i < tracks.size(); i++) {
                 queue.offer(new AudioTrackRequest(tracks.get(i), channel, member));
@@ -99,7 +95,8 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
     public void stop() {
         player.stopTrack();
         queue.clear();
-        sendEvent(new DeleteMessageEvent(currentEmbedLocation, embedMessageId, 0, this));
+        player.setPaused(false);
+        sendEvent(new DeleteMessageEvent(currentEmbedLocation, currentEmbedMessageId, 0, this));
     }
 
     public AudioTrack getCurrentTrack() {
