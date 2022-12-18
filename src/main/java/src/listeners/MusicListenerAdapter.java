@@ -25,6 +25,8 @@ import src.exception.UserNotInVoiceChannelException;
 import src.model.AudioTrackRequest;
 import src.model.YouTubeVideo;
 import src.music.GuildMusicManager;
+import src.youtube.HttpYouTubeRequester;
+import src.youtube.YouTubeRequestResultParser;
 import src.youtube.YouTubeSearch;
 
 import java.awt.*;
@@ -104,7 +106,12 @@ public class MusicListenerAdapter extends ListenerAdapter {
         var channel = event.getChannel();
 
         if (UrlValidator.getInstance().isValid(songName)) {
-            processUrlPlayRequest(event.getMember(), event.getGuild(), songName, musicManager, channel);
+            var result = HttpYouTubeRequester.queryYoutubeVideo(songName);
+            String thumbnailUrl = "";
+            if (result.isPresent()){
+                thumbnailUrl = YouTubeRequestResultParser.getThumbnailUrlFromYouTubeUrl(result.get());
+            }
+            processUrlPlayRequest(event.getMember(), event.getGuild(), songName, musicManager, channel, thumbnailUrl);
         } else {
             processSearchPlayRequest(event, songName, musicManager, channel);
         }
@@ -112,12 +119,12 @@ public class MusicListenerAdapter extends ListenerAdapter {
         handled.set(true);
     }
 
-    private void processUrlPlayRequest(Member member, Guild guild, String songName, GuildMusicManager musicManager, MessageChannel channel) {
+    private void processUrlPlayRequest(Member member, Guild guild, String songName, GuildMusicManager musicManager, MessageChannel channel, String thumbnailUrl) {
         playerManager.loadItemOrdered(musicManager, songName, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
                 try {
-                    play(member, guild, musicManager, track, channel);
+                    play(member, guild, musicManager, track, channel, thumbnailUrl);
                 } catch (UserNotInVoiceChannelException e) {
                     log.warn("Failed to acquire user channel");
                     channel.sendMessage("Are you in the voice channel?").queue();
@@ -199,7 +206,7 @@ public class MusicListenerAdapter extends ListenerAdapter {
         if (!button.equals("Cancel")) {
             var video = musicManager.getVideoAndClearSearchResults(Integer.parseInt(button));
             var url = "https://www.youtube.com" + video.watchUrl;
-            processUrlPlayRequest(event.getMember(), event.getGuild(), url, musicManager, event.getChannel());
+            processUrlPlayRequest(event.getMember(), event.getGuild(), url, musicManager, event.getChannel(), video.thumbnailUrl);
         }
         event.getMessage().delete().queue();
     }
@@ -245,10 +252,10 @@ public class MusicListenerAdapter extends ListenerAdapter {
         event.deferEdit().queue();
     }
 
-    private void play(Member member, Guild guild, GuildMusicManager musicManager, AudioTrack track, MessageChannel channel) throws UserNotInVoiceChannelException {
+    private void play(Member member, Guild guild, GuildMusicManager musicManager, AudioTrack track, MessageChannel channel, String thumbnailUrl) throws UserNotInVoiceChannelException {
         connectToVoiceChannel(member, guild.getAudioManager());
 
-        musicManager.scheduler.enqueue(new AudioTrackRequest(track, channel, member));
+        musicManager.scheduler.enqueue(new AudioTrackRequest(track, channel, member, thumbnailUrl));
     }
 
     private void play(Member member, Guild guild, GuildMusicManager musicManager, List<AudioTrack> tracks, String name, MessageChannel channel) throws UserNotInVoiceChannelException {

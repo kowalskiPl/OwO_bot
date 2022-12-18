@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import src.events.*;
 import src.events.Event;
 import src.model.AudioTrackRequest;
+import src.youtube.HttpYouTubeRequester;
+import src.youtube.YouTubeRequestResultParser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +60,7 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
     public void enqueue(AudioTrackRequest audioTrackRequest) {
         if (!player.startTrack(audioTrackRequest.audioTrack, true)) {// check if the player is free and play the track if so, else enqueue
             queue.offer(audioTrackRequest);
-            sendEvent(new SendMessageEvent(audioTrackRequest.channel, "Added: " + audioTrackRequest.audioTrack.getInfo().title + " to queue",10, this));
+            sendEvent(new SendMessageEvent(audioTrackRequest.channel, "Added: " + audioTrackRequest.audioTrack.getInfo().title + " to queue", 5, this));
         } else {
             sendEvent(new SendMusicMessageEvent(audioTrackRequest, this));
         }
@@ -66,14 +68,28 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
 
     public void enqueue(List<AudioTrack> tracks, String name, MessageChannel channel, Member member) {
         if (!player.startTrack(tracks.get(0), true)) {
-            tracks.forEach(track -> queue.offer(new AudioTrackRequest(track, channel, member)));
+            tracks.forEach(track -> {
+                var thumbnailUrl = getThumbnailUrl(track);
+                queue.offer(new AudioTrackRequest(track, channel, member, thumbnailUrl));
+            });
             sendEvent(new SendMessageEvent(channel, "Added playlist: " + name + " to queue", 5, this));
         } else {
+            String firstThumbnailUrl = getThumbnailUrl(tracks.get(0));
+            sendEvent(new SendMusicMessageEvent(new AudioTrackRequest(tracks.get(0), channel, member, firstThumbnailUrl), this));
             for (int i = 1; i < tracks.size(); i++) {
-                queue.offer(new AudioTrackRequest(tracks.get(i), channel, member));
+                var thumbnailUrl = getThumbnailUrl(tracks.get(i));
+                queue.offer(new AudioTrackRequest(tracks.get(i), channel, member, thumbnailUrl));
             }
-            sendEvent(new SendMessageEvent(channel, "Now playing playlist: " + name, this));
         }
+    }
+
+    private String getThumbnailUrl(AudioTrack track) {
+        var firstResult = HttpYouTubeRequester.queryYoutubeVideo(track.getInfo().uri);
+        String firstThumbnailUrl = "";
+        if (firstResult.isPresent()) {
+            firstThumbnailUrl = YouTubeRequestResultParser.getThumbnailUrlFromYouTubeUrl(firstResult.get());
+        }
+        return firstThumbnailUrl;
     }
 
     public void nextTrack() {
@@ -83,7 +99,7 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
             sendEvent(new ModifyMusicMessageEvent(track, this));
         }
 
-        if (track == null){
+        if (track == null) {
             sendEvent(new DeleteMessageEvent(currentEmbedLocation, currentEmbedMessageId, 0, this));
             currentEmbedLocation = null;
             currentEmbedMessageId = 0;
@@ -134,7 +150,7 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
         this.listeners.forEach(listener -> listener.onEventReceived(event));
     }
 
-    private void sendEvent(Event event){
+    private void sendEvent(Event event) {
         log.info("Sending event: " + event.getClass());
         notifyListeners(event);
     }

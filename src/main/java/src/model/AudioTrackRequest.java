@@ -8,10 +8,12 @@ public class AudioTrackRequest {
     public AudioTrack audioTrack;
     public MessageChannel channel;
     public Member requester;
+    public String thumbnailUrl;
 
-    public AudioTrackRequest(AudioTrack audioTrack, MessageChannel channel, Member requester) {
+    public AudioTrackRequest(AudioTrack audioTrack, MessageChannel channel, Member requester, String thumbnailUrl) {
         this.audioTrack = audioTrack;
         this.channel = channel;
         this.requester = requester;
+        this.thumbnailUrl = thumbnailUrl;
     }
 }

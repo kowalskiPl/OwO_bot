@@ -70,7 +70,8 @@ public class MusicEmbedMessageSender implements Listener {
                 .setColor(Color.BLUE)
                 .addField("Total length", SimpleTimeConverter.getTimeStringFromLong(request.audioTrack.getInfo().length), false)
                 .addField("Author", request.audioTrack.getInfo().author, false)
-                .addField("Requester", request.requester.getEffectiveName(), false);
+                .addField("Requester", request.requester.getEffectiveName(), false)
+                .setThumbnail(request.thumbnailUrl);
         return builder;
     }
 
