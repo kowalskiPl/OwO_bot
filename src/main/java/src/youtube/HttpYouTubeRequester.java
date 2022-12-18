@@ -32,4 +32,18 @@ public class HttpYouTubeRequester {
 
         return Optional.empty();
     }
+
+    public static Optional<Document> queryYoutubeVideo(String url) {
+        try {
+            Document document = Jsoup.connect(url)
+                    .timeout(5000)
+                    .header("User-Agent", "Chrome")
+                    .get();
+            return Optional.of(document);
+        } catch (IOException e) {
+            log.warn("Failed to query YouTube video: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
 }

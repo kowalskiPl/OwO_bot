@@ -40,9 +40,9 @@ public class Content {
     public class Thumbnail{
         public List<InnerThumbnail> thumbnails;
         public class InnerThumbnail{
-            String url;
-            int width;
-            int height;
+            public String url;
+            public int width;
+            public int height;
         }
     }
 
