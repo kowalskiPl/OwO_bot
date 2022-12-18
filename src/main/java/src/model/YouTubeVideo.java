@@ -5,6 +5,7 @@ public class YouTubeVideo {
     public String title;
     public String length;
     public String author;
+    public String thumbnailUrl;
 
     @Override
     public String toString() {
@@ -13,6 +14,7 @@ public class YouTubeVideo {
                 ", title='" + title + '\'' +
                 ", length='" + length + '\'' +
                 ", author='" + author + '\'' +
+                ", thumbnailUrl='" + thumbnailUrl + '\'' +
                 '}';
     }
 }
