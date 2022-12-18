@@ -22,6 +22,7 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
     private final AudioPlayer player;
     private final BlockingQueue<AudioTrackRequest> queue;
     private final List<Listener> listeners;
+    private AudioTrackRequest currentMusic;
     private long currentEmbedMessageId;
     private MessageChannel currentEmbedLocation;
     private final long guildId;
@@ -60,9 +61,10 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
     public void enqueue(AudioTrackRequest audioTrackRequest) {
         if (!player.startTrack(audioTrackRequest.audioTrack, true)) {// check if the player is free and play the track if so, else enqueue
             queue.offer(audioTrackRequest);
-            sendEvent(new SendMessageEvent(audioTrackRequest.channel, "Added: " + audioTrackRequest.audioTrack.getInfo().title + " to queue", 5, this));
+            sendEvent(new ModifyMusicMessageEvent(currentMusic, queue.peek(), this));
         } else {
-            sendEvent(new SendMusicMessageEvent(audioTrackRequest, this));
+            sendEvent(new SendMusicMessageEvent(audioTrackRequest, queue.peek(),this));
+            currentMusic = audioTrackRequest;
         }
     }
 
@@ -75,11 +77,12 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
             sendEvent(new SendMessageEvent(channel, "Added playlist: " + name + " to queue", 5, this));
         } else {
             String firstThumbnailUrl = getThumbnailUrl(tracks.get(0));
-            sendEvent(new SendMusicMessageEvent(new AudioTrackRequest(tracks.get(0), channel, member, firstThumbnailUrl), this));
             for (int i = 1; i < tracks.size(); i++) {
                 var thumbnailUrl = getThumbnailUrl(tracks.get(i));
                 queue.offer(new AudioTrackRequest(tracks.get(i), channel, member, thumbnailUrl));
             }
+            currentMusic = new AudioTrackRequest(tracks.get(0), channel, member, firstThumbnailUrl);
+            sendEvent(new SendMusicMessageEvent(currentMusic, queue.peek(),this));
         }
     }
 
@@ -96,7 +99,8 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
         var track = queue.poll();
         if (track != null) {
             player.startTrack(track.audioTrack, false);
-            sendEvent(new ModifyMusicMessageEvent(track, this));
+            currentMusic = track;
+            sendEvent(new ModifyMusicMessageEvent(track, queue.peek(), this));
         }
 
         if (track == null) {

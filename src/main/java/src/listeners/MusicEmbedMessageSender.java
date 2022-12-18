@@ -31,7 +31,7 @@ public class MusicEmbedMessageSender implements Listener {
     public void onEventReceived(Event event) {
         if (event instanceof SendMusicMessageEvent sendMusicMsgEvt) {
             if (sendMusicMsgEvt.getSender() instanceof TrackScheduler scheduler) {
-                sendEmbedPlayerMessage(sendMusicMsgEvt.getAudioTrackRequest(), scheduler);
+                sendEmbedPlayerMessage(sendMusicMsgEvt.getAudioTrackRequest(), sendMusicMsgEvt.getNextTrack(), scheduler);
             }
         }
 
@@ -40,11 +40,11 @@ public class MusicEmbedMessageSender implements Listener {
                 var channel = modifyMusicMessageEvent.getAudioTrackRequest().channel;
                 if (channel.getIdLong() != scheduler.getCurrentEmbedLocation().getIdLong()) {
                     scheduler.getCurrentEmbedLocation().deleteMessageById(scheduler.getCurrentEmbedMessageId()).queue();
-                    sendEmbedPlayerMessage(modifyMusicMessageEvent.getAudioTrackRequest(), scheduler);
+                    sendEmbedPlayerMessage(modifyMusicMessageEvent.getAudioTrackRequest(), modifyMusicMessageEvent.getNextTrack(), scheduler);
                 } else {
                     channel.retrieveMessageById(scheduler.getCurrentEmbedMessageId())
                             .queue(message -> message
-                                    .editMessageEmbeds(constructEmbedPlayerMessage(modifyMusicMessageEvent.getAudioTrackRequest()).build())
+                                    .editMessageEmbeds(constructEmbedPlayerMessage(modifyMusicMessageEvent.getAudioTrackRequest(), modifyMusicMessageEvent.getNextTrack()).build())
                                     .queue(), new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
                 }
             }
@@ -64,19 +64,25 @@ public class MusicEmbedMessageSender implements Listener {
         }
     }
 
-    private EmbedBuilder constructEmbedPlayerMessage(AudioTrackRequest request) {
+    private EmbedBuilder constructEmbedPlayerMessage(AudioTrackRequest request, AudioTrackRequest nextTrack) {
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setTitle("Now playing: \n" + request.audioTrack.getInfo().title)
+        builder.setAuthor("Now Playing:")
+                .setTitle(request.audioTrack.getInfo().title)
                 .setColor(Color.BLUE)
-                .addField("Total length", SimpleTimeConverter.getTimeStringFromLong(request.audioTrack.getInfo().length), false)
-                .addField("Author", request.audioTrack.getInfo().author, false)
+                .addField("Total length", SimpleTimeConverter.getTimeStringFromLong(request.audioTrack.getInfo().length), true)
+                .addField("Author", request.audioTrack.getInfo().author, true)
                 .addField("Requester", request.requester.getEffectiveName(), false)
                 .setThumbnail(request.thumbnailUrl);
+        if (nextTrack != null){
+            builder.setFooter("Next track: " + nextTrack.audioTrack.getInfo().title);
+        } else {
+            builder.setFooter("No next track");
+        }
         return builder;
     }
 
-    private void sendEmbedPlayerMessage(AudioTrackRequest request, TrackScheduler scheduler) {
-        var builder = constructEmbedPlayerMessage(request);
+    private void sendEmbedPlayerMessage(AudioTrackRequest request, AudioTrackRequest nextTrack, TrackScheduler scheduler) {
+        var builder = constructEmbedPlayerMessage(request, nextTrack);
         var channel = request.channel;
         channel.sendMessageEmbeds(builder.build())
                 .setActionRows(
