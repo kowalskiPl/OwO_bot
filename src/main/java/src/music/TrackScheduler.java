@@ -4,75 +4,127 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
-import net.dv8tion.jda.api.entities.Channel;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import src.events.*;
+import src.events.Event;
+import src.model.AudioTrackRequest;
+import src.youtube.HttpYouTubeRequester;
+import src.youtube.YouTubeRequestResultParser;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class TrackScheduler extends AudioEventAdapter {
+public class TrackScheduler extends AudioEventAdapter implements Observable {
     private final AudioPlayer player;
-    private final BlockingQueue<AudioTrack> queue;
-    private MessageChannel linkedTextChannel;
+    private final BlockingQueue<AudioTrackRequest> queue;
+    private final List<Listener> listeners;
+    private AudioTrackRequest currentMusic;
+    private long currentEmbedMessageId;
+    private MessageChannel currentEmbedLocation;
+    private final long guildId;
 
     private static final Logger log = LoggerFactory.getLogger(TrackScheduler.class);
 
-    public Channel getLinkedTextChannel() {
-        return linkedTextChannel;
-    }
-
-    public void setLinkedTextChannel(MessageChannel linkedTextChannel) {
-        this.linkedTextChannel = linkedTextChannel;
-    }
-
-    public TrackScheduler(AudioPlayer player) {
+    public TrackScheduler(AudioPlayer player, long guildId) {
         this.player = player;
         this.queue = new LinkedBlockingQueue<>();
+        this.listeners = new ArrayList<>();
+        this.guildId = guildId;
     }
 
-    public void enqueue(AudioTrack track) {
-        if (!player.startTrack(track, true)) {// check if the player is free and play the track if so, else enqueue
-            queue.offer(track);
-            linkedTextChannel.sendMessage("Added: " + track.getInfo().title + " to queue").queue();
-        } else
-            linkedTextChannel.sendMessage("Now playing: " + track.getInfo().title).queue();
+    public TrackScheduler setCurrentEmbedMessageId(long embedMessage) {
+        this.currentEmbedMessageId = embedMessage;
+        return this;
     }
 
-    public void enqueue(List<AudioTrack> tracks, String name) {
-        if (!player.startTrack(tracks.get(0), true)) {
-            tracks.forEach(queue::offer);
-            linkedTextChannel.sendMessage("Added playlist: " + name + " to queue").queue();
+    public long getCurrentEmbedMessageId() {
+        return currentEmbedMessageId;
+    }
+
+    public long getGuildId() {
+        return guildId;
+    }
+
+    public TrackScheduler setCurrentEmbedLocation(MessageChannel currentEmbedLocation) {
+        this.currentEmbedLocation = currentEmbedLocation;
+        return this;
+    }
+
+    public MessageChannel getCurrentEmbedLocation() {
+        return currentEmbedLocation;
+    }
+
+    public void enqueue(AudioTrackRequest audioTrackRequest) {
+        if (!player.startTrack(audioTrackRequest.audioTrack, true)) {// check if the player is free and play the track if so, else enqueue
+            queue.offer(audioTrackRequest);
+            sendEvent(new ModifyMusicMessageEvent(currentMusic, queue.peek(), this));
         } else {
-            for (int i = 1; i < tracks.size(); i++) {
-                queue.offer(tracks.get(i));
-            }
-            linkedTextChannel.sendMessage("Now playing playlist: " + name + " to queue").queue();
+            sendEvent(new SendMusicMessageEvent(audioTrackRequest, queue.peek(),this));
+            currentMusic = audioTrackRequest;
         }
+    }
+
+    public void enqueue(List<AudioTrack> tracks, String name, MessageChannel channel, Member member) {
+        if (!player.startTrack(tracks.get(0), true)) {
+            tracks.forEach(track -> {
+                var thumbnailUrl = getThumbnailUrl(track);
+                queue.offer(new AudioTrackRequest(track, channel, member, thumbnailUrl));
+            });
+            sendEvent(new SendMessageEvent(channel, "Added playlist: " + name + " to queue", 5, this));
+        } else {
+            String firstThumbnailUrl = getThumbnailUrl(tracks.get(0));
+            for (int i = 1; i < tracks.size(); i++) {
+                var thumbnailUrl = getThumbnailUrl(tracks.get(i));
+                queue.offer(new AudioTrackRequest(tracks.get(i), channel, member, thumbnailUrl));
+            }
+            currentMusic = new AudioTrackRequest(tracks.get(0), channel, member, firstThumbnailUrl);
+            sendEvent(new SendMusicMessageEvent(currentMusic, queue.peek(),this));
+        }
+    }
+
+    private String getThumbnailUrl(AudioTrack track) {
+        var firstResult = HttpYouTubeRequester.queryYoutubeVideo(track.getInfo().uri);
+        String firstThumbnailUrl = "";
+        if (firstResult.isPresent()) {
+            firstThumbnailUrl = YouTubeRequestResultParser.getThumbnailUrlFromYouTubeUrl(firstResult.get());
+        }
+        return firstThumbnailUrl;
     }
 
     public void nextTrack() {
         var track = queue.poll();
         if (track != null) {
-            player.startTrack(track, false);
-            linkedTextChannel.sendMessage("Now playing: " + track.getInfo().title).queue();
+            player.startTrack(track.audioTrack, false);
+            currentMusic = track;
+            sendEvent(new ModifyMusicMessageEvent(track, queue.peek(), this));
         }
 
+        if (track == null) {
+            sendEvent(new DeleteMessageEvent(currentEmbedLocation, currentEmbedMessageId, 0, this));
+            currentEmbedLocation = null;
+            currentEmbedMessageId = 0;
+        }
     }
 
     public void pause() {
         AudioTrack track = player.getPlayingTrack();
         if (track != null) {
             player.setPaused(!player.isPaused());
+            sendEvent(new PlayerPauseEvent(currentEmbedLocation, !player.isPaused(), this));
         }
     }
 
     public void stop() {
         player.stopTrack();
         queue.clear();
+        player.setPaused(false);
+        sendEvent(new DeleteMessageEvent(currentEmbedLocation, currentEmbedMessageId, 0, this));
+        currentEmbedLocation = null;
+        currentEmbedMessageId = 0;
     }
 
     public AudioTrack getCurrentTrack() {
@@ -85,5 +137,25 @@ public class TrackScheduler extends AudioEventAdapter {
         if (endReason.mayStartNext) {
             nextTrack();
         }
+    }
+
+    @Override
+    public void addListener(Listener listener) {
+        this.listeners.add(listener);
+    }
+
+    @Override
+    public void removeListener(Listener listener) {
+        this.listeners.remove(listener);
+    }
+
+    @Override
+    public void notifyListeners(Event event) {
+        this.listeners.forEach(listener -> listener.onEventReceived(event));
+    }
+
+    private void sendEvent(Event event) {
+        log.info("Sending event: " + event.getClass());
+        notifyListeners(event);
     }
 }

@@ -2,9 +2,9 @@ package src.music;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
-import net.dv8tion.jda.api.entities.Channel;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import src.model.YouTubeVideo;
+import src.utilities.listener.BasicMessageHandler;
+import src.listeners.MusicEmbedMessageSender;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,11 +18,13 @@ public class GuildMusicManager {
 
     public final Map<Integer, YouTubeVideo> recentSearchResults;
 
-    public GuildMusicManager(AudioPlayerManager manager) {
+    public GuildMusicManager(AudioPlayerManager manager, long guildId) {
         player = manager.createPlayer();
-        scheduler = new TrackScheduler(player);
+        scheduler = new TrackScheduler(player, guildId);
         player.addListener(scheduler);
         recentSearchResults = new LinkedHashMap<>();
+        scheduler.addListener(new BasicMessageHandler());
+        scheduler.addListener(new MusicEmbedMessageSender());
     }
 
     public AudioPlayerTaskSendHandler getSendHandler(){
@@ -33,10 +35,6 @@ public class GuildMusicManager {
         for (int i = 0; i < videoList.size(); i++){
             recentSearchResults.put(i, videoList.get(i));
         }
-    }
-
-    public void setTextChannel(MessageChannel channel) {
-        scheduler.setLinkedTextChannel(channel);
     }
 
     public YouTubeVideo getVideoAndClearSearchResults(int searchIndex) {
