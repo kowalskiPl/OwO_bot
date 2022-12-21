@@ -3,6 +3,7 @@ package src.music;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import src.model.YouTubeVideo;
+import src.utilities.ServiceContext;
 import src.utilities.listener.BasicMessageHandler;
 import src.listeners.MusicEmbedMessageSender;
 
@@ -20,6 +21,7 @@ public class GuildMusicManager {
 
     public GuildMusicManager(AudioPlayerManager manager, long guildId) {
         player = manager.createPlayer();
+        player.setFrameBufferDuration(ServiceContext.getConfig().getFrameBufferDuration());
         scheduler = new TrackScheduler(player, guildId);
         player.addListener(scheduler);
         recentSearchResults = new LinkedHashMap<>();

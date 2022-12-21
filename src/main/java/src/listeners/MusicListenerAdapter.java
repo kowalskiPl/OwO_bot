@@ -24,7 +24,11 @@ import org.slf4j.LoggerFactory;
 import src.exception.UserNotInVoiceChannelException;
 import src.model.AudioTrackRequest;
 import src.model.YouTubeVideo;
+import src.model.commands.Command;
+import src.model.commands.ParameterlessCommand;
+import src.model.commands.ParametrizedCommand;
 import src.music.GuildMusicManager;
+import src.utilities.CommandParser;
 import src.youtube.HttpYouTubeRequester;
 import src.youtube.YouTubeRequestResultParser;
 import src.youtube.YouTubeSearch;
@@ -37,6 +41,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 public class MusicListenerAdapter extends ListenerAdapter {
 
@@ -77,7 +82,6 @@ public class MusicListenerAdapter extends ListenerAdapter {
         Message message = event.getMessage();
         User author = message.getAuthor();
         String content = message.getContentRaw();
-        Guild guild = event.getGuild();
 
         if (author.isBot())
             return;
@@ -85,18 +89,25 @@ public class MusicListenerAdapter extends ListenerAdapter {
         if (!event.isFromGuild())
             return;
 
-        String[] arr = content.split(" ", 2);
-
+        Command command = CommandParser.processMessage(content);
         AtomicBoolean handled = new AtomicBoolean(false);
-        switch (arr[0]) {
-            case "!play" -> handlePlayCommand(event, arr[1], handled);
-            case "!pause" -> handlePauseCommand(event, handled);
-            case "!skip" -> handleSkipCommand(event, handled);
-            case "!stop" -> handleStopCommand(event, handled);
-            case "!disconnect", "!leave" -> handleDisconnectCommand(event, handled);
+
+        if (command instanceof ParameterlessCommand newCommand){
+            switch (newCommand.command) {
+                case "pause" -> handlePauseCommand(event, handled);
+                case "skip" -> handleSkipCommand(event, handled);
+                case "stop" -> handleStopCommand(event, handled);
+                case "disconnect", "leave" -> handleDisconnectCommand(event, handled);
+            }
         }
+
+        if (command instanceof ParametrizedCommand newCommand){
+            if (newCommand.command.equals("play"))
+                handlePlayCommand(event, String.join(" ", newCommand.parameters), handled);
+        }
+
         if (handled.get())
-            message.delete().delay(Duration.ofSeconds(2)).queue();
+            message.delete().delay(Duration.ofSeconds(3)).queue();
 
         super.onMessageReceived(event);
     }
