@@ -15,6 +15,11 @@ sourceCompatibility = 1.16
 group 'org.kowalski'
 version '1.1.1.0'
 
+shadowJar {
+    archiveBaseName.set('OwO_bot')
+    archiveClassifier.set('dev')
+    archiveVersion.set(version)
+}
 
 
 repositories {
