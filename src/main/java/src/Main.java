@@ -1,5 +1,7 @@
 package src;
 
+import src.database.MongoConnectionPool;
+import src.database.MongoDbContext;
 import src.listeners.MainMessageListener;
 import src.listeners.MusicListenerAdapter;
 import net.dv8tion.jda.api.JDABuilder;
@@ -19,12 +21,17 @@ import java.io.IOException;
 public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);
     private static String token;
+    private static String conString;
 
     public static void main(String[] args) {
         log.info("Starting up");
         token = args[0];
         log.info("Loading config");
         loadConfig();
+        conString = args[1];
+        log.info("Setting up DB connection");
+        var dbContext = new MongoDbContext(conString, 3, ServiceContext.getConfig().getMongoDb());
+        ServiceContext.provideDbConnectionPool(dbContext);
 
         JDABuilder builder = JDABuilder.createDefault(token, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_VOICE_STATES);
         builder.addEventListeners(new MainMessageListener(), new MusicListenerAdapter())

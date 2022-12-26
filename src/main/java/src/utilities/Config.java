@@ -48,7 +48,7 @@ public class Config {
             config.eventThreadPoolSize = Integer.parseInt(properties.getProperty("app.event.threadPoolSize", "1"));
             config.frameBufferDuration = Integer.parseInt(properties.getProperty("app.music.framebufferDuration", "5000"));
             config.mongoDb = properties.getProperty("app.mongo.database", "OwO_bot_db");
-            config.mongoDb = properties.getProperty("app.mongo.database.test", "OwO_bot_db_test");
+            config.testMongoDb = properties.getProperty("app.mongo.database.test", "OwO_bot_db_test");
             return config;
         }
     }
