@@ -10,6 +10,8 @@ public class Config {
     private Set<String> prefixes;
     private int frameBufferDuration;
     private int eventThreadPoolSize;
+    private String mongoDb;
+    private String testMongoDb;
 
     public Config() {
     }
@@ -30,6 +32,14 @@ public class Config {
         return eventThreadPoolSize;
     }
 
+    public String getMongoDb() {
+        return mongoDb;
+    }
+
+    public String getTestMongoDb() {
+        return testMongoDb;
+    }
+
     public static class ConfigBuilder {
         public static Config build(Properties properties) {
             Config config = new Config();
@@ -37,7 +47,8 @@ public class Config {
             config.prefixes = Arrays.stream(properties.getProperty("app.commands.prefixes", "!").split(",")).collect(Collectors.toSet());
             config.eventThreadPoolSize = Integer.parseInt(properties.getProperty("app.event.threadPoolSize", "1"));
             config.frameBufferDuration = Integer.parseInt(properties.getProperty("app.music.framebufferDuration", "5000"));
-
+            config.mongoDb = properties.getProperty("app.mongo.database", "OwO_bot_db");
+            config.mongoDb = properties.getProperty("app.mongo.database.test", "OwO_bot_db_test");
             return config;
         }
     }
