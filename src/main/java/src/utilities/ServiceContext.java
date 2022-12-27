@@ -23,4 +23,8 @@ public class ServiceContext {
     public static Config getConfig() {
         return config;
     }
+
+    public static MongoDbContext getDbContext() {
+        return dbContext;
+    }
 }

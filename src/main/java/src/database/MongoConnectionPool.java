@@ -27,7 +27,7 @@ public class MongoConnectionPool implements ConnectionPool {
     }
 
     @Override
-    public void shutdown() {
+    public synchronized void shutdown() {
         freeConnections.forEach(DbConnection::shutDown);
         takenConnections.forEach(DbConnection::shutDown);
     }
