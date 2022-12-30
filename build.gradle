@@ -18,7 +18,6 @@ version '1.1.1.1'
 shadowJar {
     archiveBaseName.set('OwO_bot')
     archiveClassifier.set('dev')
-    archiveVersion.set(archiveVersion)
 }
 
 
