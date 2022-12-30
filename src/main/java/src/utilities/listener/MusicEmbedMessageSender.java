@@ -1,4 +1,4 @@
-package src.listeners;
+package src.utilities.listener;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;

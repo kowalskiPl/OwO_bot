@@ -4,8 +4,6 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import src.model.YouTubeVideo;
 import src.utilities.ServiceContext;
-import src.utilities.listener.BasicMessageHandler;
-import src.listeners.MusicEmbedMessageSender;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,8 +23,6 @@ public class GuildMusicManager {
         scheduler = new TrackScheduler(player, guildId);
         player.addListener(scheduler);
         recentSearchResults = new LinkedHashMap<>();
-        scheduler.addListener(new BasicMessageHandler());
-        scheduler.addListener(new MusicEmbedMessageSender());
     }
 
     public AudioPlayerTaskSendHandler getSendHandler(){
