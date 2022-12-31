@@ -12,23 +12,28 @@ import java.time.Duration;
 
 public class BasicMessageHandler implements Listener {
     @Override
-    public void onEventReceived(Event event) {
+    public boolean onEventReceived(Event event) {
         if (event instanceof SendMessageEvent messageEvent) {
             if (messageEvent.getDelay() > 0) {
                 messageEvent.getMessageChannel().sendMessage(((SendMessageEvent) event).getText())
                         .delay(Duration.ofSeconds(messageEvent.getDelay()))
                         .flatMap(Message::delete)
                         .queue();
-            } else
+            } else {
                 messageEvent.getMessageChannel().sendMessage(((SendMessageEvent) event).getText()).queue();
+            }
+            return true;
         }
 
         if (event instanceof DeleteMessageEvent messageEvent) {
             if (messageEvent.getPreviousMessages() > 0) {
                 //TODO: some serious stuff here to delete n messages backwards
+                return false;
             } else {
                 messageEvent.getMessageChannel().deleteMessageById(messageEvent.getMessageID()).queue(null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
+                return true;
             }
         }
+        return false;
     }
 }

@@ -28,10 +28,11 @@ public class MusicEmbedMessageSender implements Listener {
     ));
 
     @Override
-    public void onEventReceived(Event event) {
+    public boolean onEventReceived(Event event) {
         if (event instanceof SendMusicMessageEvent sendMusicMsgEvt) {
             if (sendMusicMsgEvt.getSender() instanceof TrackScheduler scheduler) {
                 sendEmbedPlayerMessage(sendMusicMsgEvt.getAudioTrackRequest(), sendMusicMsgEvt.getNextTrack(), scheduler);
+                return true;
             }
         }
 
@@ -47,6 +48,7 @@ public class MusicEmbedMessageSender implements Listener {
                                     .editMessageEmbeds(constructEmbedPlayerMessage(modifyMusicMessageEvent.getAudioTrackRequest(), modifyMusicMessageEvent.getNextTrack()).build())
                                     .queue(), new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
                 }
+                return true;
             }
         }
 
@@ -60,8 +62,10 @@ public class MusicEmbedMessageSender implements Listener {
                                 Button.secondary("Next", "Next"),
                                 Button.secondary("Stop", "Stop"),
                                 Button.secondary("Leave", "Leave"))).queue());
+                return true;
             }
         }
+        return false;
     }
 
     private EmbedBuilder constructEmbedPlayerMessage(AudioTrackRequest request, AudioTrackRequest nextTrack) {

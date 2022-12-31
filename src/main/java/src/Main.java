@@ -118,10 +118,11 @@ public class Main {
             if (secrets) {
                 FileInputStream fis = new FileInputStream(secretsFile);
                 ServiceContext.provideConfig(Config.ConfigBuilder.build(ConfigReader.readConfig(inputStream), ConfigReader.readConfig(fis)));
+                fis.close();
             } else {
                 ServiceContext.provideConfig(Config.ConfigBuilder.build(ConfigReader.readConfig(inputStream)));
             }
-        } catch (ConfigurationException | FileNotFoundException e) {
+        } catch (ConfigurationException | IOException e) {
             log.error("Config load failed!");
             e.printStackTrace();
         } finally {
