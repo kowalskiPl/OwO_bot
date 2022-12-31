@@ -1,5 +1,5 @@
 package src.events;
 
 public interface Listener {
-    void onEventReceived(Event event);
+    boolean onEventReceived(Event event);
 }

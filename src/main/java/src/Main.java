@@ -2,8 +2,8 @@ package src;
 
 import org.apache.commons.cli.*;
 import src.database.MongoDbContext;
-import src.listeners.MainMessageListener;
-import src.listeners.MusicListenerAdapter;
+import src.messagelisteners.MainMessageListener;
+import src.messagelisteners.MusicListenerAdapter;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -13,6 +13,9 @@ import org.slf4j.LoggerFactory;
 import src.utilities.Config;
 import src.utilities.ConfigReader;
 import src.utilities.ServiceContext;
+import src.utilities.listener.BasicMessageHandler;
+import src.utilities.listener.EventListenerStack;
+import src.utilities.listener.MusicEmbedMessageSender;
 
 import javax.naming.ConfigurationException;
 import javax.security.auth.login.LoginException;
@@ -79,6 +82,11 @@ public class Main {
         var dbContext = new MongoDbContext(ServiceContext.getConfig().getConnectionString(), 3, ServiceContext.getConfig().getMongoDb());
         ServiceContext.provideDbConnectionPool(dbContext);
 
+        log.info("Creating event listener stack");
+        var listenerStack = new EventListenerStack(ServiceContext.getConfig().getEventThreadPoolSize());
+        listenerStack.registerListener(new MusicEmbedMessageSender(), new BasicMessageHandler());
+        ServiceContext.provideEventListenerStack(listenerStack);
+
         JDABuilder builder = JDABuilder.createDefault(ServiceContext.getConfig().getDiscordToken(), GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_VOICE_STATES);
         builder.addEventListeners(new MainMessageListener(), new MusicListenerAdapter())
                 .setActivity(Activity.playing("Honk"))
@@ -99,6 +107,7 @@ public class Main {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             log.info("Preparing to shutdown");
             ServiceContext.getDbContext().shutdown();
+            ServiceContext.getListenerStack().shutdown();
         }));
     }
 
@@ -109,10 +118,11 @@ public class Main {
             if (secrets) {
                 FileInputStream fis = new FileInputStream(secretsFile);
                 ServiceContext.provideConfig(Config.ConfigBuilder.build(ConfigReader.readConfig(inputStream), ConfigReader.readConfig(fis)));
+                fis.close();
             } else {
                 ServiceContext.provideConfig(Config.ConfigBuilder.build(ConfigReader.readConfig(inputStream)));
             }
-        } catch (ConfigurationException | FileNotFoundException e) {
+        } catch (ConfigurationException | IOException e) {
             log.error("Config load failed!");
             e.printStackTrace();
         } finally {

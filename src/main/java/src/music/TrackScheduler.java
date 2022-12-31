@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import src.events.*;
 import src.events.Event;
 import src.model.AudioTrackRequest;
+import src.utilities.ServiceContext;
 import src.youtube.HttpYouTubeRequester;
 import src.youtube.YouTubeRequestResultParser;
 
@@ -21,7 +22,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class TrackScheduler extends AudioEventAdapter implements Observable {
     private final AudioPlayer player;
     private final BlockingQueue<AudioTrackRequest> queue;
-    private final List<Listener> listeners;
     private AudioTrackRequest currentMusic;
     private long currentEmbedMessageId;
     private MessageChannel currentEmbedLocation;
@@ -32,11 +32,10 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
     public TrackScheduler(AudioPlayer player, long guildId) {
         this.player = player;
         this.queue = new LinkedBlockingQueue<>();
-        this.listeners = new ArrayList<>();
         this.guildId = guildId;
     }
 
-    public TrackScheduler setCurrentEmbedMessageId(long embedMessage) {
+    public synchronized TrackScheduler setCurrentEmbedMessageId(long embedMessage) {
         this.currentEmbedMessageId = embedMessage;
         return this;
     }
@@ -49,7 +48,7 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
         return guildId;
     }
 
-    public TrackScheduler setCurrentEmbedLocation(MessageChannel currentEmbedLocation) {
+    public synchronized TrackScheduler setCurrentEmbedLocation(MessageChannel currentEmbedLocation) {
         this.currentEmbedLocation = currentEmbedLocation;
         return this;
     }
@@ -140,18 +139,8 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
     }
 
     @Override
-    public void addListener(Listener listener) {
-        this.listeners.add(listener);
-    }
-
-    @Override
-    public void removeListener(Listener listener) {
-        this.listeners.remove(listener);
-    }
-
-    @Override
     public void notifyListeners(Event event) {
-        this.listeners.forEach(listener -> listener.onEventReceived(event));
+        ServiceContext.getListenerStack().onEvent(event);
     }
 
     private void sendEvent(Event event) {
