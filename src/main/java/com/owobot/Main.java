@@ -75,33 +75,15 @@ public class Main {
             loadConfig(true);
         }
 
-        log.info("Setting up DB connection");
-        var dbContext = new MongoDbContext(ServiceContext.getConfig().getConnectionString(), 3, ServiceContext.getConfig().getMongoDb());
-        ServiceContext.provideDbConnectionPool(dbContext);
-
-        log.info("Creating event listener stack");
-        var listenerStack = new EventListenerStack(ServiceContext.getConfig().getEventThreadPoolSize());
-        listenerStack.registerListener(new MusicEmbedMessageSender(), new BasicMessageHandler());
-        ServiceContext.provideEventListenerStack(listenerStack);
-
-        JDABuilder builder = JDABuilder.createDefault(ServiceContext.getConfig().getDiscordToken(), GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.MESSAGE_CONTENT);
-        builder.addEventListeners(new MainMessageListener(), new MusicListenerAdapter())
-                .setActivity(Activity.playing("Honk"))
-                .enableCache(CacheFlag.VOICE_STATE);
-
         OwoBot owoBot = new OwoBot();
 
-        // sharding setup
-        for (int i = 0; i < 3; i++) {
-            builder.useSharding(i, 3);
-            builder.build();
-        }
         log.info("Startup complete");
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             log.info("Preparing to shutdown");
             ServiceContext.getDbContext().shutdown();
             ServiceContext.getListenerStack().shutdown();
+            owoBot.shutdown();
         }));
     }
 
