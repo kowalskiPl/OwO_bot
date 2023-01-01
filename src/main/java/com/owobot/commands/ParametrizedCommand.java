@@ -1,4 +1,4 @@
-package com.owobot.model.commands;
+package com.owobot.commands;
 
 import java.util.ArrayList;
 import java.util.Collections;

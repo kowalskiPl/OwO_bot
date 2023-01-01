@@ -1,9 +1,9 @@
 package com.owobot.utilities;
 
-import com.owobot.model.commands.ParametrizedCommand;
-import com.owobot.model.commands.Command;
-import com.owobot.model.commands.EmptyCommand;
-import com.owobot.model.commands.ParameterlessCommand;
+import com.owobot.commands.ParametrizedCommand;
+import com.owobot.commands.Command;
+import com.owobot.commands.EmptyCommand;
+import com.owobot.commands.ParameterlessCommand;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

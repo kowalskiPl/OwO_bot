@@ -1,4 +1,4 @@
-package com.owobot.model.commands;
+package com.owobot.commands;
 
 public class ParameterlessCommand implements Command{
     public String command;
