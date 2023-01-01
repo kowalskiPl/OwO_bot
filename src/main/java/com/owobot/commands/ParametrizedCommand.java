@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class ParametrizedCommand implements Command{
+public class ParametrizedCommand extends Command{
     public String command;
     public List<String> parameters;
 

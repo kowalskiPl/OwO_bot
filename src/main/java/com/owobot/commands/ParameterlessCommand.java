@@ -1,6 +1,6 @@
 package com.owobot.commands;
 
-public class ParameterlessCommand implements Command{
+public class ParameterlessCommand extends Command{
     public String command;
 
     public ParameterlessCommand(String command) {
