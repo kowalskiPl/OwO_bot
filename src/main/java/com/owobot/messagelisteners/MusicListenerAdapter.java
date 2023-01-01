@@ -11,6 +11,9 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
@@ -121,7 +124,7 @@ public class MusicListenerAdapter extends ListenerAdapter {
             if (result.isPresent()){
                 thumbnailUrl = YouTubeRequestResultParser.getThumbnailUrlFromYouTubeUrl(result.get());
             }
-            processUrlPlayRequest(event.getMember(), event.getGuild(), songName, musicManager, channel, thumbnailUrl);
+            processUrlPlayRequest(event.getMember(), event.getGuild(), songName, musicManager, channel.asTextChannel(), thumbnailUrl);
         } else {
             processSearchPlayRequest(event, songName, musicManager, channel);
         }
@@ -129,7 +132,7 @@ public class MusicListenerAdapter extends ListenerAdapter {
         handled.set(true);
     }
 
-    private void processUrlPlayRequest(Member member, Guild guild, String songName, GuildMusicManager musicManager, MessageChannel channel, String thumbnailUrl) {
+    private void processUrlPlayRequest(Member member, Guild guild, String songName, GuildMusicManager musicManager, TextChannel channel, String thumbnailUrl) {
         playerManager.loadItemOrdered(musicManager, songName, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
@@ -190,7 +193,7 @@ public class MusicListenerAdapter extends ListenerAdapter {
 
         var entrySet = trackButtonsIds.entrySet().stream().toList();
         channel.sendMessageEmbeds(builder.build())
-                .setActionRows(
+                .setComponents(
                         ActionRow.of(Button.secondary(entrySet.get(0).getKey(), entrySet.get(0).getValue()),
                                 Button.secondary(entrySet.get(1).getKey(), entrySet.get(1).getValue()),
                                 Button.secondary(entrySet.get(2).getKey(), entrySet.get(2).getValue()),
@@ -216,7 +219,7 @@ public class MusicListenerAdapter extends ListenerAdapter {
         if (!button.equals("Cancel")) {
             var video = musicManager.getVideoAndClearSearchResults(Integer.parseInt(button));
             var url = "https://www.youtube.com" + video.watchUrl;
-            processUrlPlayRequest(event.getMember(), event.getGuild(), url, musicManager, event.getChannel(), video.thumbnailUrl);
+            processUrlPlayRequest(event.getMember(), event.getGuild(), url, musicManager, event.getChannel().asTextChannel(), video.thumbnailUrl);
         }
         event.getMessage().delete().queue();
     }
@@ -262,13 +265,13 @@ public class MusicListenerAdapter extends ListenerAdapter {
         event.deferEdit().queue();
     }
 
-    private void play(Member member, Guild guild, GuildMusicManager musicManager, AudioTrack track, MessageChannel channel, String thumbnailUrl) throws UserNotInVoiceChannelException {
+    private void play(Member member, Guild guild, GuildMusicManager musicManager, AudioTrack track, TextChannel channel, String thumbnailUrl) throws UserNotInVoiceChannelException {
         connectToVoiceChannel(member, guild.getAudioManager());
 
         musicManager.scheduler.enqueue(new AudioTrackRequest(track, channel, member, thumbnailUrl));
     }
 
-    private void play(Member member, Guild guild, GuildMusicManager musicManager, List<AudioTrack> tracks, String name, MessageChannel channel) throws UserNotInVoiceChannelException {
+    private void play(Member member, Guild guild, GuildMusicManager musicManager, List<AudioTrack> tracks, String name, TextChannel channel) throws UserNotInVoiceChannelException {
         connectToVoiceChannel(member, guild.getAudioManager());
 
         musicManager.scheduler.enqueue(tracks, name, channel, member);

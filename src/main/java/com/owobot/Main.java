@@ -18,14 +18,12 @@ import org.slf4j.LoggerFactory;
 import com.owobot.utilities.listener.BasicMessageHandler;
 
 import javax.naming.ConfigurationException;
-import javax.security.auth.login.LoginException;
 import java.io.FileInputStream;
 import java.io.IOException;
 
 public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);
     private static String secretsFile;
-
     public static void main(String[] args) {
         Options options = new Options();
         Option secrets = new Option("s", "secrets", true, "File containing secrets");
@@ -86,20 +84,17 @@ public class Main {
         listenerStack.registerListener(new MusicEmbedMessageSender(), new BasicMessageHandler());
         ServiceContext.provideEventListenerStack(listenerStack);
 
-        JDABuilder builder = JDABuilder.createDefault(ServiceContext.getConfig().getDiscordToken(), GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_VOICE_STATES);
+        JDABuilder builder = JDABuilder.createDefault(ServiceContext.getConfig().getDiscordToken(), GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.MESSAGE_CONTENT);
         builder.addEventListeners(new MainMessageListener(), new MusicListenerAdapter())
                 .setActivity(Activity.playing("Honk"))
                 .enableCache(CacheFlag.VOICE_STATE);
 
+        OwoBot owoBot = new OwoBot();
+
         // sharding setup
         for (int i = 0; i < 3; i++) {
             builder.useSharding(i, 3);
-            try {
-                builder.build();
-            } catch (LoginException e) {
-                log.error("Startup failed: " + e.getMessage());
-                e.printStackTrace();
-            }
+            builder.build();
         }
         log.info("Startup complete");
 

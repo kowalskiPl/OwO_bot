@@ -37,7 +37,7 @@ public class MainMessageListener extends ListenerAdapter implements Observable {
 //        if (arr[0].equals("!test")) {
 //
 //        }
-        var myEvent = new SendMessageEvent(message.getChannel(), "This is a test of event stack", this);
+        var myEvent = new SendMessageEvent(message.getChannel().asTextChannel(), "This is a test of event stack", this);
 //        notifyListeners(myEvent);
     }
 

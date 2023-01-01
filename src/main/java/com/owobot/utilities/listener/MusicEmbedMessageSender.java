@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import owobot.events.*;
 import com.owobot.model.AudioTrackRequest;
 import com.owobot.music.TrackScheduler;
 import com.owobot.utilities.SimpleTimeConverter;
@@ -59,7 +58,7 @@ public class MusicEmbedMessageSender implements Listener {
                 pauseEvent
                         .getMessageChannel()
                         .retrieveMessageById(scheduler.getCurrentEmbedMessageId())
-                        .queue(message -> message.editMessageEmbeds(message.getEmbeds().get(0)).setActionRows(ActionRow.of(Button.secondary("Pause", pause),
+                        .queue(message -> message.editMessageEmbeds(message.getEmbeds().get(0)).setComponents(ActionRow.of(Button.secondary("Pause", pause),
                                 Button.secondary("Next", "Next"),
                                 Button.secondary("Stop", "Stop"),
                                 Button.secondary("Leave", "Leave"))).queue());
@@ -90,7 +89,7 @@ public class MusicEmbedMessageSender implements Listener {
         var builder = constructEmbedPlayerMessage(request, nextTrack);
         var channel = request.channel;
         channel.sendMessageEmbeds(builder.build())
-                .setActionRows(
+                .setComponents(
                         ActionRow.of(Button.secondary("Pause", "Pause"),
                                 Button.secondary("Next", "Next"),
                                 Button.secondary("Stop", "Stop"),

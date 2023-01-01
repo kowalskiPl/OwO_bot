@@ -1,26 +1,26 @@
 package com.owobot.events;
 
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
 public class SendMessageEvent extends Event {
-    private final MessageChannel messageChannel;
+    private final TextChannel messageChannel;
     private final String text;
     private int delay;
 
-    public SendMessageEvent(MessageChannel messageChannel, String text, Observable sender) {
+    public SendMessageEvent(TextChannel messageChannel, String text, Observable sender) {
         super(sender);
         this.messageChannel = messageChannel;
         this.text = text;
     }
 
-    public SendMessageEvent(MessageChannel messageChannel, String text, int delayDelete, Observable sender) {
+    public SendMessageEvent(TextChannel messageChannel, String text, int delayDelete, Observable sender) {
         super(sender);
         this.messageChannel = messageChannel;
         this.text = text;
         this.delay = delayDelete;
     }
 
-    public MessageChannel getMessageChannel() {
+    public TextChannel getMessageChannel() {
         return messageChannel;
     }
 

@@ -7,9 +7,9 @@ import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import owobot.events.*;
 import com.owobot.model.AudioTrackRequest;
 import com.owobot.youtube.HttpYouTubeRequester;
 import com.owobot.youtube.YouTubeRequestResultParser;
@@ -18,12 +18,13 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class TrackScheduler extends AudioEventAdapter implements Observable {
     private final AudioPlayer player;
     private final BlockingQueue<AudioTrackRequest> queue;
     private AudioTrackRequest currentMusic;
     private long currentEmbedMessageId;
-    private MessageChannel currentEmbedLocation;
+    private TextChannel currentEmbedLocation;
     private final long guildId;
 
     private static final Logger log = LoggerFactory.getLogger(TrackScheduler.class);
@@ -47,12 +48,12 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
         return guildId;
     }
 
-    public synchronized TrackScheduler setCurrentEmbedLocation(MessageChannel currentEmbedLocation) {
+    public synchronized TrackScheduler setCurrentEmbedLocation(TextChannel currentEmbedLocation) {
         this.currentEmbedLocation = currentEmbedLocation;
         return this;
     }
 
-    public MessageChannel getCurrentEmbedLocation() {
+    public TextChannel getCurrentEmbedLocation() {
         return currentEmbedLocation;
     }
 
@@ -66,7 +67,7 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
         }
     }
 
-    public void enqueue(List<AudioTrack> tracks, String name, MessageChannel channel, Member member) {
+    public void enqueue(List<AudioTrack> tracks, String name, TextChannel channel, Member member) {
         if (!player.startTrack(tracks.get(0), true)) {
             tracks.forEach(track -> {
                 var thumbnailUrl = getThumbnailUrl(track);
