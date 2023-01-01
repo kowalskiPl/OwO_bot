@@ -1,6 +1,6 @@
 import org.junit.jupiter.api.Test;
-import src.youtube.HttpYouTubeRequester;
-import src.youtube.YouTubeRequestResultParser;
+import com.owobot.youtube.HttpYouTubeRequester;
+import com.owobot.youtube.YouTubeRequestResultParser;
 
 public class YouTubeTests {
     @Test

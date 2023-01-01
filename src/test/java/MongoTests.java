@@ -2,12 +2,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import src.database.MongoConnectionPool;
-import src.database.MongoDbContext;
-import src.model.database.GuildSettings;
-import src.utilities.Config;
-import src.utilities.ConfigReader;
-import src.utilities.ServiceContext;
+import com.owobot.database.MongoDbContext;
+import com.owobot.model.database.GuildSettings;
+import com.owobot.utilities.Config;
+import com.owobot.utilities.ConfigReader;
+import com.owobot.utilities.ServiceContext;
 
 import javax.naming.ConfigurationException;
 import java.io.IOException;
