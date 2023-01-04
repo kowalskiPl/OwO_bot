@@ -13,7 +13,7 @@ jar {
 
 sourceCompatibility = 1.16
 group 'org.kowalski'
-version '1.1.1.2'
+version '1.2.0.0'
 
 shadowJar {
     archiveBaseName.set('OwO_bot')
