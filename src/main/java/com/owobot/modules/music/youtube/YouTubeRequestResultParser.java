@@ -1,7 +1,7 @@
-package com.owobot.youtube;
+package com.owobot.modules.music.youtube;
 
 import com.google.gson.Gson;
-import com.owobot.model.YouTubeVideo;
+import com.owobot.modules.music.model.YouTubeVideo;
 import com.owobot.model.youtube.ItemSectionRenderer;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;

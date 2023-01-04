@@ -1,7 +1,8 @@
-package com.owobot.music;
+package com.owobot.modules.music;
 
-import com.owobot.model.YouTubeVideo;
-import com.owobot.utilities.ServiceContext;
+import com.owobot.OwoBot;
+import com.owobot.modules.music.model.YouTubeVideo;
+import com.owobot.utilities.Reflectional;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 
@@ -9,7 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GuildMusicManager {
+public class GuildMusicManager extends Reflectional {
 
     public final AudioPlayer player;
 
@@ -17,9 +18,10 @@ public class GuildMusicManager {
 
     public final Map<Integer, YouTubeVideo> recentSearchResults;
 
-    public GuildMusicManager(AudioPlayerManager manager, long guildId) {
+    public GuildMusicManager(OwoBot owoBot, AudioPlayerManager manager, long guildId) {
+        super(owoBot);
         player = manager.createPlayer();
-        player.setFrameBufferDuration(ServiceContext.getConfig().getFrameBufferDuration());
+        player.setFrameBufferDuration(owoBot.getConfig().getFrameBufferDuration());
         scheduler = new TrackScheduler(player, guildId);
         player.addListener(scheduler);
         recentSearchResults = new LinkedHashMap<>();

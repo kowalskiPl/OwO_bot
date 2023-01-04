@@ -1,12 +1,11 @@
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.owobot.database.MongoDbContext;
 import com.owobot.model.database.GuildSettings;
 import com.owobot.utilities.Config;
 import com.owobot.utilities.ConfigReader;
-import com.owobot.utilities.ServiceContext;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.naming.ConfigurationException;
 import java.io.IOException;
@@ -15,16 +14,20 @@ import java.util.Set;
 
 public class MongoTests {
     private static final Logger log = LoggerFactory.getLogger(MongoTests.class);
+    private static Config config;
 
     @BeforeAll
     static void prepareConfig() {
-        loadConfig();
+        config = loadConfig();
+        if (config == null){
+            throw new RuntimeException("Failed to load config");
+        }
     }
 
     @Test
     public void connectionPoolTests(){
-        System.out.println(ServiceContext.getConfig().getTestMongoDb());
-        MongoDbContext context = new MongoDbContext("", 3, ServiceContext.getConfig().getTestMongoDb());
+        System.out.println(config.getTestMongoDb());
+        MongoDbContext context = new MongoDbContext("", 3, config.getTestMongoDb());
         Set<Long> aa = new HashSet<>();
         aa.add(123123L);
         GuildSettings settings = new GuildSettings(123123123L, aa, 100);
@@ -36,11 +39,11 @@ public class MongoTests {
         context.shutdown();
     }
 
-    private static void loadConfig() {
+    private static Config loadConfig() {
         var loader = MongoTests.class.getClassLoader();
         var inputStream = loader.getResourceAsStream("application_test.config");
         try {
-            ServiceContext.provideConfig(Config.ConfigBuilder.build(ConfigReader.readConfig(inputStream)));
+            return (Config.ConfigBuilder.build(ConfigReader.readConfig(inputStream)));
         } catch (ConfigurationException e) {
             log.error("Config load failed!");
             e.printStackTrace();
@@ -53,5 +56,6 @@ public class MongoTests {
                 e.printStackTrace();
             }
         }
+        return null;
     }
 }

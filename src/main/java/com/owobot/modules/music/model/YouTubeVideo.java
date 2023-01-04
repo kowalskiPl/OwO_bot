@@ -1,4 +1,4 @@
-package com.owobot.model;
+package com.owobot.modules.music.model;
 
 public class YouTubeVideo {
     public String watchUrl;

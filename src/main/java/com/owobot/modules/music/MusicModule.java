@@ -4,6 +4,8 @@ import com.owobot.OwoBot;
 import com.owobot.commands.Command;
 import com.owobot.commands.CommandListener;
 import com.owobot.modules.Module;
+import com.owobot.modules.music.commands.*;
+import com.owobot.modules.music.listener.MusicCommandListener;
 import com.owobot.utilities.Reflectional;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,10 +17,21 @@ public class MusicModule extends Reflectional implements Module {
 
     private final Set<CommandListener> commandListeners;
     private final Set<Command> commands;
+
     public MusicModule(OwoBot owoBot) {
         super(owoBot);
-        commandListeners = new LinkedHashSet<>();
-        commands = new LinkedHashSet<>();
+        commandListeners = new LinkedHashSet<>(Set.of(
+                new MusicCommandListener(owoBot)
+        ));
+
+        commands = new LinkedHashSet<>(Set.of(
+                new PlayCommand(),
+                new StopCommand(),
+                new LeaveCommand(),
+                new PauseCommand(),
+                new SearchResultButtonPressedCommand(),
+                new ControlPanelButtonPressCommand()
+        ));
     }
 
     @Override

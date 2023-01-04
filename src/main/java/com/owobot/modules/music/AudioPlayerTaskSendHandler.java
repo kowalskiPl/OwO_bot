@@ -1,4 +1,4 @@
-package com.owobot.music;
+package com.owobot.modules.music;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.track.playback.MutableAudioFrame;

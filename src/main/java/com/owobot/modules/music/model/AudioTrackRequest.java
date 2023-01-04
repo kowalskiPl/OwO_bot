@@ -1,4 +1,4 @@
-package com.owobot.model;
+package com.owobot.modules.music.model;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.entities.Member;

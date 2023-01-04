@@ -1,6 +1,6 @@
 import org.junit.jupiter.api.Test;
-import com.owobot.youtube.HttpYouTubeRequester;
-import com.owobot.youtube.YouTubeRequestResultParser;
+import com.owobot.modules.music.youtube.HttpYouTubeRequester;
+import com.owobot.modules.music.youtube.YouTubeRequestResultParser;
 
 public class YouTubeTests {
     @Test
@@ -26,7 +26,7 @@ public class YouTubeTests {
     @Test
     public void thumbnailFromUrlTest() {
         System.out.println("Test start!");
-        var result = HttpYouTubeRequester.queryYoutubeVideo("https://www.youtube.com/watch?v=vMIf7DKzWEM");
+        var result = HttpYouTubeRequester.queryYoutubeVideo("https://www.youtube.com/watch?v=-QW6BXwMXEs");
         if (result.isPresent()){
             var url = YouTubeRequestResultParser.getThumbnailUrlFromYouTubeUrl(result.get());
             System.out.println(url);

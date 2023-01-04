@@ -2,15 +2,12 @@ package com.owobot;
 
 import com.owobot.core.CommandCache;
 import com.owobot.core.CommandListenerStack;
-import com.owobot.core.EventListenerStack;
 import com.owobot.core.ModuleManager;
 import com.owobot.database.MongoDbContext;
 import com.owobot.messagelisteners.MainMessageListener;
 import com.owobot.modules.admin.AdminModule;
-import com.owobot.modules.music.MusicEmbedMessageSender;
 import com.owobot.modules.music.MusicModule;
 import com.owobot.utilities.Config;
-import com.owobot.utilities.listener.BasicMessageHandler;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
@@ -29,7 +26,6 @@ public class OwoBot {
     private final ShardManager shardManager;
     private final Config config;
     private final MongoDbContext mongoDbContext;
-    private final EventListenerStack eventListenerStack;
     private final ModuleManager moduleManager;
     private final CommandCache commandCache;
 
@@ -41,10 +37,6 @@ public class OwoBot {
 
         log.info("Setting up DB connection");
         mongoDbContext = new MongoDbContext(config.getConnectionString(), 3, config.getMongoDb());
-
-        log.info("Creating event listener stack");
-        eventListenerStack = new EventListenerStack(config.getEventThreadPoolSize());
-        eventListenerStack.registerListener(new MusicEmbedMessageSender(), new BasicMessageHandler());
 
         log.info("Creating command cache");
         commandCache = new CommandCache(this);
@@ -88,7 +80,6 @@ public class OwoBot {
 
     public void shutdown() {
         shardManager.shutdown();
-        eventListenerStack.shutdown();
         mongoDbContext.shutdown();
     }
 
@@ -102,10 +93,6 @@ public class OwoBot {
 
     public MongoDbContext getMongoDbContext() {
         return mongoDbContext;
-    }
-
-    public EventListenerStack getEventListenerStack() {
-        return eventListenerStack;
     }
 
     public ModuleManager getModuleManager() {

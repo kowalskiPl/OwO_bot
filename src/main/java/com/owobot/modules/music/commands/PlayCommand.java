@@ -4,6 +4,8 @@ import com.owobot.commands.Command;
 import com.owobot.modules.music.MusicParameterNames;
 import org.apache.commons.validator.routines.UrlValidator;
 
+import java.util.LinkedHashMap;
+
 public class PlayCommand extends Command {
     public PlayCommand() {
         super();
@@ -14,10 +16,13 @@ public class PlayCommand extends Command {
 
     @Override
     public void setParameters(String parameters) {
+        parameterMap = new LinkedHashMap<>();
         if (UrlValidator.getInstance().isValid(parameters)){
-            parameterMap.put(MusicParameterNames.MUSIC_PARAMETER_SONG_URL.getName(), parameters);
+            parameterMap.put(MusicParameterNames.MUSIC_PARAMETER_SONG_NAME.getName(), parameters);
+            parameterMap.put(MusicParameterNames.MUSIC_PARAMETER_IS_SONG_URL.getName(), "true");
         } else {
             parameterMap.put(MusicParameterNames.MUSIC_PARAMETER_SONG_NAME.getName(), parameters);
+            parameterMap.put(MusicParameterNames.MUSIC_PARAMETER_IS_SONG_URL.getName(), "false");
         }
     }
 
@@ -28,5 +33,15 @@ public class PlayCommand extends Command {
     @Override
     public Command clone() {
         return new PlayCommand(this);
+    }
+
+    @Override
+    public String toString() {
+        return "PlayCommand{" +
+                "name='" + name + '\'' +
+                ", triggers=" + triggers +
+                ", commandMessage=" + commandMessage +
+                ", parameterMap=" + parameterMap +
+                '}';
     }
 }

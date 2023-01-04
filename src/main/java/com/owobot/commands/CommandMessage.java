@@ -7,8 +7,8 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
-import net.dv8tion.jda.internal.requests.DeferredRestAction;
 
 public class CommandMessage implements CommandContext {
     private final Guild guild;
@@ -22,6 +22,13 @@ public class CommandMessage implements CommandContext {
         this.guild = message.isFromGuild() ? message.getGuild() : null;
         this.member = message.isFromGuild() ? message.getMember() : null;
         this.textChannel = message.isFromGuild() ? message.getChannel().asTextChannel() : null;
+    }
+
+    public CommandMessage(ButtonInteractionEvent event) {
+        this.message = event.getMessage();
+        this.guild = event.isFromGuild() ? event.getGuild() : null;
+        this.member = event.isFromGuild() ? event.getMember() : null;
+        this.textChannel = event.isFromGuild() ? event.getChannel().asTextChannel() : null;
     }
 
     public JDA getJDA() {

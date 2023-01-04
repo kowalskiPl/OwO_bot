@@ -1,35 +1,31 @@
-package com.owobot.music;
+package com.owobot.modules.music;
 
-import com.owobot.events.*;
-import com.owobot.modules.music.events.ModifyMusicMessageEvent;
-import com.owobot.modules.music.events.PlayerPauseEvent;
-import com.owobot.modules.music.events.SendMessageEvent;
-import com.owobot.modules.music.events.SendMusicMessageEvent;
-import com.owobot.utilities.ServiceContext;
+import com.owobot.modules.music.model.AudioTrackRequest;
+import com.owobot.modules.music.youtube.HttpYouTubeRequester;
+import com.owobot.modules.music.youtube.YouTubeRequestResultParser;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
+import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.owobot.model.AudioTrackRequest;
-import com.owobot.youtube.HttpYouTubeRequester;
-import com.owobot.youtube.YouTubeRequestResultParser;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
-public class TrackScheduler extends AudioEventAdapter implements Observable {
+public class TrackScheduler extends AudioEventAdapter {
     private final AudioPlayer player;
     private final BlockingQueue<AudioTrackRequest> queue;
     private AudioTrackRequest currentMusic;
     private long currentEmbedMessageId;
     private TextChannel currentEmbedLocation;
     private final long guildId;
+    private final PlayerControlPanel controlPanel;
 
     private static final Logger log = LoggerFactory.getLogger(TrackScheduler.class);
 
@@ -37,6 +33,7 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
         this.player = player;
         this.queue = new LinkedBlockingQueue<>();
         this.guildId = guildId;
+        controlPanel = new PlayerControlPanel(this);
     }
 
     public synchronized TrackScheduler setCurrentEmbedMessageId(long embedMessage) {
@@ -64,9 +61,9 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
     public void enqueue(AudioTrackRequest audioTrackRequest) {
         if (!player.startTrack(audioTrackRequest.audioTrack, true)) {// check if the player is free and play the track if so, else enqueue
             queue.offer(audioTrackRequest);
-            sendEvent(new ModifyMusicMessageEvent(currentMusic, queue.peek(), this));
+            controlPanel.updateControlPanel(currentMusic, queue.peek());
         } else {
-            sendEvent(new SendMusicMessageEvent(audioTrackRequest, queue.peek(),this));
+            controlPanel.startNewControlPanel(audioTrackRequest, queue.peek());
             currentMusic = audioTrackRequest;
         }
     }
@@ -77,7 +74,6 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
                 var thumbnailUrl = getThumbnailUrl(track);
                 queue.offer(new AudioTrackRequest(track, channel, member, thumbnailUrl));
             });
-            sendEvent(new SendMessageEvent(channel, "Added playlist: " + name + " to queue", 5, this));
         } else {
             String firstThumbnailUrl = getThumbnailUrl(tracks.get(0));
             for (int i = 1; i < tracks.size(); i++) {
@@ -85,7 +81,7 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
                 queue.offer(new AudioTrackRequest(tracks.get(i), channel, member, thumbnailUrl));
             }
             currentMusic = new AudioTrackRequest(tracks.get(0), channel, member, firstThumbnailUrl);
-            sendEvent(new SendMusicMessageEvent(currentMusic, queue.peek(),this));
+            controlPanel.startNewControlPanel(currentMusic, queue.peek());
         }
     }
 
@@ -103,13 +99,14 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
         if (track != null) {
             player.startTrack(track.audioTrack, false);
             currentMusic = track;
-            sendEvent(new ModifyMusicMessageEvent(track, queue.peek(), this));
+            controlPanel.updateControlPanel(track, queue.peek());
         }
 
         if (track == null) {
-            sendEvent(new DeleteMessageEvent(currentEmbedLocation, currentEmbedMessageId, 0, this));
+            currentMusic = null;
             currentEmbedLocation = null;
             currentEmbedMessageId = 0;
+            controlPanel.setPlayingNothing();
         }
     }
 
@@ -117,7 +114,7 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
         AudioTrack track = player.getPlayingTrack();
         if (track != null) {
             player.setPaused(!player.isPaused());
-            sendEvent(new PlayerPauseEvent(currentEmbedLocation, !player.isPaused(), this));
+            controlPanel.pauseControlPanel(!player.isPaused());
         }
     }
 
@@ -125,9 +122,20 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
         player.stopTrack();
         queue.clear();
         player.setPaused(false);
-        sendEvent(new DeleteMessageEvent(currentEmbedLocation, currentEmbedMessageId, 0, this));
         currentEmbedLocation = null;
         currentEmbedMessageId = 0;
+        currentMusic = null;
+        controlPanel.setPlayingNothing();
+    }
+
+    public void leave() {
+        player.stopTrack();
+        queue.clear();
+        player.setPaused(false);
+        currentEmbedLocation = null;
+        currentEmbedMessageId = 0;
+        currentMusic = null;
+        controlPanel.leave();
     }
 
     public AudioTrack getCurrentTrack() {
@@ -143,12 +151,11 @@ public class TrackScheduler extends AudioEventAdapter implements Observable {
     }
 
     @Override
-    public void notifyListeners(Event event) {
-        ServiceContext.getListenerStack().onEvent(event);
-    }
+    public void onTrackException(AudioPlayer player, AudioTrack track, FriendlyException exception) {
+        if (queue.isEmpty()){
+            stop();
+        }
 
-    private void sendEvent(Event event) {
-        log.info("Sending event: " + event.getClass());
-        notifyListeners(event);
+        super.onTrackException(player, track, exception);
     }
 }

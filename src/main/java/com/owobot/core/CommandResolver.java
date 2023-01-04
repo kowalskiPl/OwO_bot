@@ -6,6 +6,7 @@ import com.owobot.commands.CommandMessage;
 import com.owobot.commands.EmptyCommand;
 import com.owobot.model.database.GuildSettings;
 import com.owobot.utilities.Reflectional;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,13 @@ public class CommandResolver extends Reflectional {
         }
 
         return new EmptyCommand();
+    }
+
+    public Command resolveButtonPress(ButtonInteractionEvent event) {
+        var buttonId = event.getButton().getId();
+        var command = owoBot.getCommandCache().getCommand(buttonId);
+        command.setParameters(buttonId);
+        return command;
     }
 
     @Nullable
