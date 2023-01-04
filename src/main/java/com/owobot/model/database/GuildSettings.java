@@ -2,6 +2,7 @@ package com.owobot.model.database;
 
 import org.bson.types.ObjectId;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class GuildSettings {
@@ -9,6 +10,7 @@ public class GuildSettings {
     private long guildId;
     private Set<Long> musicChannelIds;
     private int volume;
+    private Set<String> prefixes;
 
     public GuildSettings() {
     }
@@ -55,6 +57,23 @@ public class GuildSettings {
 
     public void setVolume(int volume) {
         this.volume = volume;
+    }
+
+    public Set<String> getPrefixes() {
+        return prefixes;
+    }
+
+    public void setPrefixes(Set<String> prefixes) {
+        this.prefixes = prefixes;
+    }
+
+    public static GuildSettings getDefaultSettings() {
+        var settings = new GuildSettings();
+        settings.volume = 100;
+        settings.musicChannelIds = new LinkedHashSet<>();
+        settings.prefixes = new LinkedHashSet<>();
+        settings.guildId = 0L;
+        return settings;
     }
 
     @Override

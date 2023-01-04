@@ -1,6 +1,10 @@
 package com.owobot.music;
 
 import com.owobot.events.*;
+import com.owobot.modules.music.events.ModifyMusicMessageEvent;
+import com.owobot.modules.music.events.PlayerPauseEvent;
+import com.owobot.modules.music.events.SendMessageEvent;
+import com.owobot.modules.music.events.SendMusicMessageEvent;
 import com.owobot.utilities.ServiceContext;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;

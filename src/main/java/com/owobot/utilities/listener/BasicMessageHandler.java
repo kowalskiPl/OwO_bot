@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.requests.ErrorResponse;
 import com.owobot.events.Event;
 import com.owobot.events.Listener;
-import com.owobot.events.SendMessageEvent;
+import com.owobot.modules.music.events.SendMessageEvent;
 
 import java.time.Duration;
 

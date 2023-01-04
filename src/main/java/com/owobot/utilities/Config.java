@@ -14,6 +14,7 @@ public class Config {
     private String testMongoDb;
     private String connectionString;
     private String discordToken;
+    private boolean useDB;
 
     public Config() {
     }
@@ -50,6 +51,10 @@ public class Config {
         return discordToken;
     }
 
+    public boolean isUseDB() {
+        return useDB;
+    }
+
     public void setConnectionString(String connectionString) {
         this.connectionString = connectionString;
     }
@@ -67,6 +72,7 @@ public class Config {
             config.frameBufferDuration = Integer.parseInt(standardProperties.getProperty("app.music.framebufferDuration", "5000"));
             config.mongoDb = standardProperties.getProperty("app.mongo.database", "OwO_bot_db");
             config.testMongoDb = standardProperties.getProperty("app.mongo.database.test", "OwO_bot_db_test");
+            config.useDB = Boolean.parseBoolean(standardProperties.getProperty("app.mongo.use.database", "false"));
             return config;
         }
 

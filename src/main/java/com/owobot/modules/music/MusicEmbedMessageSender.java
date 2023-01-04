@@ -1,7 +1,10 @@
-package com.owobot.utilities.listener;
+package com.owobot.modules.music;
 
 import com.owobot.events.*;
 import com.owobot.events.Event;
+import com.owobot.modules.music.events.ModifyMusicMessageEvent;
+import com.owobot.modules.music.events.PlayerPauseEvent;
+import com.owobot.modules.music.events.SendMusicMessageEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.interactions.components.ActionRow;

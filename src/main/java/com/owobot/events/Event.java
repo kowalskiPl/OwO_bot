@@ -10,4 +10,8 @@ public abstract class Event {
     public Observable getSender() {
         return sender;
     }
+
+    public static String getName(){
+        return Event.class.getName();
+    }
 }

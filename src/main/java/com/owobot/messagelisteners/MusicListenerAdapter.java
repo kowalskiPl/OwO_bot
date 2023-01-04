@@ -78,41 +78,41 @@ public class MusicListenerAdapter extends ListenerAdapter {
         return musicManager;
     }
 
-    @Override
-    public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-
-        Message message = event.getMessage();
-        User author = message.getAuthor();
-        String content = message.getContentRaw();
-
-        if (author.isBot())
-            return;
-
-        if (!event.isFromGuild())
-            return;
-
-        Command command = CommandParser.processMessage(content);
-        AtomicBoolean handled = new AtomicBoolean(false);
-
-        if (command instanceof ParameterlessCommand newCommand){
-            switch (newCommand.command) {
-                case "pause" -> handlePauseCommand(event, handled);
-                case "skip" -> handleSkipCommand(event, handled);
-                case "stop" -> handleStopCommand(event, handled);
-                case "disconnect", "leave" -> handleDisconnectCommand(event, handled);
-            }
-        }
-
-        if (command instanceof ParametrizedCommand newCommand){
-            if (newCommand.command.equals("play"))
-                handlePlayCommand(event, String.join(" ", newCommand.parameters), handled);
-        }
-
-        if (handled.get())
-            message.delete().delay(Duration.ofSeconds(3)).queue();
-
-        super.onMessageReceived(event);
-    }
+//    @Override
+//    public void onMessageReceived(@NotNull MessageReceivedEvent event) {
+//
+//        Message message = event.getMessage();
+//        User author = message.getAuthor();
+//        String content = message.getContentRaw();
+//
+//        if (author.isBot())
+//            return;
+//
+//        if (!event.isFromGuild())
+//            return;
+//
+//        Command command = CommandParser.processMessage(content);
+//        AtomicBoolean handled = new AtomicBoolean(false);
+//
+//        if (command instanceof ParameterlessCommand newCommand){
+//            switch (newCommand.command) {
+//                case "pause" -> handlePauseCommand(event, handled);
+//                case "skip" -> handleSkipCommand(event, handled);
+//                case "stop" -> handleStopCommand(event, handled);
+//                case "disconnect", "leave" -> handleDisconnectCommand(event, handled);
+//            }
+//        }
+//
+//        if (command instanceof ParametrizedCommand newCommand){
+//            if (newCommand.command.equals("play"))
+//                handlePlayCommand(event, String.join(" ", newCommand.parameters), handled);
+//        }
+//
+//        if (handled.get())
+//            message.delete().delay(Duration.ofSeconds(3)).queue();
+//
+//        super.onMessageReceived(event);
+//    }
 
     private void handlePlayCommand(MessageReceivedEvent event, String songName, AtomicBoolean handled) {
         GuildMusicManager musicManager = getGuildAudioPlayer(event.getGuild());

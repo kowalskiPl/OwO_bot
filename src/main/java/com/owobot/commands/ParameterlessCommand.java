@@ -13,4 +13,9 @@ public class ParameterlessCommand extends Command{
                 "command='" + command + '\'' +
                 '}';
     }
+
+    @Override
+    public Command clone() {
+        return null;
+    }
 }

@@ -1,12 +1,16 @@
 package com.owobot;
 
+import com.owobot.core.CommandCache;
+import com.owobot.core.CommandListenerStack;
+import com.owobot.core.EventListenerStack;
+import com.owobot.core.ModuleManager;
 import com.owobot.database.MongoDbContext;
 import com.owobot.messagelisteners.MainMessageListener;
-import com.owobot.messagelisteners.MusicListenerAdapter;
-import com.owobot.utilities.ServiceContext;
+import com.owobot.modules.admin.AdminModule;
+import com.owobot.modules.music.MusicEmbedMessageSender;
+import com.owobot.modules.music.MusicModule;
+import com.owobot.utilities.Config;
 import com.owobot.utilities.listener.BasicMessageHandler;
-import com.owobot.utilities.listener.EventListenerStack;
-import com.owobot.utilities.listener.MusicEmbedMessageSender;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
@@ -22,32 +26,51 @@ import java.util.EnumSet;
 public class OwoBot {
     protected static OwoBot owoBot;
     private static final Logger log = LoggerFactory.getLogger(OwoBot.class);
-    private ShardManager shardManager = null;
+    private final ShardManager shardManager;
+    private final Config config;
+    private final MongoDbContext mongoDbContext;
+    private final EventListenerStack eventListenerStack;
+    private final ModuleManager moduleManager;
+    private final CommandCache commandCache;
 
-    public OwoBot() {
+    private final CommandListenerStack commandListenerStack;
+
+    public OwoBot(Config config) {
         OwoBot.owoBot = this;
+        this.config = config;
 
         log.info("Setting up DB connection");
-        var dbContext = new MongoDbContext(ServiceContext.getConfig().getConnectionString(), 3, ServiceContext.getConfig().getMongoDb());
-        ServiceContext.provideDbConnectionPool(dbContext);
+        mongoDbContext = new MongoDbContext(config.getConnectionString(), 3, config.getMongoDb());
 
         log.info("Creating event listener stack");
-        var listenerStack = new EventListenerStack(ServiceContext.getConfig().getEventThreadPoolSize());
-        listenerStack.registerListener(new MusicEmbedMessageSender(), new BasicMessageHandler());
-        ServiceContext.provideEventListenerStack(listenerStack);
+        eventListenerStack = new EventListenerStack(config.getEventThreadPoolSize());
+        eventListenerStack.registerListener(new MusicEmbedMessageSender(), new BasicMessageHandler());
+
+        log.info("Creating command cache");
+        commandCache = new CommandCache(this);
+
+        log.info("Creating module manager");
+        moduleManager = new ModuleManager(this);
+
+        commandListenerStack = new CommandListenerStack(config.getEventThreadPoolSize());
+
+        log.info("Loading standard modules");
+        moduleManager.loadModule(new MusicModule(owoBot));
+        moduleManager.loadModule(new AdminModule(owoBot));
+
 
         shardManager = createShardManager();
     }
 
-    private ShardManager createShardManager(){
+    private ShardManager createShardManager() {
         DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.create(EnumSet.of(
-                GatewayIntent.GUILD_MESSAGES,
-                GatewayIntent.GUILD_MESSAGE_REACTIONS,
-                GatewayIntent.GUILD_VOICE_STATES,
-                GatewayIntent.DIRECT_MESSAGES,
-                GatewayIntent.MESSAGE_CONTENT
-        ))
-                .setToken(ServiceContext.getConfig().getDiscordToken())
+                        GatewayIntent.GUILD_MESSAGES,
+                        GatewayIntent.GUILD_MESSAGE_REACTIONS,
+                        GatewayIntent.GUILD_VOICE_STATES,
+                        GatewayIntent.DIRECT_MESSAGES,
+                        GatewayIntent.MESSAGE_CONTENT
+                ))
+                .setToken(config.getDiscordToken())
                 .setSessionController(new SessionControllerAdapter())
                 .setActivity(Activity.playing("OwO-ing"))
                 .setBulkDeleteSplittingEnabled(false)
@@ -58,12 +81,42 @@ public class OwoBot {
                 .setContextEnabled(true)
                 .setShardsTotal(3);
 
-        builder.addEventListeners(new MainMessageListener(), new MusicListenerAdapter());
+        builder.addEventListeners(new MainMessageListener(this));
 
         return builder.build();
     }
 
-    public void shutdown(){
+    public void shutdown() {
         shardManager.shutdown();
+        eventListenerStack.shutdown();
+        mongoDbContext.shutdown();
+    }
+
+    public ShardManager getShardManager() {
+        return shardManager;
+    }
+
+    public Config getConfig() {
+        return config;
+    }
+
+    public MongoDbContext getMongoDbContext() {
+        return mongoDbContext;
+    }
+
+    public EventListenerStack getEventListenerStack() {
+        return eventListenerStack;
+    }
+
+    public ModuleManager getModuleManager() {
+        return moduleManager;
+    }
+
+    public CommandCache getCommandCache() {
+        return commandCache;
+    }
+
+    public CommandListenerStack getCommandListenerStack() {
+        return commandListenerStack;
     }
 }

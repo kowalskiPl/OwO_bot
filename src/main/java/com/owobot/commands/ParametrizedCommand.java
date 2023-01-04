@@ -21,4 +21,9 @@ public class ParametrizedCommand extends Command{
                 ", parameters=" + parameters +
                 '}';
     }
+
+    @Override
+    public Command clone() {
+        return null;
+    }
 }

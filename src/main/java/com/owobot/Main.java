@@ -1,21 +1,10 @@
 package com.owobot;
 
-import com.owobot.database.MongoDbContext;
 import com.owobot.utilities.Config;
 import com.owobot.utilities.ConfigReader;
-import com.owobot.utilities.ServiceContext;
-import com.owobot.utilities.listener.EventListenerStack;
-import com.owobot.utilities.listener.MusicEmbedMessageSender;
 import org.apache.commons.cli.*;
-import com.owobot.messagelisteners.MainMessageListener;
-import com.owobot.messagelisteners.MusicListenerAdapter;
-import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.requests.GatewayIntent;
-import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.owobot.utilities.listener.BasicMessageHandler;
 
 import javax.naming.ConfigurationException;
 import java.io.FileInputStream;
@@ -56,7 +45,7 @@ public class Main {
 
         log.info("Starting up");
 
-
+        Config config = null;
         if (secretsFile == null) {
             if (token == null) {
                 log.error("No discord token provided!");
@@ -67,36 +56,43 @@ public class Main {
                 System.exit(1);
             }
             log.info("Loading config");
-            loadConfig(false);
-            ServiceContext.getConfig().setConnectionString(conString);
-            ServiceContext.getConfig().setDiscordToken(token);
+            config = loadConfig(false);
+            if (config == null){
+                log.error("Failed to load config");
+                System.exit(1);
+            }
+            config.setConnectionString(conString);
+            config.setDiscordToken(token);
         } else {
             log.info("Loading config");
-            loadConfig(true);
+            config = loadConfig(true);
+            if (config == null){
+                log.error("Failed to load config");
+                System.exit(1);
+            }
         }
 
-        OwoBot owoBot = new OwoBot();
+        OwoBot owoBot = new OwoBot(config);
 
         log.info("Startup complete");
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             log.info("Preparing to shutdown");
-            ServiceContext.getDbContext().shutdown();
-            ServiceContext.getListenerStack().shutdown();
             owoBot.shutdown();
         }));
     }
 
-    private static void loadConfig(boolean secrets) {
+    private static Config loadConfig(boolean secrets) {
         var loader = Main.class.getClassLoader();
         var inputStream = loader.getResourceAsStream("application.config");
         try {
             if (secrets) {
                 FileInputStream fis = new FileInputStream(secretsFile);
-                ServiceContext.provideConfig(Config.ConfigBuilder.build(ConfigReader.readConfig(inputStream), ConfigReader.readConfig(fis)));
+                var config =  Config.ConfigBuilder.build(ConfigReader.readConfig(inputStream), ConfigReader.readConfig(fis));
                 fis.close();
+                return config;
             } else {
-                ServiceContext.provideConfig(Config.ConfigBuilder.build(ConfigReader.readConfig(inputStream)));
+                return Config.ConfigBuilder.build(ConfigReader.readConfig(inputStream));
             }
         } catch (ConfigurationException | IOException e) {
             log.error("Config load failed!");
@@ -110,5 +106,6 @@ public class Main {
                 e.printStackTrace();
             }
         }
+        return null;
     }
 }

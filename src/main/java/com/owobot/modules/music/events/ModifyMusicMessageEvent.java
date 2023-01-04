@@ -1,20 +1,23 @@
-package com.owobot.events;
+package com.owobot.modules.music.events;
 
+import com.owobot.events.Event;
+import com.owobot.events.Observable;
 import com.owobot.model.AudioTrackRequest;
 
-public class SendMusicMessageEvent extends Event {
+public class ModifyMusicMessageEvent extends Event {
     private final AudioTrackRequest audioTrackRequest;
     private AudioTrackRequest nextTrack;
 
-    public SendMusicMessageEvent(AudioTrackRequest audioTrackRequest, AudioTrackRequest nextTrack, Observable sender) {
+
+    public ModifyMusicMessageEvent(AudioTrackRequest audioTrackRequest, Observable sender) {
+        super(sender);
+        this.audioTrackRequest = audioTrackRequest;
+    }
+
+    public ModifyMusicMessageEvent(AudioTrackRequest audioTrackRequest, AudioTrackRequest nextTrack, Observable sender) {
         super(sender);
         this.audioTrackRequest = audioTrackRequest;
         this.nextTrack = nextTrack;
-    }
-
-    public SendMusicMessageEvent(AudioTrackRequest audioTrackRequest, Observable sender) {
-        super(sender);
-        this.audioTrackRequest = audioTrackRequest;
     }
 
     public AudioTrackRequest getAudioTrackRequest() {

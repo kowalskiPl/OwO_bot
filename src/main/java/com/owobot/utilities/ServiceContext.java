@@ -1,7 +1,7 @@
 package com.owobot.utilities;
 
 import com.owobot.database.MongoDbContext;
-import com.owobot.utilities.listener.EventListenerStack;
+import com.owobot.core.EventListenerStack;
 
 public class ServiceContext {
     private static Config config;

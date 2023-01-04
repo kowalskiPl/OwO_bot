@@ -1,5 +1,7 @@
-package com.owobot.events;
+package com.owobot.modules.music.events;
 
+import com.owobot.events.Event;
+import com.owobot.events.Observable;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
 public class SendMessageEvent extends Event {
