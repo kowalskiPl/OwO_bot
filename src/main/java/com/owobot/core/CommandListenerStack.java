@@ -43,6 +43,7 @@ public class CommandListenerStack {
             for (CommandListener listener : eventListeners) {
                 result = listener.onCommand(command);
                 if (result){
+                    log.info("Handled command: " + command);
                     break;
                 }
             }
