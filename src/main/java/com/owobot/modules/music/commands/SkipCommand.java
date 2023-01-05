@@ -21,6 +21,11 @@ public class SkipCommand extends Command {
     }
 
     @Override
+    protected String getInfo() {
+        return "Skips the currently played song";
+    }
+
+    @Override
     public void setParameters(String parameters) {
         super.setParameters(parameters);
     }

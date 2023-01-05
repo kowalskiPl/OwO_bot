@@ -16,6 +16,7 @@ public class SearchResultButtonPressedCommand extends Command {
         for (var entry : buttonIdMap.entrySet()){
             triggers.add(entry.getKey());
         }
+        isButtonCommand = true;
     }
 
     public SearchResultButtonPressedCommand(SearchResultButtonPressedCommand command) {
@@ -25,6 +26,11 @@ public class SearchResultButtonPressedCommand extends Command {
     @Override
     public Command clone() {
         return new SearchResultButtonPressedCommand(this);
+    }
+
+    @Override
+    protected String getInfo() {
+        return "This should not be here";
     }
 
     @Override

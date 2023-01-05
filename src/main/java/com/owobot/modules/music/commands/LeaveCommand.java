@@ -19,4 +19,9 @@ public class LeaveCommand extends Command {
     public Command clone() {
         return new LeaveCommand(this);
     }
+
+    @Override
+    protected String getInfo() {
+        return "Stops the player, clears music queue and the bot leaves voice channel";
+    }
 }

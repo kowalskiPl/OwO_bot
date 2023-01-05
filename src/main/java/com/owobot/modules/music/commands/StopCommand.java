@@ -19,4 +19,9 @@ public class StopCommand extends Command {
     public Command clone() {
         return new StopCommand(this);
     }
+
+    @Override
+    protected String getInfo() {
+        return "Stops the currently played music and clears the queue";
+    }
 }

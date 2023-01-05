@@ -19,4 +19,9 @@ public class PauseCommand extends Command {
     public Command clone() {
         return new PauseCommand(this);
     }
+
+    @Override
+    protected String getInfo() {
+        return "Pauses the music player";
+    }
 }
