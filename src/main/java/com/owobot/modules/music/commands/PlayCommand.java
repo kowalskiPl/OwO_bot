@@ -36,6 +36,11 @@ public class PlayCommand extends Command {
     }
 
     @Override
+    protected String getInfo() {
+        return "Makes the bot join the chat and play music. Accepts one parameter, a link to YT video or playlist or a search query";
+    }
+
+    @Override
     public String toString() {
         return "PlayCommand{" +
                 "name='" + name + '\'' +

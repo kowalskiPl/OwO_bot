@@ -15,4 +15,10 @@ public class EmptyCommand extends Command {
     public Command clone() {
         return null;
     }
+
+    @Override
+    protected String getInfo() {
+        return "Nothing to see here";
+    }
+
 }

@@ -27,6 +27,11 @@ public class AddPrefixCommand extends Command {
     }
 
     @Override
+    protected String getInfo() {
+        return "Used to add new prefix to the server prefix set. Accepts one parameter, new prefix";
+    }
+
+    @Override
     public void setParameters(String parameters) {
         this.parameterMap = new LinkedHashMap<>();
         if (parameters != null)

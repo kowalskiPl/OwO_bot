@@ -10,17 +10,20 @@ public abstract class Command{
     protected Set<String> triggers; //all have to be unique
     protected CommandMessage commandMessage;
     protected Map<String, String> parameterMap;
+    protected boolean isButtonCommand;
 
     protected Command() {
         name = "";
         triggers = new LinkedHashSet<>();
         commandMessage = null;
+        isButtonCommand = false;
     }
 
     protected Command(Command command){
         this.name = command.getName();
         this.triggers = command.getTriggers();
         this.commandMessage = command.commandMessage;
+        this.isButtonCommand = command.isButtonCommand;
     }
 
     public String getName() {
@@ -46,6 +49,10 @@ public abstract class Command{
         return parameterMap;
     }
 
+    public boolean isButtonCommand() {
+        return isButtonCommand;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -62,6 +69,11 @@ public abstract class Command{
     public abstract Command clone();
 
     public String getHelp(){
-        return "A generic command class, nothing to see here";
+        StringBuilder helpMessage = new StringBuilder();
+        helpMessage.append("**").append(name).append("**").append(" - triggered by:");
+        triggers.forEach(trigger -> helpMessage.append(" ").append(trigger).append(","));
+        helpMessage.append(" ").append(getInfo());
+        return helpMessage.toString();
     }
+    protected abstract String getInfo();
 }

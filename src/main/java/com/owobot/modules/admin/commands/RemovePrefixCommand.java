@@ -27,6 +27,11 @@ public class RemovePrefixCommand extends Command {
     }
 
     @Override
+    protected String getInfo() {
+        return "Removes prefix from active prefixes for server. Accepts one parameter, prefix to remove";
+    }
+
+    @Override
     public void setParameters(String parameters) {
         this.parameterMap = new LinkedHashMap<>();
         if (parameters != null)

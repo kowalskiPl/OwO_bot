@@ -13,4 +13,6 @@ public interface Module extends Comparable<Module> {
 
     public Set<Command> getCommands();
 
+    public String getNameUserFriendly();
+
 }

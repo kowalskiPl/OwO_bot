@@ -25,6 +25,11 @@ public class ListPrefixesCommand extends Command {
     }
 
     @Override
+    protected String getInfo() {
+        return "Lists currently active prefixes for the server";
+    }
+
+    @Override
     public void setParameters(String parameters) {
         super.setParameters(parameters);
     }

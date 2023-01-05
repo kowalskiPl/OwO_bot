@@ -51,6 +51,11 @@ public class MusicModule extends Reflectional implements Module {
     }
 
     @Override
+    public String getNameUserFriendly() {
+        return "Music";
+    }
+
+    @Override
     public int compareTo(@NotNull Module o) {
         return o.getName().compareTo(this.getName());
     }
