@@ -2,11 +2,16 @@ import com.owobot.modules.music.youtube.HttpYouTubeRequester;
 import com.owobot.modules.music.youtube.YouTubeRequestResultParser;
 import org.junit.jupiter.api.Test;
 
+import java.util.regex.Pattern;
+
 public class YouTubeTests {
+
+    private static final Pattern searchContentJsonPattern = Pattern.compile("(ytInitialData) = (\\{.*})");
+
     @Test
     public void queryTest() {
         System.out.println("Test start!");
-        var result = HttpYouTubeRequester.performSearchQuery("PUR Kowalski");
+        var result = HttpYouTubeRequester.performSearchQuery("Devil trigger");
         if (result.isPresent()) {
             var videos = YouTubeRequestResultParser.getVideoUrlFromSearch(result.get());
             videos.forEach(System.out::println);
@@ -27,7 +32,7 @@ public class YouTubeTests {
     public void thumbnailFromUrlTest() {
         System.out.println("Test start!");
         var result = HttpYouTubeRequester.queryYoutubeVideo("https://www.youtube.com/watch?v=-QW6BXwMXEs");
-        if (result.isPresent()){
+        if (result.isPresent()) {
             var url = YouTubeRequestResultParser.getThumbnailUrlFromYouTubeUrl(result.get());
             System.out.println(url);
             assert !"".equals(url);

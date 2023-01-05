@@ -1,11 +1,11 @@
 package com.owobot.modules.music.youtube;
 
-import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.owobot.modules.music.model.YouTubeVideo;
-import com.owobot.model.youtube.ItemSectionRenderer;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import com.owobot.model.youtube.SearchQueryResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,24 +25,28 @@ public class YouTubeRequestResultParser {
         List<YouTubeVideo> videoResults = new ArrayList<>();
         if (m.find()) {
             String json = m.group(2);
-            Gson gson = new Gson();
-            SearchQueryResult result = gson.fromJson(json, SearchQueryResult.class);
-            result.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents.forEach(rendererContents -> {
-                ItemSectionRenderer renderer = rendererContents.itemSectionRenderer;
-                if (renderer != null){
-                    renderer.contents.forEach(content -> {
-                        if (content.videoRenderer != null) {
-                            YouTubeVideo video = new YouTubeVideo();
-                            video.author = content.videoRenderer.ownerText.runs.get(0).text;
-                            video.length = content.videoRenderer.lengthText.simpleText;
-                            video.watchUrl = content.videoRenderer.navigationEndpoint.commandMetadata.webCommandMetadata.url;
-                            video.title = content.videoRenderer.title.runs.get(0).text;
-                            video.thumbnailUrl = content.videoRenderer.thumbnail.thumbnails.get(0).url;
-                            videoResults.add(video);
-                        }
-                    });
-                }
-            });
+            JsonElement element = JsonParser.parseString(json);
+            JsonObject jsonObject = element.getAsJsonObject();
+
+            var tracks = jsonObject.get("contents").getAsJsonObject()
+                    .get("twoColumnSearchResultsRenderer").getAsJsonObject()
+                    .get("primaryContents").getAsJsonObject()
+                    .get("sectionListRenderer").getAsJsonObject()
+                    .get("contents").getAsJsonArray().get(0).getAsJsonObject()
+                    .get("itemSectionRenderer").getAsJsonObject()
+                    .get("contents").getAsJsonArray();
+            for (int i = 0; i < 9; i++){
+                var singleTrack = tracks.get(i).getAsJsonObject();
+                var videoElement = singleTrack.get("videoRenderer").getAsJsonObject();
+                YouTubeVideo video = new YouTubeVideo();
+                video.title = videoElement.get("title").getAsJsonObject().get("runs").getAsJsonArray().get(0).getAsJsonObject().get("text").getAsString();
+                video.length = videoElement.get("lengthText").getAsJsonObject().get("simpleText").getAsString();
+                video.thumbnailUrl = videoElement.get("thumbnail").getAsJsonObject().get("thumbnails").getAsJsonArray().get(0).getAsJsonObject().get("url").getAsString();
+                video.author = videoElement.get("ownerText").getAsJsonObject().get("runs").getAsJsonArray().get(0).getAsJsonObject().get("text").getAsString();
+                video.watchUrl = videoElement.get("navigationEndpoint").getAsJsonObject().get("commandMetadata").getAsJsonObject()
+                        .get("webCommandMetadata").getAsJsonObject().get("url").getAsString();
+                videoResults.add(video);
+            }
         }
         return videoResults.stream().limit(10).collect(Collectors.toList());
     }

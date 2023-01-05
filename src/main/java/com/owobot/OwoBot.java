@@ -36,7 +36,7 @@ public class OwoBot {
         this.config = config;
 
         log.info("Setting up DB connection");
-        mongoDbContext = new MongoDbContext(config.getConnectionString(), 3, config.getMongoDb());
+        mongoDbContext = new MongoDbContext(config.getConnectionString(), 3, config.getTestMongoDb());
 
         log.info("Creating command cache");
         commandCache = new CommandCache(this);

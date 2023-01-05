@@ -42,9 +42,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.*;
 
-@SuppressWarnings("DuplicatedCode")
 public class MusicCommandListener extends Reflectional implements CommandListener {
-    private static Logger log = LoggerFactory.getLogger(MusicCommandListener.class);
+    private static final Logger log = LoggerFactory.getLogger(MusicCommandListener.class);
     private final AudioPlayerManager playerManager;
     private final Map<Long, GuildMusicManager> guildMusicManagers;
     public static final Map<String, String> trackButtonsIds = Collections.unmodifiableMap(createSelectTrackButtonData());
@@ -59,10 +58,10 @@ public class MusicCommandListener extends Reflectional implements CommandListene
 
     private static Map<String, String> createSelectTrackButtonData(){
         Map<String, String> buttons = new LinkedHashMap<>();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 9; i++) {
             buttons.put("select_" + i, "" + i);
         }
-        buttons.put("cancel_10", "Cancel");
+        buttons.put("cancel_9", "Cancel");
         return buttons;
     }
 
@@ -183,13 +182,13 @@ public class MusicCommandListener extends Reflectional implements CommandListene
                                 Button.secondary(entrySet.get(6).getKey(), entrySet.get(6).getValue()),
                                 Button.secondary(entrySet.get(7).getKey(), entrySet.get(7).getValue()),
                                 Button.secondary(entrySet.get(8).getKey(), entrySet.get(8).getValue()),
-                                Button.secondary(entrySet.get(9).getKey(), entrySet.get(9).getValue())),
-                        ActionRow.of(Button.danger(entrySet.get(10).getKey(), entrySet.get(10).getValue())))
+                                Button.danger(entrySet.get(9).getKey(), entrySet.get(9).getValue())))
                 .delay(Duration.ofSeconds(30))
                 .flatMap(Message::delete)
                 .queue(e -> channel
                         .sendMessage("Request timed out!")
-                        .delay(Duration.ofSeconds(30))
+                        .delay(Duration.ofSeconds(15))
+                        .flatMap(Message::delete)
                         .flatMap(message -> command
                                 .getCommandMessage()
                                 .getMessage()
