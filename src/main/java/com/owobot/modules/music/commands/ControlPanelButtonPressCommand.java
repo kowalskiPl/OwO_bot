@@ -14,6 +14,7 @@ public class ControlPanelButtonPressCommand extends Command {
         triggers = new LinkedHashSet<>();
         var ids = PlayerControlPanel.controlPanelButtonsIds;
         triggers.addAll(ids);
+        isButtonCommand = true;
     }
 
     public ControlPanelButtonPressCommand(ControlPanelButtonPressCommand command) {
@@ -29,6 +30,11 @@ public class ControlPanelButtonPressCommand extends Command {
     @Override
     public Command clone() {
         return new ControlPanelButtonPressCommand(this);
+    }
+
+    @Override
+    protected String getInfo() {
+        return "This should not be here";
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.owobot.core.ModuleManager;
 import com.owobot.database.MongoDbContext;
 import com.owobot.messagelisteners.MainMessageListener;
 import com.owobot.modules.admin.AdminModule;
+import com.owobot.modules.help.HelpModule;
 import com.owobot.modules.music.MusicModule;
 import com.owobot.utilities.Config;
 import net.dv8tion.jda.api.entities.Activity;
@@ -28,7 +29,6 @@ public class OwoBot {
     private final MongoDbContext mongoDbContext;
     private final ModuleManager moduleManager;
     private final CommandCache commandCache;
-
     private final CommandListenerStack commandListenerStack;
 
     public OwoBot(Config config) {
@@ -49,7 +49,7 @@ public class OwoBot {
         log.info("Loading standard modules");
         moduleManager.loadModule(new MusicModule(owoBot));
         moduleManager.loadModule(new AdminModule(owoBot));
-
+        moduleManager.loadModule(new HelpModule(owoBot));
 
         shardManager = createShardManager();
     }

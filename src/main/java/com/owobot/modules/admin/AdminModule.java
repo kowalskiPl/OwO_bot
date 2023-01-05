@@ -45,6 +45,11 @@ public class AdminModule extends Reflectional implements Module {
     }
 
     @Override
+    public String getNameUserFriendly() {
+        return "Admin";
+    }
+
+    @Override
     public int compareTo(@NotNull Module o) {
         return getName().compareTo(o.getName());
     }
