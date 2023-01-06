@@ -1,7 +1,10 @@
+import com.owobot.modules.music.SongRequestProcessingException;
+import com.owobot.modules.music.model.YouTubeVideo;
 import com.owobot.modules.music.youtube.HttpYouTubeRequester;
 import com.owobot.modules.music.youtube.YouTubeRequestResultParser;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class YouTubeTests {
@@ -13,7 +16,12 @@ public class YouTubeTests {
         System.out.println("Test start!");
         var result = HttpYouTubeRequester.performSearchQuery("Devil trigger");
         if (result.isPresent()) {
-            var videos = YouTubeRequestResultParser.getVideoUrlFromSearch(result.get());
+            List<YouTubeVideo> videos = null;
+            try {
+                videos = YouTubeRequestResultParser.getVideoUrlFromSearch(result.get());
+            } catch (SongRequestProcessingException e) {
+                throw new RuntimeException(e);
+            }
             videos.forEach(System.out::println);
         }
     }
@@ -23,7 +31,12 @@ public class YouTubeTests {
         System.out.println("Test start!");
         var result = HttpYouTubeRequester.performSearchQuery("Devil trigger");
         if (result.isPresent()) {
-            var videos = YouTubeRequestResultParser.getVideoUrlFromSearch(result.get());
+            List<YouTubeVideo> videos = null;
+            try {
+                videos = YouTubeRequestResultParser.getVideoUrlFromSearch(result.get());
+            } catch (SongRequestProcessingException e) {
+                throw new RuntimeException(e);
+            }
             videos.forEach(youTubeVideo -> System.out.println(youTubeVideo.thumbnailUrl));
         }
     }

@@ -6,6 +6,7 @@ import com.owobot.commands.CommandListener;
 import com.owobot.exception.UserNotInVoiceChannelException;
 import com.owobot.modules.music.GuildMusicManager;
 import com.owobot.modules.music.MusicParameterNames;
+import com.owobot.modules.music.SongRequestProcessingException;
 import com.owobot.modules.music.commands.*;
 import com.owobot.modules.music.model.AudioTrackRequest;
 import com.owobot.modules.music.model.YouTubeVideo;
@@ -158,7 +159,15 @@ public class MusicCommandListener extends Reflectional implements CommandListene
     }
 
     private void processSearchPlayRequest(String songName, GuildMusicManager musicManager, MessageChannel channel, PlayCommand command) {
-        var results = YouTubeSearch.performVideoQuery(songName);
+        List<YouTubeVideo> results;
+
+        try {
+            results = YouTubeSearch.performVideoQuery(songName);
+        } catch (SongRequestProcessingException e) {
+            log.warn("Failed to acquire songs from search for: " + songName);
+            channel.sendMessage("Something went wrong with song query, please provide song url").delay(Duration.ofSeconds(30)).flatMap(Message::delete).queue();
+            return;
+        }
 
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle("Search results");
@@ -205,7 +214,7 @@ public class MusicCommandListener extends Reflectional implements CommandListene
                     play(member, guild, musicManager, track, channel, thumbnailUrl);
                 } catch (UserNotInVoiceChannelException e) {
                     log.warn("Failed to acquire user channel");
-                    channel.sendMessage("Are you in the voice channel?").queue();
+                    channel.sendMessage("Are you in the voice channel?").delay(Duration.ofSeconds(20)).flatMap(Message::delete).queue();
                 }
             }
 
@@ -216,18 +225,18 @@ public class MusicCommandListener extends Reflectional implements CommandListene
                     play(member, guild, musicManager, playlist.getTracks(), name, channel);
                 } catch (UserNotInVoiceChannelException e) {
                     log.warn("Failed to acquire user channel");
-                    channel.sendMessage("Are you in the voice channel?").queue();
+                    channel.sendMessage("Are you in the voice channel?").delay(Duration.ofSeconds(20)).flatMap(Message::delete).queue();
                 }
             }
 
             @Override
             public void noMatches() {
-                channel.sendMessage("Nothing found by " + songName).queue();
+                channel.sendMessage("Nothing found by " + songName).delay(Duration.ofSeconds(20)).flatMap(Message::delete).queue();
             }
 
             @Override
             public void loadFailed(FriendlyException exception) {
-                channel.sendMessage("Could not play: " + exception.getMessage()).queue();
+                channel.sendMessage("Could not play: " + exception.getMessage()).delay(Duration.ofSeconds(20)).flatMap(Message::delete).queue();
             }
         });
     }
