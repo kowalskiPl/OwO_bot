@@ -1,5 +1,6 @@
 package com.owobot.core;
 
+import com.owobot.async.NamedThreadFactory;
 import com.owobot.commands.Command;
 import com.owobot.commands.CommandListener;
 import org.slf4j.Logger;
@@ -17,7 +18,8 @@ public class CommandListenerStack {
     private final Set<CommandListener> eventListeners;
 
     public CommandListenerStack(int poolSize) {
-        threadPool = Executors.newFixedThreadPool(poolSize);
+        var factory = new NamedThreadFactory("Command-Listener-Executor");
+        threadPool = Executors.newFixedThreadPool(poolSize, factory);
         eventListeners = new LinkedHashSet<>();
     }
 
