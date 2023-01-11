@@ -1,6 +1,7 @@
 package com.owobot.utilities;
 
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -15,6 +16,7 @@ public class Config {
     private String connectionString;
     private String discordToken;
     private boolean useDB;
+    private Set<String> botAdmins;
 
     public Config() {
     }
@@ -63,6 +65,10 @@ public class Config {
         this.discordToken = discordToken;
     }
 
+    public Set<String> getBotAdmins() {
+        return botAdmins;
+    }
+
     public static class ConfigBuilder {
         public static Config build(Properties standardProperties) {
             Config config = new Config();
@@ -80,6 +86,7 @@ public class Config {
             var config = build(standardProperties);
             config.discordToken = secrets.getProperty("app.discord.token");
             config.connectionString = secrets.getProperty("app.database.connection.string");
+            config.botAdmins = new LinkedHashSet<>(Arrays.asList(secrets.getProperty("app.bot.admins", "0").split(",")));
             return config;
         }
     }

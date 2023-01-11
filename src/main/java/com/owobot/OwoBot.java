@@ -1,10 +1,12 @@
 package com.owobot;
 
+import com.owobot.admin.BotAdmin;
 import com.owobot.core.CommandCache;
 import com.owobot.core.CommandListenerStack;
 import com.owobot.core.ModuleManager;
 import com.owobot.database.MongoDbContext;
 import com.owobot.messagelisteners.MainMessageListener;
+import com.owobot.middleware.BotAdminMiddleware;
 import com.owobot.middleware.MiddlewareHandler;
 import com.owobot.middleware.RequirePermissionMiddleware;
 import com.owobot.modules.admin.AdminModule;
@@ -33,10 +35,14 @@ public class OwoBot {
     private final CommandCache commandCache;
     private final CommandListenerStack commandListenerStack;
     private final MiddlewareHandler middlewareHandler;
+    private final BotAdmin botAdmins;
 
     public OwoBot(Config config) {
         OwoBot.owoBot = this;
         this.config = config;
+
+        log.info("Loading bot admins");
+        botAdmins = new BotAdmin(this, config.getBotAdmins());
 
         log.info("Setting up DB connection");
         mongoDbContext = new MongoDbContext(config.getConnectionString(), 3, config.getTestMongoDb());
@@ -47,6 +53,7 @@ public class OwoBot {
         log.info("Creating default middlewares");
         middlewareHandler = new MiddlewareHandler();
         middlewareHandler.registerMiddleware("require", new RequirePermissionMiddleware(this));
+        middlewareHandler.registerMiddleware("botAdmin", new BotAdminMiddleware(this));
 
         log.info("Creating module manager");
         moduleManager = new ModuleManager(this);
@@ -120,5 +127,9 @@ public class OwoBot {
 
     public MiddlewareHandler getMiddlewareHandler() {
         return middlewareHandler;
+    }
+
+    public BotAdmin getBotAdmins() {
+        return botAdmins;
     }
 }
