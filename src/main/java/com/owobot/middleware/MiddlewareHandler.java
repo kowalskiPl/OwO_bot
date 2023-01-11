@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class MiddlewareHandler {
-    private Map<String, Middleware> registeredMiddlewares;
+    private final Map<String, Middleware> registeredMiddlewares;
     private static final Logger log = LoggerFactory.getLogger(MiddlewareStack.class);
 
     public MiddlewareHandler() {
@@ -15,11 +15,12 @@ public class MiddlewareHandler {
     }
 
     public void registerMiddleware(String name, Middleware middleware) {
-        if (registeredMiddlewares.containsKey(name)) {
-            log.error(name + " has already been registered as a middleware");
+        if (registeredMiddlewares.containsKey(name.toLowerCase())) {
+            log.warn("{} has already been registered as a middleware", name);
         }
 
-        registeredMiddlewares.put(name, middleware);
+        registeredMiddlewares.put(name.toLowerCase(), middleware);
+        log.info("Registered middleware {}, {}", name, middleware);
     }
 
     public Middleware getMiddleware(String name) {

@@ -52,6 +52,7 @@ public class MiddlewareStack {
             return true;
 
         MiddlewareContainer middlewareContainer = middlewareList.get(--index);
+        log.info("Executing middleware {}", middlewareContainer.getMiddlewareReference());
         return middlewareContainer.getMiddlewareReference().handle(command, this, middlewareContainer.getArgs());
     }
 }
