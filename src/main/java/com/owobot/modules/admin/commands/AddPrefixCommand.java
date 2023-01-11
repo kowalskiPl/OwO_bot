@@ -1,10 +1,13 @@
 package com.owobot.modules.admin.commands;
 
 import com.owobot.commands.Command;
+import com.owobot.core.Permissions;
 import com.owobot.modules.admin.AdminParameterNames;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 
 @SuppressWarnings("CopyConstructorMissesField")
 public class AddPrefixCommand extends Command {
@@ -36,6 +39,13 @@ public class AddPrefixCommand extends Command {
         this.parameterMap = new LinkedHashMap<>();
         if (parameters != null)
             this.parameterMap.put(AdminParameterNames.ADMIN_PARAMETER_PREFIX.getName(), parameters);
+    }
+
+    @Override
+    public List<String> getMiddlewares() {
+        List<String> middlewares = new ArrayList<>();
+        middlewares.add("require:user," + Permissions.ADMINISTRATOR.getNode());
+        return middlewares;
     }
 
     @Override

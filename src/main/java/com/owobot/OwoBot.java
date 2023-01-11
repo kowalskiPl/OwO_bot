@@ -5,6 +5,8 @@ import com.owobot.core.CommandListenerStack;
 import com.owobot.core.ModuleManager;
 import com.owobot.database.MongoDbContext;
 import com.owobot.messagelisteners.MainMessageListener;
+import com.owobot.middleware.MiddlewareHandler;
+import com.owobot.middleware.RequirePermissionMiddleware;
 import com.owobot.modules.admin.AdminModule;
 import com.owobot.modules.help.HelpModule;
 import com.owobot.modules.music.MusicModule;
@@ -23,23 +25,28 @@ import java.util.EnumSet;
 
 public class OwoBot {
     protected static OwoBot owoBot;
-    private static final Logger log = LoggerFactory.getLogger(OwoBot.class);
+    private final Logger log = LoggerFactory.getLogger(OwoBot.class);
     private final ShardManager shardManager;
     private final Config config;
     private final MongoDbContext mongoDbContext;
     private final ModuleManager moduleManager;
     private final CommandCache commandCache;
     private final CommandListenerStack commandListenerStack;
+    private final MiddlewareHandler middlewareHandler;
 
     public OwoBot(Config config) {
         OwoBot.owoBot = this;
         this.config = config;
 
         log.info("Setting up DB connection");
-        mongoDbContext = new MongoDbContext(config.getConnectionString(), 3, config.getMongoDb());
+        mongoDbContext = new MongoDbContext(config.getConnectionString(), 3, config.getTestMongoDb());
 
         log.info("Creating command cache");
         commandCache = new CommandCache(this);
+
+        log.info("Creating default middlewares");
+        middlewareHandler = new MiddlewareHandler();
+        middlewareHandler.registerMiddleware("require", new RequirePermissionMiddleware(this));
 
         log.info("Creating module manager");
         moduleManager = new ModuleManager(this);
@@ -105,5 +112,13 @@ public class OwoBot {
 
     public CommandListenerStack getCommandListenerStack() {
         return commandListenerStack;
+    }
+
+    public Logger getLog() {
+        return log;
+    }
+
+    public MiddlewareHandler getMiddlewareHandler() {
+        return middlewareHandler;
     }
 }

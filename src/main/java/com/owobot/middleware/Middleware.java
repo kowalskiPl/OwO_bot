@@ -14,5 +14,5 @@ public abstract class Middleware extends Reflectional {
     public String buildHelp(Command command){
         return null;
     }
-    public abstract boolean handle(Command command);
+    public abstract boolean handle(Command command, MiddlewareStack stack,String... args);
 }
