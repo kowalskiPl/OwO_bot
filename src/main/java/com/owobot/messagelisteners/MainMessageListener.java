@@ -3,6 +3,7 @@ package com.owobot.messagelisteners;
 import com.owobot.OwoBot;
 import com.owobot.commands.CommandMessage;
 import com.owobot.core.CommandResolver;
+import com.owobot.middleware.MiddlewareStack;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
@@ -32,6 +33,10 @@ public class MainMessageListener extends MessageListener {
         if (command.getName().equals("")){
             return;
         }
+        MiddlewareStack stack = new MiddlewareStack();
+        stack.buildMiddlewares(command, owoBot.getMiddlewareHandler());
+        if (!stack.next())
+            return;
         owoBot.getCommandListenerStack().onCommand(command);
     }
 

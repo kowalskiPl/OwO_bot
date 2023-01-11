@@ -1,11 +1,10 @@
 package com.owobot.modules.admin.commands;
 
 import com.owobot.commands.Command;
+import com.owobot.core.Permissions;
 import com.owobot.modules.admin.AdminParameterNames;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 public class RemovePrefixCommand extends Command {
     public RemovePrefixCommand() {
@@ -36,6 +35,13 @@ public class RemovePrefixCommand extends Command {
         this.parameterMap = new LinkedHashMap<>();
         if (parameters != null)
             this.parameterMap.put(AdminParameterNames.ADMIN_PARAMETER_PREFIX.getName(), parameters);
+    }
+
+    @Override
+    public List<String> getMiddlewares() {
+        List<String> middlewares = new ArrayList<>();
+        middlewares.add("require:user," + Permissions.ADMINISTRATOR.getNode());
+        return middlewares;
     }
 
     @Override
