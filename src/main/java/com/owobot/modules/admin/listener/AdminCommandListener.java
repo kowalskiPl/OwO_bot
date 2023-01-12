@@ -45,7 +45,7 @@ public class AdminCommandListener extends Reflectional implements CommandListene
             }
             addPrefixCommand.getCommandMessage()
                     .getMessage()
-                    .reply("Added " + addPrefixCommand.getParameterMap().get(AdminParameterNames.ADMIN_PARAMETER_PREFIX.getName()) + "as a new prefix")
+                    .reply("Added " + addPrefixCommand.getParameterMap().get(AdminParameterNames.ADMIN_PARAMETER_PREFIX.getName()) + " as a new prefix")
                     .queue();
             return true;
         }
