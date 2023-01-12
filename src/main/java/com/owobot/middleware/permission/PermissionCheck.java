@@ -36,16 +36,16 @@ public class PermissionCheck {
                 return false;
             }
 
-            if (!isAdmin && type.isCheckUser() && command.getCommandMessage().getMember().hasPermission(permission.getPermission())) {
+            if (!isAdmin && type.isCheckUser() && !command.getCommandMessage().getMember().hasPermission(permission.getPermission())) {
                 missingUserPermissions.add(permission);
             }
 
-            if (type.isCheckBot() && command.getCommandMessage().getGuild().getSelfMember().hasPermission(permission.getPermission())) {
+            if (type.isCheckBot() && !command.getCommandMessage().getGuild().getSelfMember().hasPermission(permission.getPermission())) {
                 missingBotPermissions.add(permission);
                 continue;
             }
 
-            if (type.isCheckBot() && command.getCommandMessage().getGuild().getSelfMember().hasPermission(command.getCommandMessage().getTextChannel(), permission.getPermission())){
+            if (type.isCheckBot() && !command.getCommandMessage().getGuild().getSelfMember().hasPermission(command.getCommandMessage().getTextChannel(), permission.getPermission())){
                 missingBotPermissions.add(permission);
             }
         }
