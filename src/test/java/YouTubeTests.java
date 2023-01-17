@@ -14,7 +14,7 @@ public class YouTubeTests {
     @Test
     public void queryTest() {
         System.out.println("Test start!");
-        var result = HttpYouTubeRequester.performSearchQuery("Devil trigger");
+        var result = HttpYouTubeRequester.performSearchQuery("bury the light");
         if (result.isPresent()) {
             List<YouTubeVideo> videos = null;
             try {
