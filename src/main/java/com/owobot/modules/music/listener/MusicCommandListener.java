@@ -1,5 +1,6 @@
 package com.owobot.modules.music.listener;
 
+import com.google.common.collect.Lists;
 import com.owobot.OwoBot;
 import com.owobot.commands.Command;
 import com.owobot.commands.CommandListener;
@@ -34,6 +35,7 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.requests.ErrorResponse;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,12 +59,12 @@ public class MusicCommandListener extends Reflectional implements CommandListene
         AudioSourceManagers.registerLocalSource(playerManager);
     }
 
-    private static Map<String, String> createSelectTrackButtonData(){
+    private static Map<String, String> createSelectTrackButtonData() {
         Map<String, String> buttons = new LinkedHashMap<>();
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 10; i++) {
             buttons.put("select_" + i, "" + i);
         }
-        buttons.put("cancel_9", "Cancel");
+        buttons.put("cancel_10", "Cancel");
         return buttons;
     }
 
@@ -103,16 +105,16 @@ public class MusicCommandListener extends Reflectional implements CommandListene
             pauseCommand.getCommandMessage().getMessage().delete().queue();
         }
 
-        if (command instanceof SkipCommand skipCommand){
+        if (command instanceof SkipCommand skipCommand) {
             result = handleSkipCommand(skipCommand);
             skipCommand.getCommandMessage().getMessage().delete().queue();
         }
 
-        if (command instanceof SearchResultButtonPressedCommand buttonPressedCommand){
+        if (command instanceof SearchResultButtonPressedCommand buttonPressedCommand) {
             result = handleTrackSelectionButtonPress(buttonPressedCommand);
         }
 
-        if (command instanceof ControlPanelButtonPressCommand buttonPressCommand){
+        if (command instanceof ControlPanelButtonPressCommand buttonPressCommand) {
             result = handleEmbedPlayerButtonPress(buttonPressCommand);
         }
 
@@ -179,19 +181,8 @@ public class MusicCommandListener extends Reflectional implements CommandListene
             builder.addField(i + " " + result.title, "**Length**: " + result.length + " **Author**: " + result.author, false);
         }
 
-        var entrySet = trackButtonsIds.entrySet().stream().toList();
-        channel.sendMessageEmbeds(builder.build())
-                .setComponents(
-                        ActionRow.of(Button.secondary(entrySet.get(0).getKey(), entrySet.get(0).getValue()),
-                                Button.secondary(entrySet.get(1).getKey(), entrySet.get(1).getValue()),
-                                Button.secondary(entrySet.get(2).getKey(), entrySet.get(2).getValue()),
-                                Button.secondary(entrySet.get(3).getKey(), entrySet.get(3).getValue()),
-                                Button.secondary(entrySet.get(4).getKey(), entrySet.get(4).getValue())),
-                        ActionRow.of(Button.secondary(entrySet.get(5).getKey(), entrySet.get(5).getValue()),
-                                Button.secondary(entrySet.get(6).getKey(), entrySet.get(6).getValue()),
-                                Button.secondary(entrySet.get(7).getKey(), entrySet.get(7).getValue()),
-                                Button.secondary(entrySet.get(8).getKey(), entrySet.get(8).getValue()),
-                                Button.danger(entrySet.get(9).getKey(), entrySet.get(9).getValue())))
+        var msg = channel.sendMessageEmbeds(builder.build());
+                buildButtons(results.size(), msg)
                 .delay(Duration.ofSeconds(30))
                 .flatMap(Message::delete)
                 .queue(e -> channel
@@ -284,7 +275,7 @@ public class MusicCommandListener extends Reflectional implements CommandListene
             handled = true;
         }
 
-        if ("next".equals(id)){
+        if ("next".equals(id)) {
             if (audioManager.isConnected()) {
                 GuildMusicManager musicManager = getGuildAudioPlayer(command.getCommandMessage().getGuild());
                 musicManager.scheduler.nextTrack();
@@ -361,5 +352,27 @@ public class MusicCommandListener extends Reflectional implements CommandListene
         var channel = command.getCommandMessage().getMessageChannel();
         channel.sendMessage("Disconnected, cleared queue").queue();
         return true;
+    }
+
+    public MessageCreateAction buildButtons(int size, MessageCreateAction builder) {
+        var entrySet = trackButtonsIds.entrySet().stream().toList();
+
+        List<Button> buttons = new ArrayList<>();
+        List<ActionRow> actionRows = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            buttons.add(Button.secondary(entrySet.get(i).getKey(), entrySet.get(i).getValue()));
+        }
+
+        List<List<Button>> splitButtons = Lists.partition(buttons, 5);
+        for (int i = 0; i < splitButtons.size(); i++) {
+            if (splitButtons.get(i).size() < 5){
+                splitButtons.get(i).add(Button.danger(entrySet.get(10).getKey(), entrySet.get(10).getValue()));
+                actionRows.add(ActionRow.of(splitButtons.get(i)));
+            } else {
+                actionRows.add(ActionRow.of(splitButtons.get(i)));
+            }
+        }
+        builder.setComponents(actionRows);
+        return builder;
     }
 }

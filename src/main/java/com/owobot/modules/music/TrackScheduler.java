@@ -74,6 +74,7 @@ public class TrackScheduler extends AudioEventAdapter {
                 var thumbnailUrl = getThumbnailUrl(track);
                 queue.offer(new AudioTrackRequest(track, channel, member, thumbnailUrl));
             });
+            controlPanel.updateControlPanel(currentMusic, queue.peek());
         } else {
             String firstThumbnailUrl = getThumbnailUrl(tracks.get(0));
             for (int i = 1; i < tracks.size(); i++) {

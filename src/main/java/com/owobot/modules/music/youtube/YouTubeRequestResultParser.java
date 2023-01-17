@@ -49,7 +49,8 @@ public class YouTubeRequestResultParser {
                             .get("webCommandMetadata").getAsJsonObject().get("url").getAsString();
                     videoResults.add(video);
                 } catch (NullPointerException e) {
-                    throw new SongRequestProcessingException("Failed to acquire some song results!");
+                    if (videoResults.isEmpty())
+                        throw new SongRequestProcessingException("Failed to acquire some song results!");
                 }
             }
         }
