@@ -94,6 +94,7 @@ public class OwoBot {
 
     public void shutdown() {
         shardManager.shutdown();
+        commandListenerStack.shutdown();
         mongoDbContext.shutdown();
     }
 
