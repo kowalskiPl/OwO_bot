@@ -7,6 +7,7 @@ import com.owobot.model.database.GuildSettings;
 import com.owobot.modules.admin.AdminParameterNames;
 import com.owobot.modules.admin.commands.*;
 import com.owobot.utilities.Reflectional;
+import net.dv8tion.jda.api.entities.ISnowflake;
 import net.dv8tion.jda.api.entities.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +61,7 @@ public class AdminCommandListener extends Reflectional implements CommandListene
                 return true;
             }
             var currentConfig = owoBot.getMongoDbContext().getGuildSettingsByGuildID(musicChannelCommand.getCommandMessage().getGuild().getIdLong());
-            currentConfig.getMusicChannelIds().addAll(mentions.stream().map(mention -> mention.getGuild().getIdLong()).collect(Collectors.toSet()));
+            currentConfig.getMusicChannelIds().addAll(mentions.stream().map(ISnowflake::getIdLong).collect(Collectors.toSet()));
             owoBot.getMongoDbContext().updateSettings(currentConfig);
 
             String addedChannels = mentions.stream().map(Channel::getName).collect(Collectors.joining(", "));
