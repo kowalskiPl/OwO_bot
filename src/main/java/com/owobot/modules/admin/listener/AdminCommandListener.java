@@ -5,15 +5,14 @@ import com.owobot.commands.Command;
 import com.owobot.commands.CommandListener;
 import com.owobot.model.database.GuildSettings;
 import com.owobot.modules.admin.AdminParameterNames;
-import com.owobot.modules.admin.commands.AddPrefixCommand;
-import com.owobot.modules.admin.commands.EnableMusicChannelCommand;
-import com.owobot.modules.admin.commands.ListPrefixesCommand;
-import com.owobot.modules.admin.commands.RemovePrefixCommand;
+import com.owobot.modules.admin.commands.*;
 import com.owobot.utilities.Reflectional;
+import net.dv8tion.jda.api.entities.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class AdminCommandListener extends Reflectional implements CommandListener {
 
@@ -40,7 +39,40 @@ public class AdminCommandListener extends Reflectional implements CommandListene
         if (command instanceof EnableMusicChannelCommand musicChannelCommand) {
             return handleEnableMusicChannelCommand( musicChannelCommand);
         }
+
+        if (command instanceof AddMusicChannelCommand musicChannelCommand){
+            return handleAddMusicChannelCommand(musicChannelCommand);
+        }
         return false;
+    }
+
+    private boolean handleAddMusicChannelCommand(AddMusicChannelCommand musicChannelCommand) {
+        if (!owoBot.getConfig().isUseDB()) {
+            musicChannelCommand.getCommandMessage().getMessage().reply("Database is disabled and this command will fail!").queue();
+        } else {
+            var mentions = musicChannelCommand.getCommandMessage().getMessage().getMentions().getChannels();
+            if (mentions.isEmpty()){
+                musicChannelCommand.getCommandMessage()
+                        .getMessage()
+                        .getChannel()
+                        .sendMessage("No channel has been specified! Please specify a channel to set as music channel.")
+                        .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                return true;
+            }
+            var currentConfig = owoBot.getMongoDbContext().getGuildSettingsByGuildID(musicChannelCommand.getCommandMessage().getGuild().getIdLong());
+            currentConfig.getMusicChannelIds().addAll(mentions.stream().map(mention -> mention.getGuild().getIdLong()).collect(Collectors.toSet()));
+            owoBot.getMongoDbContext().updateSettings(currentConfig);
+
+            String addedChannels = mentions.stream().map(Channel::getName).collect(Collectors.joining(", "));
+            musicChannelCommand.getCommandMessage()
+                    .getMessage()
+                    .getChannel()
+                    .sendMessage("Added following channel(s) as music channels: " + addedChannels)
+                    .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+            return true;
+        }
+
+        return true;
     }
 
     private boolean handleEnableMusicChannelCommand(EnableMusicChannelCommand musicChannelCommand) {

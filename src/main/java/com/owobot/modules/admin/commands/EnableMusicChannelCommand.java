@@ -10,7 +10,12 @@ public class EnableMusicChannelCommand extends Command {
 
     public EnableMusicChannelCommand() {
         this.name = "enableMusic";
-        this.triggers = new LinkedHashSet<>(Set.of("enableMusicChannel"));
+        this.triggers = new LinkedHashSet<>(
+                Set.of(
+                        "enableMusic",
+                        "enableMusicChannel"
+                )
+        );
     }
 
     public EnableMusicChannelCommand(EnableMusicChannelCommand command) {
