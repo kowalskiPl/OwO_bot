@@ -67,14 +67,25 @@ public abstract class Command{
 
     public String getHelp(){
         StringBuilder helpMessage = new StringBuilder();
-        helpMessage.append("**").append(name).append("**").append(" - triggered by:");
+        helpMessage.append("Triggered by:");
         triggers.forEach(trigger -> helpMessage.append(" ").append(trigger).append(","));
-        helpMessage.append(" ").append(getInfo());
+        helpMessage.append("\n").append(getInfo());
         return helpMessage.toString();
     }
     protected abstract String getInfo();
 
     public List<String> getMiddlewares(){
         return Collections.emptyList();
+    }
+
+    @Override
+    public String toString() {
+        return "Command{" +
+                "name='" + name + '\'' +
+                ", triggers=" + triggers +
+                ", commandMessage=" + commandMessage +
+                ", parameterMap=" + parameterMap +
+                ", isButtonCommand=" + isButtonCommand +
+                '}';
     }
 }

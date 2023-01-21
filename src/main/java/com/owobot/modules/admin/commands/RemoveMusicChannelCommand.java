@@ -40,4 +40,15 @@ public class RemoveMusicChannelCommand extends Command {
     protected String getInfo() {
         return "Removes specified music channels. Accepts multiple channel mentions.";
     }
+
+    @Override
+    public String toString() {
+        return "RemoveMusicChannelCommand{" +
+                "name='" + name + '\'' +
+                ", triggers=" + triggers +
+                ", commandMessage=" + commandMessage +
+                ", parameterMap=" + parameterMap +
+                ", isButtonCommand=" + isButtonCommand +
+                '}';
+    }
 }
