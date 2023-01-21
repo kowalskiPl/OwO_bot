@@ -46,7 +46,7 @@ public class OwoBot {
         botAdmins = new BotAdmin(this, config.getBotAdmins());
 
         log.info("Setting up DB connection");
-        mongoDbContext = new MongoDbContext(config.getConnectionString(), 3, config.getTestMongoDb());
+        mongoDbContext = new MongoDbContext(config.getConnectionString(), 3, config.getMongoDb());
 
         log.info("Creating command cache");
         commandCache = new CommandCache(this);
