@@ -26,25 +26,103 @@ public class AdminCommandListener extends Reflectional implements CommandListene
     @Override
     public boolean onCommand(Command command) {
         if (command instanceof AddPrefixCommand addPrefixCommand) {
-            return handleAddPrefixCommand( addPrefixCommand);
+            return handleAddPrefixCommand(addPrefixCommand);
         }
 
         if (command instanceof RemovePrefixCommand removePrefixCommand) {
-            return handleRemovePrefixCommand( removePrefixCommand);
+            return handleRemovePrefixCommand(removePrefixCommand);
         }
 
         if (command instanceof ListPrefixesCommand listPrefixesCommand) {
-            return handleListPrefixesCommand( listPrefixesCommand);
+            return handleListPrefixesCommand(listPrefixesCommand);
         }
 
         if (command instanceof EnableMusicChannelCommand musicChannelCommand) {
-            return handleEnableMusicChannelCommand( musicChannelCommand);
+            return handleEnableMusicChannelCommand(musicChannelCommand);
         }
 
-        if (command instanceof AddMusicChannelCommand musicChannelCommand){
+        if (command instanceof AddMusicChannelCommand musicChannelCommand) {
             return handleAddMusicChannelCommand(musicChannelCommand);
         }
+
+        if (command instanceof RemoveMusicChannelCommand musicChannelCommand) {
+            return handleRemoveMusicChannelCommand(musicChannelCommand);
+        }
+
+        if (command instanceof GetMusicChannelsCommand musicChannelCommand){
+            return handleGetMusicChannelsCommand(musicChannelCommand);
+        }
         return false;
+    }
+
+    private boolean handleGetMusicChannelsCommand(Command musicChannelCommand) {
+        if (!owoBot.getConfig().isUseDB()) {
+            musicChannelCommand.getCommandMessage().getMessage().reply("Database is disabled and this command will fail!").queue();
+        } else {
+            var currentConfig = owoBot.getMongoDbContext().getGuildSettingsByGuildID(musicChannelCommand.getCommandMessage().getGuild().getIdLong());
+            if (currentConfig.getMusicChannelIds().isEmpty()) {
+                musicChannelCommand.getCommandMessage()
+                        .getMessage()
+                        .getChannel()
+                        .sendMessage("No music channel has been specified.")
+                        .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                return true;
+            }
+
+            StringBuilder channels = new StringBuilder();
+            currentConfig.getMusicChannelIds().forEach(channel -> channels.append("<#").append(channel).append("> "));
+
+            musicChannelCommand.getCommandMessage()
+                    .getMessage()
+                    .getChannel()
+                    .sendMessage("Currently available music channels: " + channels.toString())
+                    .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+        }
+        return true;
+    }
+
+    private boolean handleRemoveMusicChannelCommand(Command musicChannelCommand) {
+        if (!owoBot.getConfig().isUseDB()) {
+            musicChannelCommand.getCommandMessage().getMessage().reply("Database is disabled and this command will fail!").queue();
+        } else {
+            var mentions = musicChannelCommand.getCommandMessage().getMessage().getMentions().getChannels();
+            if (mentions.isEmpty()) {
+                musicChannelCommand.getCommandMessage()
+                        .getMessage()
+                        .getChannel()
+                        .sendMessage("No channel has been specified! Please specify a channel to delete from music channels.")
+                        .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                return true;
+            }
+            var currentConfig = owoBot.getMongoDbContext().getGuildSettingsByGuildID(musicChannelCommand.getCommandMessage().getGuild().getIdLong());
+            var result = currentConfig.getMusicChannelIds().removeAll(mentions.stream().map(ISnowflake::getIdLong).collect(Collectors.toSet()));
+            owoBot.getMongoDbContext().updateSettings(currentConfig);
+
+            if (currentConfig.getMusicChannelIds().isEmpty()) {
+                musicChannelCommand.getCommandMessage()
+                        .getMessage()
+                        .getChannel()
+                        .sendMessage("There is no music channel defined. Users will be able to use music commands in any channel now!")
+                        .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+            }
+
+            if (result) {
+                String removedChannels = mentions.stream().map(Channel::getName).collect(Collectors.joining(", "));
+                musicChannelCommand.getCommandMessage()
+                        .getMessage()
+                        .getChannel()
+                        .sendMessage("Removed following channel(s) as music channels: " + removedChannels)
+                        .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                return true;
+            } else {
+                musicChannelCommand.getCommandMessage()
+                        .getMessage()
+                        .getChannel()
+                        .sendMessage("Given channel is invalid. Make sure it is a valid music channel!")
+                        .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+            }
+        }
+        return true;
     }
 
     private boolean handleAddMusicChannelCommand(AddMusicChannelCommand musicChannelCommand) {
@@ -52,7 +130,7 @@ public class AdminCommandListener extends Reflectional implements CommandListene
             musicChannelCommand.getCommandMessage().getMessage().reply("Database is disabled and this command will fail!").queue();
         } else {
             var mentions = musicChannelCommand.getCommandMessage().getMessage().getMentions().getChannels();
-            if (mentions.isEmpty()){
+            if (mentions.isEmpty()) {
                 musicChannelCommand.getCommandMessage()
                         .getMessage()
                         .getChannel()

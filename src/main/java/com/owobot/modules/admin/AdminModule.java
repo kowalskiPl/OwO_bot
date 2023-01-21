@@ -25,7 +25,9 @@ public class AdminModule extends Reflectional implements Module {
                 new RemovePrefixCommand(),
                 new ListPrefixesCommand(),
                 new EnableMusicChannelCommand(),
-                new AddMusicChannelCommand()
+                new AddMusicChannelCommand(),
+                new RemoveMusicChannelCommand(),
+                new GetMusicChannelsCommand()
         ));
     }
 

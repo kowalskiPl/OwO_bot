@@ -15,7 +15,7 @@ public class MusicChannelMiddleware extends Middleware {
         var messageChannelId = command.getCommandMessage().getMessage().getChannel().getIdLong();
         var settings = owoBot.getMongoDbContext().getGuildSettingsByGuildID(command.getCommandMessage().getGuild().getIdLong());
 
-        if (!settings.isMusicChannelEnabled())
+        if (!settings.isMusicChannelEnabled() || settings.getMusicChannelIds().isEmpty())
             return stack.next();
 
         if (!settings.getMusicChannelIds().contains(messageChannelId)) {
