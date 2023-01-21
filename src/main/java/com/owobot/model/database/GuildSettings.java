@@ -12,6 +12,8 @@ public class GuildSettings {
     private int volume;
     private Set<String> prefixes;
 
+    private boolean isMusicChannelEnabled;
+
     public GuildSettings() {
     }
 
@@ -19,12 +21,14 @@ public class GuildSettings {
         this.guildId = guildId;
         this.musicChannelIds = musicChannelIds;
         this.volume = volume;
+        this.isMusicChannelEnabled = false;
     }
 
     public void update(GuildSettings settings) {
         this.guildId = settings.guildId;
         this.musicChannelIds = settings.musicChannelIds;
         this.volume = settings.volume;
+        this.isMusicChannelEnabled = settings.isMusicChannelEnabled;
     }
 
     public ObjectId getId() {
@@ -65,6 +69,14 @@ public class GuildSettings {
 
     public void setPrefixes(Set<String> prefixes) {
         this.prefixes = prefixes;
+    }
+
+    public boolean isMusicChannelEnabled() {
+        return isMusicChannelEnabled;
+    }
+
+    public void setMusicChannelEnabled(boolean musicChannelEnabled) {
+        isMusicChannelEnabled = musicChannelEnabled;
     }
 
     public static GuildSettings getDefaultSettings() {

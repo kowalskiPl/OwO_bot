@@ -4,7 +4,9 @@ import com.owobot.commands.Command;
 import com.owobot.modules.music.MusicParameterNames;
 import org.apache.commons.validator.routines.UrlValidator;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 public class PlayCommand extends Command {
     public PlayCommand() {
@@ -28,6 +30,13 @@ public class PlayCommand extends Command {
 
     public PlayCommand(PlayCommand target) {
         super(target);
+    }
+
+    @Override
+    public List<String> getMiddlewares() {
+        List<String> middlewares = new ArrayList<>();
+        middlewares.add("musicChannel");
+        return middlewares;
     }
 
     @Override
