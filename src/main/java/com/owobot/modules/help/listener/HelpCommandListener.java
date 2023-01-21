@@ -51,14 +51,15 @@ public class HelpCommandListener extends Reflectional implements CommandListener
                 if (moduleInQuestion.isPresent()){
                     var loadedModule = moduleInQuestion.get();
                     builder.setAuthor("Commands for module:");
+                    builder.setTitle(loadedModule.getNameUserFriendly());
+
                     var commands = loadedModule.getCommands();
-                    StringBuilder sb = new StringBuilder();
 
                     for (Command processedCommand : commands) {
                         if (!processedCommand.isButtonCommand())
-                            sb.append("\n").append(processedCommand.getHelp()).append("\n");
+                            builder.addField(processedCommand.getName(), processedCommand.getHelp(), false);
                     }
-                    builder.addField(loadedModule.getNameUserFriendly(), sb.toString(), false);
+
                     builder.setFooter("This message and command will self-destruct in 60 seconds");
                     getHelpCommand.getCommandMessage().getMessage().getChannel().sendMessageEmbeds(builder.build()).delay(Duration.ofSeconds(60)).
                             queue(message -> message.delete().queue(leMessage -> getHelpCommand.getCommandMessage().getMessage().delete().queue()));
