@@ -8,6 +8,7 @@ import com.owobot.database.MongoDbContext;
 import com.owobot.messagelisteners.MainMessageListener;
 import com.owobot.middleware.BotAdminMiddleware;
 import com.owobot.middleware.MiddlewareHandler;
+import com.owobot.middleware.MusicChannelMiddleware;
 import com.owobot.middleware.RequirePermissionMiddleware;
 import com.owobot.modules.admin.AdminModule;
 import com.owobot.modules.help.HelpModule;
@@ -54,6 +55,7 @@ public class OwoBot {
         middlewareHandler = new MiddlewareHandler();
         middlewareHandler.registerMiddleware("require", new RequirePermissionMiddleware(this));
         middlewareHandler.registerMiddleware("botAdmin", new BotAdminMiddleware(this));
+        middlewareHandler.registerMiddleware("musicChannel", new MusicChannelMiddleware(this));
 
         log.info("Creating module manager");
         moduleManager = new ModuleManager(this);
@@ -94,6 +96,7 @@ public class OwoBot {
 
     public void shutdown() {
         shardManager.shutdown();
+        commandListenerStack.shutdown();
         mongoDbContext.shutdown();
     }
 

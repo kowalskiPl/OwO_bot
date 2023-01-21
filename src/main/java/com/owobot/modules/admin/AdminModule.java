@@ -4,9 +4,7 @@ import com.owobot.OwoBot;
 import com.owobot.commands.Command;
 import com.owobot.commands.CommandListener;
 import com.owobot.modules.Module;
-import com.owobot.modules.admin.commands.AddPrefixCommand;
-import com.owobot.modules.admin.commands.ListPrefixesCommand;
-import com.owobot.modules.admin.commands.RemovePrefixCommand;
+import com.owobot.modules.admin.commands.*;
 import com.owobot.modules.admin.listener.AdminCommandListener;
 import com.owobot.utilities.Reflectional;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +23,11 @@ public class AdminModule extends Reflectional implements Module {
         commands = new LinkedHashSet<>(Set.of(
                 new AddPrefixCommand(),
                 new RemovePrefixCommand(),
-                new ListPrefixesCommand()
+                new ListPrefixesCommand(),
+                new EnableMusicChannelCommand(),
+                new AddMusicChannelCommand(),
+                new RemoveMusicChannelCommand(),
+                new GetMusicChannelsCommand()
         ));
     }
 
