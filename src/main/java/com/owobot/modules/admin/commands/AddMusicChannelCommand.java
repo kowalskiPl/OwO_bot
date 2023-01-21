@@ -36,6 +36,17 @@ public class AddMusicChannelCommand extends Command {
 
     @Override
     protected String getInfo() {
-        return "Adds new channel as the music channel. Accepts mentions of channels as parameters (Mention is #<channel name>)";
+        return "Adds new channel as the music channel. Accepts mentions of channels as parameters";
+    }
+
+    @Override
+    public String toString() {
+        return "AddMusicChannelCommand{" +
+                "name='" + name + '\'' +
+                ", triggers=" + triggers +
+                ", commandMessage=" + commandMessage +
+                ", parameterMap=" + parameterMap +
+                ", isButtonCommand=" + isButtonCommand +
+                '}';
     }
 }

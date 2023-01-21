@@ -30,4 +30,15 @@ public class GetMusicChannelsCommand extends Command {
     protected String getInfo() {
         return "Lists currently active music channels.";
     }
+
+    @Override
+    public String toString() {
+        return "GetMusicChannelsCommand{" +
+                "name='" + name + '\'' +
+                ", triggers=" + triggers +
+                ", commandMessage=" + commandMessage +
+                ", parameterMap=" + parameterMap +
+                ", isButtonCommand=" + isButtonCommand +
+                '}';
+    }
 }
