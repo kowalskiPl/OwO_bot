@@ -49,7 +49,7 @@ public class AdminCommandListener extends Reflectional implements CommandListene
             return handleRemoveMusicChannelCommand(musicChannelCommand);
         }
 
-        if (command instanceof GetMusicChannelsCommand musicChannelCommand){
+        if (command instanceof GetMusicChannelsCommand musicChannelCommand) {
             return handleGetMusicChannelsCommand(musicChannelCommand);
         }
         return false;
@@ -66,6 +66,7 @@ public class AdminCommandListener extends Reflectional implements CommandListene
                         .getChannel()
                         .sendMessage("No music channel has been specified.")
                         .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                deleteMessage(musicChannelCommand, 30);
                 return true;
             }
 
@@ -77,6 +78,7 @@ public class AdminCommandListener extends Reflectional implements CommandListene
                     .getChannel()
                     .sendMessage("Currently available music channels: " + channels.toString())
                     .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+            deleteMessage(musicChannelCommand, 30);
         }
         return true;
     }
@@ -92,6 +94,7 @@ public class AdminCommandListener extends Reflectional implements CommandListene
                         .getChannel()
                         .sendMessage("No channel has been specified! Please specify a channel to delete from music channels.")
                         .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                deleteMessage(musicChannelCommand, 30);
                 return true;
             }
             var currentConfig = owoBot.getMongoDbContext().getGuildSettingsByGuildID(musicChannelCommand.getCommandMessage().getGuild().getIdLong());
@@ -104,6 +107,8 @@ public class AdminCommandListener extends Reflectional implements CommandListene
                         .getChannel()
                         .sendMessage("There is no music channel defined. Users will be able to use music commands in any channel now!")
                         .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                deleteMessage(musicChannelCommand, 30);
+                return true;
             }
 
             if (result) {
@@ -113,6 +118,7 @@ public class AdminCommandListener extends Reflectional implements CommandListene
                         .getChannel()
                         .sendMessage("Removed following channel(s) as music channels: " + removedChannels)
                         .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                deleteMessage(musicChannelCommand, 30);
                 return true;
             } else {
                 musicChannelCommand.getCommandMessage()
@@ -120,6 +126,7 @@ public class AdminCommandListener extends Reflectional implements CommandListene
                         .getChannel()
                         .sendMessage("Given channel is invalid. Make sure it is a valid music channel!")
                         .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                deleteMessage(musicChannelCommand, 30);
             }
         }
         return true;
@@ -136,6 +143,7 @@ public class AdminCommandListener extends Reflectional implements CommandListene
                         .getChannel()
                         .sendMessage("No channel has been specified! Please specify a channel to set as music channel.")
                         .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                deleteMessage(musicChannelCommand, 30);
                 return true;
             }
             var currentConfig = owoBot.getMongoDbContext().getGuildSettingsByGuildID(musicChannelCommand.getCommandMessage().getGuild().getIdLong());
@@ -148,6 +156,7 @@ public class AdminCommandListener extends Reflectional implements CommandListene
                     .getChannel()
                     .sendMessage("Added following channel(s) as music channels: " + addedChannels)
                     .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+            deleteMessage(musicChannelCommand, 30);
             return true;
         }
 
@@ -164,6 +173,7 @@ public class AdminCommandListener extends Reflectional implements CommandListene
                         .getMessage()
                         .reply("Something went wrong and you don't have configuration file, try running addPrefix command first")
                         .queue();
+                deleteMessage(musicChannelCommand, 30);
             } else {
                 var parameter = musicChannelCommand.getParameterMap().getOrDefault(AdminParameterNames.ADMIN_PARAMETER_ENABLE_MUSIC_CHANNEL.getName(), "");
 
@@ -173,6 +183,7 @@ public class AdminCommandListener extends Reflectional implements CommandListene
                             .getMessage()
                             .reply("Music channel is " + enabled)
                             .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                    deleteMessage(musicChannelCommand, 30);
                     return true;
                 }
 
@@ -181,6 +192,7 @@ public class AdminCommandListener extends Reflectional implements CommandListene
                             .getMessage()
                             .reply("Invalid argument! This command accepts only true or false as parameters")
                             .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                    deleteMessage(musicChannelCommand, 30);
                 } else {
                     boolean enable = Boolean.parseBoolean(parameter);
                     String message;
@@ -194,7 +206,8 @@ public class AdminCommandListener extends Reflectional implements CommandListene
                     musicChannelCommand.getCommandMessage()
                             .getMessage()
                             .reply(message)
-                            .queue();
+                            .queue(message1 -> message1.delete().queueAfter(30, TimeUnit.SECONDS));
+                    deleteMessage(musicChannelCommand, 30);
                 }
             }
         }
@@ -210,7 +223,8 @@ public class AdminCommandListener extends Reflectional implements CommandListene
                 listPrefixesCommand.getCommandMessage()
                         .getMessage()
                         .reply("Something went wrong and you don't have configuration file, try running addPrefix command first")
-                        .queue();
+                        .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                deleteMessage(listPrefixesCommand, 30);
             } else {
                 var currentPrefixes = currentSettings.getPrefixes();
                 StringBuilder sb = new StringBuilder();
@@ -221,7 +235,8 @@ public class AdminCommandListener extends Reflectional implements CommandListene
                 listPrefixesCommand.getCommandMessage()
                         .getMessage()
                         .reply(sb.toString())
-                        .queue();
+                        .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                deleteMessage(listPrefixesCommand, 30);
             }
         }
         return true;
@@ -237,19 +252,22 @@ public class AdminCommandListener extends Reflectional implements CommandListene
                         .getMessage()
                         .reply("Something went wrong and you don't have configuration file, try running addPrefix command first")
                         .queue();
+                deleteMessage(removePrefixCommand, 30);
             } else {
                 if (currentSettings.getPrefixes().size() == 1) {
                     removePrefixCommand.getCommandMessage()
                             .getMessage()
                             .reply("You can't remove all prefixes!")
-                            .queue();
+                            .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                    deleteMessage(removePrefixCommand, 30);
                 } else {
                     currentSettings.getPrefixes().remove(removePrefixCommand.getParameterMap().get(AdminParameterNames.ADMIN_PARAMETER_PREFIX.getName()));
                     owoBot.getMongoDbContext().updateSettings(currentSettings);
                     removePrefixCommand.getCommandMessage()
                             .getMessage()
                             .reply("Removed prefix: " + removePrefixCommand.getParameterMap().get(AdminParameterNames.ADMIN_PARAMETER_PREFIX.getName()))
-                            .queue();
+                            .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                    deleteMessage(removePrefixCommand, 30);
                 }
             }
         }
@@ -280,7 +298,12 @@ public class AdminCommandListener extends Reflectional implements CommandListene
         addPrefixCommand.getCommandMessage()
                 .getMessage()
                 .reply("Added " + addPrefixCommand.getParameterMap().get(AdminParameterNames.ADMIN_PARAMETER_PREFIX.getName()) + " as a new prefix")
-                .queue();
+                .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+        deleteMessage(addPrefixCommand, 30);
         return true;
+    }
+
+    private void deleteMessage(Command command, int delay) {
+        command.getCommandMessage().getMessage().delete().queueAfter(delay, TimeUnit.SECONDS);
     }
 }
