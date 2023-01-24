@@ -172,7 +172,7 @@ public class AdminCommandListener extends Reflectional implements CommandListene
                 musicChannelCommand.getCommandMessage()
                         .getMessage()
                         .reply("Something went wrong and you don't have configuration file, try running addPrefix command first")
-                        .queue();
+                        .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
                 deleteMessage(musicChannelCommand, 30);
             } else {
                 var parameter = musicChannelCommand.getParameterMap().getOrDefault(AdminParameterNames.ADMIN_PARAMETER_ENABLE_MUSIC_CHANNEL.getName(), "");
