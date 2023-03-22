@@ -3,6 +3,7 @@ package com.owobot.modules.warframe;
 import com.owobot.model.TrigramSearchResult;
 import com.owobot.modules.warframe.model.MissionRewards;
 import com.owobot.modules.warframe.model.RelicReward;
+import com.owobot.modules.warframe.model.RewardSearchResult;
 import com.owobot.utilities.TrigramStringSearch;
 import lombok.Getter;
 
@@ -55,5 +56,14 @@ public class AllRewardsDatabase {
             }
         });
         return relicRewards;
+    }
+
+    public Set<RewardSearchResult> getRewardsFromMissions(String rewardName) {
+        Set<RewardSearchResult> missionRewards = new LinkedHashSet<>();
+        allMissionRewards.forEach(reward -> {
+            Optional<RewardSearchResult> searchResult = reward.searchReward(rewardName);
+            searchResult.ifPresent(missionRewards::add);
+        });
+        return missionRewards;
     }
 }

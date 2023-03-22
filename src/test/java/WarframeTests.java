@@ -28,11 +28,11 @@ public class WarframeTests {
         TrigramStringSearch search = new TrigramStringSearch();
         var result = search.compareStrings(query, stringToSearch);
         System.out.println(result);
-        assert result.getMatchCount() == result.getSearchTrigramCount();
+        assert result.getMatchCount() == Integer.MAX_VALUE;
     }
 
     @Test
-    void relicRewardSearchTest(){
+    void relicRewardSearchTest() {
         try {
             AllRewardsDatabase database = new AllRewardsDatabase();
             var results = database.searchAllRewards("Braon Pime Stok")
@@ -44,6 +44,20 @@ public class WarframeTests {
             var relics = database.getRewardFromRelic(results.get().getComparedString());
             assert relics != null;
             relics.forEach(System.out::println);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void testMissionRewards() {
+        try {
+            AllRewardsDatabase database = new AllRewardsDatabase();
+            var results = database.searchAllRewards("Trinity Chassis")
+                    .stream()
+                    .filter(result -> result.getCheckedTrigramCount() - result.getMatchCount() < 8)
+                    .max(Comparator.comparingInt(TrigramSearchResult::getMatchCount));
+            System.out.println(results);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

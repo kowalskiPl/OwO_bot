@@ -20,7 +20,7 @@ public class TrigramStringSearch {
         List<String> queryTrigrams = prepareTrigrams(query);
         List<String> checkedTextTrigrams = prepareTrigrams(checkedText);
 
-        TrigramSearchResult result = new TrigramSearchResult(queryTrigrams.size(), 0, query, checkedText, false);
+        TrigramSearchResult result = new TrigramSearchResult(queryTrigrams.size(), checkedTextTrigrams.size(), 0, query, checkedText, false);
         if (query.equalsIgnoreCase(checkedText)){
             result.setMatchCount(DIRECT_MATCH_INT);
             result.setDirectMatch(true);
