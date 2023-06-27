@@ -2,6 +2,7 @@ import com.owobot.model.TrigramSearchResult;
 import com.owobot.modules.warframe.AllRewardsDatabase;
 import com.owobot.modules.warframe.HTMLDropTableParser;
 import com.owobot.utilities.TrigramStringSearch;
+import me.xdrop.fuzzywuzzy.FuzzySearch;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -58,6 +59,18 @@ public class WarframeTests {
                     .filter(result -> result.getCheckedTrigramCount() - result.getMatchCount() < 8)
                     .max(Comparator.comparingInt(TrigramSearchResult::getMatchCount));
             System.out.println(results);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void fuzzyTest(){
+        try {
+            AllRewardsDatabase database = new AllRewardsDatabase();
+            var results = FuzzySearch.extractTop("braton prie stk", database.getAllRewardNames(), 5);
+            System.out.println(results);
+            assert "Braton Prime Stock".equals(results.get(0).getString());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

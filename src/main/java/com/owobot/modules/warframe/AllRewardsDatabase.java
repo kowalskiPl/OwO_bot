@@ -6,9 +6,12 @@ import com.owobot.modules.warframe.model.RelicReward;
 import com.owobot.modules.warframe.model.RewardSearchResult;
 import com.owobot.utilities.TrigramStringSearch;
 import lombok.Getter;
+import me.xdrop.fuzzywuzzy.FuzzySearch;
+import me.xdrop.fuzzywuzzy.model.ExtractedResult;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
 public class AllRewardsDatabase {
@@ -39,6 +42,7 @@ public class AllRewardsDatabase {
         });
     }
 
+    @Deprecated
     public List<TrigramSearchResult> searchAllRewards(String query) {
         TrigramStringSearch search = new TrigramStringSearch();
         List<TrigramSearchResult> searchResults = new LinkedList<>();
@@ -46,6 +50,10 @@ public class AllRewardsDatabase {
             searchResults.add(search.compareStrings(query, rewardName));
         });
         return searchResults;
+    }
+
+    public List<String> searchAllRewards(String query, int limit){
+        return FuzzySearch.extractTop(query, allRewardNames, limit).stream().map(ExtractedResult::getString).collect(Collectors.toList());
     }
 
     public Set<RelicReward> getRewardFromRelic(String rewardName) {

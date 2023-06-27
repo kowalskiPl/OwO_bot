@@ -43,37 +43,52 @@ public class WarframeCommandListener extends Reflectional implements CommandList
 
     private boolean handleMissionRewardSearchCommand(SearchMissionRewardCommand command) {
         if (command.getParameterMap().containsKey(WarframeParameterNames.WARFRAME_PARAMETER_REWARD_SEARCH_STRING.getName())) {
-            String searchedReward = command.getParameterMap().get(WarframeParameterNames.WARFRAME_PARAMETER_REWARD_SEARCH_STRING.getName());
-            var searchResults = rewardsDatabase.searchAllRewards(searchedReward);
-
-            var optionalHighestChanceMatch = searchResults.stream().max(Comparator.comparingInt(TrigramSearchResult::getMatchCount)); //HERE IMPROVE
-
-            if (optionalHighestChanceMatch.isPresent()) {
-                var highestChanceMatch = optionalHighestChanceMatch.get();
-                if (highestChanceMatch.isDirectMatch()) {
-                    String requestedItem = highestChanceMatch.getComparedString();
-                    Set<RewardSearchResult> rewards = rewardsDatabase.getRewardsFromMissions(requestedItem);
-                    WarframeEmbedMessagesHelper.createAndSendMissionRewardsEmbed(rewards, requestedItem, command);
-                } else {
-                    if ((highestChanceMatch.getMatchCount() / highestChanceMatch.getSearchTrigramCount()) * 100 > searchCutOffPercentage) {
-                        String requestedItem = highestChanceMatch.getComparedString();
-                        Set<RewardSearchResult> rewards = rewardsDatabase.getRewardsFromMissions(requestedItem);
-                        WarframeEmbedMessagesHelper.createAndSendMissionRewardsEmbed(rewards, requestedItem, command);
-                    } else {
-                        command
-                                .getCommandMessage()
-                                .getMessage()
-                                .reply("I couldn't find a reward with enough confidence to provide results.\nReward might be unavailable or your input wasn't precise enough")
-                                .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
-
-                    }
-                }
-            }
-            command.getCommandMessage().getMessage().delete().queueAfter(30, TimeUnit.SECONDS);
-            return true;
+            return handleSearchMissionRewardCommand2(command);
         } else {
             command.getCommandMessage().getMessage().delete().queueAfter(30, TimeUnit.SECONDS);
             return false;
         }
+    }
+
+    private boolean handleSearchMissionRewardCommand2(SearchMissionRewardCommand command){
+        String searchedReward = command.getParameterMap().get(WarframeParameterNames.WARFRAME_PARAMETER_REWARD_SEARCH_STRING.getName());
+        var searchResults = rewardsDatabase.searchAllRewards(searchedReward, 5);
+        if (!searchResults.isEmpty()){
+            WarframeEmbedMessagesHelper.createAndSendRewardSearchEmbed(searchResults, searchedReward, command);
+        }
+        command.getCommandMessage().getMessage().delete().queueAfter(30, TimeUnit.SECONDS);
+        return true;
+    }
+
+    @Deprecated
+    private boolean handleSearchMissionRewardCommand(SearchMissionRewardCommand command) {
+        String searchedReward = command.getParameterMap().get(WarframeParameterNames.WARFRAME_PARAMETER_REWARD_SEARCH_STRING.getName());
+        var searchResults = rewardsDatabase.searchAllRewards(searchedReward);
+
+        var optionalHighestChanceMatch = searchResults.stream().max(Comparator.comparingInt(TrigramSearchResult::getMatchCount)); //HERE IMPROVE
+
+        if (optionalHighestChanceMatch.isPresent()) {
+            var highestChanceMatch = optionalHighestChanceMatch.get();
+            if (highestChanceMatch.isDirectMatch()) {
+                String requestedItem = highestChanceMatch.getComparedString();
+                Set<RewardSearchResult> rewards = rewardsDatabase.getRewardsFromMissions(requestedItem);
+                WarframeEmbedMessagesHelper.createAndSendMissionRewardsEmbed(rewards, requestedItem, command);
+            } else {
+                if ((highestChanceMatch.getMatchCount() / highestChanceMatch.getSearchTrigramCount()) * 100 > searchCutOffPercentage) {
+                    String requestedItem = highestChanceMatch.getComparedString();
+                    Set<RewardSearchResult> rewards = rewardsDatabase.getRewardsFromMissions(requestedItem);
+                    WarframeEmbedMessagesHelper.createAndSendMissionRewardsEmbed(rewards, requestedItem, command);
+                } else {
+                    command
+                            .getCommandMessage()
+                            .getMessage()
+                            .reply("I couldn't find a reward with enough confidence to provide results.\nReward might be unavailable or your input wasn't precise enough")
+                            .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+
+                }
+            }
+        }
+        command.getCommandMessage().getMessage().delete().queueAfter(30, TimeUnit.SECONDS);
+        return true;
     }
 }
