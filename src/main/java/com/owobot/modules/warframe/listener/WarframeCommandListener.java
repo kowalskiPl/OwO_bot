@@ -8,20 +8,25 @@ import com.owobot.modules.warframe.AllRewardsDatabase;
 import com.owobot.modules.warframe.WarframeEmbedMessagesHelper;
 import com.owobot.modules.warframe.WarframeParameterNames;
 import com.owobot.modules.warframe.commands.SearchMissionRewardCommand;
+import com.owobot.modules.warframe.commands.WarframeSearchButtonPressCommand;
 import com.owobot.modules.warframe.model.RewardSearchResult;
 import com.owobot.utilities.Reflectional;
+import me.xdrop.fuzzywuzzy.model.ExtractedResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Comparator;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class WarframeCommandListener extends Reflectional implements CommandListener {
     private final AllRewardsDatabase rewardsDatabase;
     private final int searchCutOffPercentage = 50;
     private static final Logger log = LoggerFactory.getLogger(WarframeCommandListener.class);
+    private static final Map<Long, Map<String, String>> guildSearchResults = new LinkedHashMap<>();
+
 
     public WarframeCommandListener(OwoBot owoBot) {
         super(owoBot);
@@ -32,10 +37,27 @@ public class WarframeCommandListener extends Reflectional implements CommandList
         }
     }
 
+    private synchronized void updateSearchResults(Long guildId, Map<String, String> newResults) {
+        if (!guildSearchResults.containsKey(guildId)) {
+            guildSearchResults.put(guildId, newResults);
+        } else {
+            guildSearchResults.get(guildId).clear();
+            guildSearchResults.get(guildId).putAll(newResults);
+        }
+    }
+
+    private synchronized Map<String, String> getSearchResults(Long guildId) {
+        return guildSearchResults.getOrDefault(guildId, Collections.emptyMap());
+    }
+
     @Override
     public boolean onCommand(Command command) {
         if (command instanceof SearchMissionRewardCommand relicRewardCommand) {
             return handleMissionRewardSearchCommand(relicRewardCommand);
+        }
+
+        if (command instanceof WarframeSearchButtonPressCommand searchCommand) {
+            return handleSearchButtonPressCommand(searchCommand);
         }
 
         return false;
@@ -50,13 +72,45 @@ public class WarframeCommandListener extends Reflectional implements CommandList
         }
     }
 
-    private boolean handleSearchMissionRewardCommand2(SearchMissionRewardCommand command){
-        String searchedReward = command.getParameterMap().get(WarframeParameterNames.WARFRAME_PARAMETER_REWARD_SEARCH_STRING.getName());
+    private boolean handleSearchMissionRewardCommand2(SearchMissionRewardCommand command) {
+        var searchedReward = command.getParameterMap().get(WarframeParameterNames.WARFRAME_PARAMETER_REWARD_SEARCH_STRING.getName());
         var searchResults = rewardsDatabase.searchAllRewards(searchedReward, 5);
-        if (!searchResults.isEmpty()){
-            WarframeEmbedMessagesHelper.createAndSendRewardSearchEmbed(searchResults, searchedReward, command);
+        var listOfResults = searchResults.stream().map(ExtractedResult::getString).toList();
+
+        Map<String, String> resultsMappedToIds = IntStream.range(0, listOfResults.size())
+                .boxed()
+                .collect(Collectors.toMap(WarframeEmbedMessagesHelper.searchPanelButtonsIds::get, listOfResults::get));
+
+        updateSearchResults(command.getCommandMessage().getGuild().getIdLong(), resultsMappedToIds);
+
+        var directMatch = searchResults.stream().max(Comparator.comparing(ExtractedResult::getScore)).stream().findFirst();
+        boolean directlyMatched = false;
+        if (directMatch.isPresent()){
+            if (directMatch.get().getScore() == 100){
+                directlyMatched = true;
+                // blah blah
+                command.getCommandMessage().getMessageChannel().sendMessage("Wow it's a direct match!").queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+            }
+        }
+
+        if (!directlyMatched && !searchResults.isEmpty()) {
+            WarframeEmbedMessagesHelper.createAndSendRewardSearchEmbed(listOfResults, searchedReward, command);
         }
         command.getCommandMessage().getMessage().delete().queueAfter(30, TimeUnit.SECONDS);
+        return true;
+    }
+
+    private boolean handleSearchButtonPressCommand(WarframeSearchButtonPressCommand command) {
+        var id = command.getParameterMap().get(WarframeParameterNames.WARFRAME_PARAMETER_SEARCH_BUTTON_ID.getName());
+        var searchResults = getSearchResults(command.getCommandMessage().getGuild().getIdLong());
+        var buttonIds = WarframeEmbedMessagesHelper.searchPanelButtonsIds;
+
+        if (id.equals(buttonIds.get(5))) {
+            command.getCommandMessage().getMessage().delete().queue();
+        } else {
+            var someResult = searchResults.get(id);
+            // handle further processing
+        }
         return true;
     }
 

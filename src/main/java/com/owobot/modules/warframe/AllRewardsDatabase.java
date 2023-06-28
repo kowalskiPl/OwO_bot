@@ -11,7 +11,6 @@ import me.xdrop.fuzzywuzzy.model.ExtractedResult;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Getter
 public class AllRewardsDatabase {
@@ -52,8 +51,8 @@ public class AllRewardsDatabase {
         return searchResults;
     }
 
-    public List<String> searchAllRewards(String query, int limit){
-        return FuzzySearch.extractTop(query, allRewardNames, limit).stream().map(ExtractedResult::getString).collect(Collectors.toList());
+    public List<ExtractedResult> searchAllRewards(String query, int limit){
+        return FuzzySearch.extractTop(query, allRewardNames, limit);
     }
 
     public Set<RelicReward> getRewardFromRelic(String rewardName) {

@@ -17,7 +17,7 @@ public class WarframeEmbedMessagesHelper {
 
     public static final List<String> searchPanelButtonsIds = Collections.unmodifiableList(prepareButtonIds());
     private static List<String> prepareButtonIds() {
-        List<String> ids = new LinkedList<>();
+        List<String> ids = new ArrayList<>();
         ids.add("warframeResult_1");
         ids.add("warframeResult_2");
         ids.add("warframeResult_3");
@@ -53,8 +53,7 @@ public class WarframeEmbedMessagesHelper {
         command.getCommandMessage().getMessage().getChannel()
                 .sendMessageEmbeds(builder.build())
                 .queue(message -> message.delete()
-                        .queueAfter(40, TimeUnit.SECONDS),
-                        new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
+                        .queueAfter(40, TimeUnit.SECONDS, null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE)));
     }
 
     public static void createAndSendRewardSearchEmbed(List<String> possibleRewards, String searchedReward, Command command) {
@@ -65,7 +64,7 @@ public class WarframeEmbedMessagesHelper {
 
         int iterator = 1;
         for (String reward : possibleRewards) {
-            builder.addField( " ",iterator + " " + reward, false);
+            builder.addField( " ",iterator + ") " + reward, false);
             iterator++;
         }
 
@@ -81,7 +80,6 @@ public class WarframeEmbedMessagesHelper {
                         ActionRow.of(Button.danger(searchPanelButtonsIds.get(5), "Cancel"))
                 )
                 .queue(message -> message.delete()
-                        .queueAfter(30, TimeUnit.SECONDS),
-                        new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
+                        .queueAfter(40, TimeUnit.SECONDS, null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE)));
     }
 }

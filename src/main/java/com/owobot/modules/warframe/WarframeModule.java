@@ -5,6 +5,7 @@ import com.owobot.commands.Command;
 import com.owobot.commands.CommandListener;
 import com.owobot.modules.Module;
 import com.owobot.modules.warframe.commands.SearchMissionRewardCommand;
+import com.owobot.modules.warframe.commands.WarframeSearchButtonPressCommand;
 import com.owobot.modules.warframe.listener.WarframeCommandListener;
 import com.owobot.utilities.Reflectional;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +25,8 @@ public class WarframeModule extends Reflectional implements Module {
         super(owoBot);
         commandListeners = new LinkedHashSet<>(Set.of(new WarframeCommandListener(owoBot)));
         commands = new LinkedHashSet<>(Set.of(
-                new SearchMissionRewardCommand()
+                new SearchMissionRewardCommand(),
+                new WarframeSearchButtonPressCommand()
         ));
     }
 
