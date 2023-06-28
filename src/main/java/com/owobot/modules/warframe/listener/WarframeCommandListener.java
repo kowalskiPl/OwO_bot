@@ -88,7 +88,7 @@ public class WarframeCommandListener extends Reflectional implements CommandList
         if (directMatch.isPresent()){
             if (directMatch.get().getScore() == 100){
                 directlyMatched = true;
-                // blah blah
+                // TODO: Add processing of direct match
                 command.getCommandMessage().getMessageChannel().sendMessage("Wow it's a direct match!").queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
             }
         }
@@ -109,7 +109,7 @@ public class WarframeCommandListener extends Reflectional implements CommandList
             command.getCommandMessage().getMessage().delete().queue();
         } else {
             var someResult = searchResults.get(id);
-            // handle further processing
+            // TODO: Add processing of chosen item
         }
         return true;
     }

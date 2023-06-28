@@ -15,9 +15,11 @@ public class MissionRewards {
     private String missionName;
     private String missionType;
     private String planet;
+    private String extraFeatures;
     private List<Reward> rotationARewards = new ArrayList<>();
     private List<Reward> rotationBRewards = new ArrayList<>();
     private List<Reward> rotationCRewards = new ArrayList<>();
+    private List<Reward> justRewards = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {

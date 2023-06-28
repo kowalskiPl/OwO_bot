@@ -21,8 +21,10 @@ public class AllRewardsDatabase {
 
     public AllRewardsDatabase() throws IOException {
         HTMLDropTableParser parser = new HTMLDropTableParser(dataURL);
+        WarframeDropTableParser tableParser = new WarframeDropTableParser(dataURL);
+        tableParser.loadHTML();
         allRelicsWithRewards = parser.parseRelicRewards();
-        allMissionRewards = parser.parseMissionRewards();
+        allMissionRewards = tableParser.processMissionDropTable(tableParser.gatherRewardsFromTables().get(0));
         processAllRewardNames();
     }
 
@@ -32,6 +34,7 @@ public class AllRewardsDatabase {
             reward.getRotationARewards().forEach(aReward -> allRewardNames.add(aReward.getName()));
             reward.getRotationBRewards().forEach(bReward -> allRewardNames.add(bReward.getName()));
             reward.getRotationCRewards().forEach(cReward -> allRewardNames.add(cReward.getName()));
+            reward.getJustRewards().forEach(justReward -> allRewardNames.add(justReward.getName()));
         });
 
         allRelicsWithRewards.forEach(relic ->{
