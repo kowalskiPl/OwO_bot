@@ -39,6 +39,7 @@ public class MissionRewards {
         Optional<Reward> rewardA = rotationARewards.stream().filter(reward -> StringUtils.containsIgnoreCase(reward.getName(), rewardName)).findFirst();
         Optional<Reward> rewardB = rotationBRewards.stream().filter(reward -> StringUtils.containsIgnoreCase(reward.getName(), rewardName)).findFirst();
         Optional<Reward> rewardC = rotationCRewards.stream().filter(reward -> StringUtils.containsIgnoreCase(reward.getName(), rewardName)).findFirst();
+        Optional<Reward> justReward = justRewards.stream().filter(reward -> StringUtils.containsIgnoreCase(reward.getName(), rewardName)).findFirst();
         boolean found = false;
 
         if (rewardA.isPresent()){
@@ -53,6 +54,11 @@ public class MissionRewards {
 
         if (rewardC.isPresent()){
             result.setRewardC(rewardC.get());
+            found = true;
+        }
+
+        if (justReward.isPresent()){
+            result.setJustReward(justReward.get());
             found = true;
         }
 

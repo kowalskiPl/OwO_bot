@@ -1,10 +1,8 @@
 package com.owobot.modules.warframe;
 
-import com.owobot.model.TrigramSearchResult;
 import com.owobot.modules.warframe.model.MissionRewards;
 import com.owobot.modules.warframe.model.RelicReward;
 import com.owobot.modules.warframe.model.RewardSearchResult;
-import com.owobot.utilities.TrigramStringSearch;
 import lombok.Getter;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
 import me.xdrop.fuzzywuzzy.model.ExtractedResult;
@@ -20,11 +18,11 @@ public class AllRewardsDatabase {
     private Set<String> allRewardNames;
 
     public AllRewardsDatabase() throws IOException {
-        HTMLDropTableParser parser = new HTMLDropTableParser(dataURL);
         WarframeDropTableParser tableParser = new WarframeDropTableParser(dataURL);
         tableParser.loadHTML();
-        allRelicsWithRewards = parser.parseRelicRewards();
-        allMissionRewards = tableParser.processMissionDropTable(tableParser.gatherRewardsFromTables().get(0));
+        var allTheRewards = tableParser.gatherRewardsFromTables();
+        allMissionRewards = tableParser.processMissionDropTable(allTheRewards.get(0));
+        allRelicsWithRewards = tableParser.processRelicDropTable(allTheRewards.get(1));
         processAllRewardNames();
     }
 
@@ -43,17 +41,6 @@ public class AllRewardsDatabase {
             allRewardNames.add(relic.getRareReward());
         });
     }
-
-    @Deprecated
-    public List<TrigramSearchResult> searchAllRewards(String query) {
-        TrigramStringSearch search = new TrigramStringSearch();
-        List<TrigramSearchResult> searchResults = new LinkedList<>();
-        allRewardNames.forEach(rewardName -> {
-            searchResults.add(search.compareStrings(query, rewardName));
-        });
-        return searchResults;
-    }
-
     public List<ExtractedResult> searchAllRewards(String query, int limit){
         return FuzzySearch.extractTop(query, allRewardNames, limit);
     }

@@ -10,4 +10,5 @@ public class RewardSearchResult {
     private Reward rewardA;
     private Reward rewardB;
     private Reward rewardC;
+    private Reward justReward;
 }

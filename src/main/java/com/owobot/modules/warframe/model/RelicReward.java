@@ -1,5 +1,6 @@
 package com.owobot.modules.warframe.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import java.util.List;
 @Data
 @RequiredArgsConstructor
 @EqualsAndHashCode
+@AllArgsConstructor
 public class RelicReward {
     private String relicName;
     private List<String> commonRewards;

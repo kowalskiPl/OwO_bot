@@ -20,7 +20,7 @@ public class MiddlewareHandler {
         }
 
         registeredMiddlewares.put(name.toLowerCase(), middleware);
-        log.info("Registered middleware {}, {}", name, middleware);
+        log.info("Registered middleware {}", name);
     }
 
     public Middleware getMiddleware(String name) {
