@@ -26,7 +26,7 @@ public class WarframeCommandListener extends Reflectional implements CommandList
     private final AllRewardsDatabase rewardsDatabase;
     private final int searchCutOffPercentage = 50;
     private static final Logger log = LoggerFactory.getLogger(WarframeCommandListener.class);
-    private static final Map<Long, Map<String, String>> guildSearchResults = new LinkedHashMap<>();
+    private static final Map<Long, Map<String, String>> userSearchResults = new LinkedHashMap<>();
 
 
     public WarframeCommandListener(OwoBot owoBot) {
@@ -38,17 +38,17 @@ public class WarframeCommandListener extends Reflectional implements CommandList
         }
     }
 
-    private synchronized void updateSearchResults(Long guildId, Map<String, String> newResults) {
-        if (!guildSearchResults.containsKey(guildId)) {
-            guildSearchResults.put(guildId, newResults);
+    private synchronized void updateSearchResults(Long userId, Map<String, String> newResults) {
+        if (!userSearchResults.containsKey(userId)) {
+            userSearchResults.put(userId, newResults);
         } else {
-            guildSearchResults.get(guildId).clear();
-            guildSearchResults.get(guildId).putAll(newResults);
+            userSearchResults.get(userId).clear();
+            userSearchResults.get(userId).putAll(newResults);
         }
     }
 
     private synchronized Map<String, String> getSearchResults(Long guildId) {
-        return guildSearchResults.getOrDefault(guildId, Collections.emptyMap());
+        return userSearchResults.getOrDefault(guildId, Collections.emptyMap());
     }
 
     @Override
@@ -82,7 +82,7 @@ public class WarframeCommandListener extends Reflectional implements CommandList
                 .boxed()
                 .collect(Collectors.toMap(WarframeEmbedMessagesHelper.searchPanelButtonsIds::get, listOfResults::get));
 
-        updateSearchResults(command.getCommandMessage().getGuild().getIdLong(), resultsMappedToIds);
+        updateSearchResults(command.getCommandMessage().getAuthor().getIdLong(), resultsMappedToIds);
 
         var directMatch = searchResults.stream().max(Comparator.comparing(ExtractedResult::getScore)).stream().findFirst();
         boolean directlyMatched = false;
@@ -103,7 +103,7 @@ public class WarframeCommandListener extends Reflectional implements CommandList
 
     private boolean handleSearchButtonPressCommand(WarframeSearchButtonPressCommand command) {
         var id = command.getParameterMap().get(WarframeParameterNames.WARFRAME_PARAMETER_SEARCH_BUTTON_ID.getName());
-        var searchResults = getSearchResults(command.getCommandMessage().getGuild().getIdLong());
+        var searchResults = getSearchResults(command.getCommandMessage().getAuthor().getIdLong());
         var buttonIds = WarframeEmbedMessagesHelper.searchPanelButtonsIds;
 
         if (id.equals(buttonIds.get(5))) {

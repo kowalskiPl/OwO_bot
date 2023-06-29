@@ -11,19 +11,19 @@ import java.util.List;
 @RequiredArgsConstructor
 @EqualsAndHashCode
 @AllArgsConstructor
-public class RelicReward {
+public class RelicRewards {
     private String relicName;
-    private List<String> commonRewards;
-    private List<String> uncommonRewards;
-    private String rareReward;
+    private List<Reward> commonRewards;
+    private List<Reward> uncommonRewards;
+    private Reward rareReward;
 
     public boolean containsReward(String rewardName) {
-        if (rareReward.equalsIgnoreCase(rewardName))
+        if (rareReward.getName().equals(rewardName))
             return true;
 
-        if (commonRewards.contains(rewardName))
+        if (commonRewards.stream().anyMatch(reward -> reward.getName().equals(rewardName)))
             return true;
 
-        return uncommonRewards.contains(rewardName);
+        return uncommonRewards.stream().anyMatch(reward -> reward.getName().equals(rewardName));
     }
 }

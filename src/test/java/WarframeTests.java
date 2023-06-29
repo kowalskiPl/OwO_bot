@@ -1,5 +1,4 @@
 import com.owobot.modules.warframe.AllRewardsDatabase;
-import com.owobot.modules.warframe.HTMLDropTableParser;
 import com.owobot.modules.warframe.WarframeDropTableParser;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
 import org.junit.jupiter.api.Test;
@@ -9,16 +8,6 @@ import java.io.IOException;
 public class WarframeTests {
 
     private static final String dataURL = "https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html";
-
-    @Test
-    void queryTest() {
-        try {
-            HTMLDropTableParser parser = new HTMLDropTableParser(dataURL);
-            System.out.println(parser.parseRelicRewards());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Test
     void fuzzyTest(){

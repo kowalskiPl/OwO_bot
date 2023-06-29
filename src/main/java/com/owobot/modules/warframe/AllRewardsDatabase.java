@@ -1,7 +1,8 @@
 package com.owobot.modules.warframe;
 
 import com.owobot.modules.warframe.model.MissionRewards;
-import com.owobot.modules.warframe.model.RelicReward;
+import com.owobot.modules.warframe.model.RelicRewards;
+import com.owobot.modules.warframe.model.Reward;
 import com.owobot.modules.warframe.model.RewardSearchResult;
 import lombok.Getter;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
@@ -13,7 +14,7 @@ import java.util.*;
 @Getter
 public class AllRewardsDatabase {
     private static final String dataURL = "https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html";
-    private Set<RelicReward> allRelicsWithRewards;
+    private Set<RelicRewards> allRelicsWithRewards;
     private Set<MissionRewards> allMissionRewards;
     private Set<String> allRewardNames;
 
@@ -36,17 +37,17 @@ public class AllRewardsDatabase {
         });
 
         allRelicsWithRewards.forEach(relic ->{
-            allRewardNames.addAll(relic.getCommonRewards());
-            allRewardNames.addAll(relic.getUncommonRewards());
-            allRewardNames.add(relic.getRareReward());
+            allRewardNames.addAll(relic.getCommonRewards().stream().map(Reward::getName).toList());
+            allRewardNames.addAll(relic.getUncommonRewards().stream().map(Reward::getName).toList());
+            allRewardNames.add(relic.getRareReward().getName());
         });
     }
     public List<ExtractedResult> searchAllRewards(String query, int limit){
         return FuzzySearch.extractTop(query, allRewardNames, limit);
     }
 
-    public Set<RelicReward> getRewardFromRelic(String rewardName) {
-        Set<RelicReward> relicRewards = new LinkedHashSet<>();
+    public Set<RelicRewards> getRewardFromRelic(String rewardName) {
+        Set<RelicRewards> relicRewards = new LinkedHashSet<>();
         allRelicsWithRewards.forEach(reward -> {
             if (reward.containsReward(rewardName)){
                 relicRewards.add(reward);
@@ -62,5 +63,9 @@ public class AllRewardsDatabase {
             searchResult.ifPresent(missionRewards::add);
         });
         return missionRewards;
+    }
+
+    public void getRewardsFromAllLocations() {
+
     }
 }

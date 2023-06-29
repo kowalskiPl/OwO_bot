@@ -1,7 +1,7 @@
 package com.owobot.modules.warframe;
 
 import com.owobot.modules.warframe.model.MissionRewards;
-import com.owobot.modules.warframe.model.RelicReward;
+import com.owobot.modules.warframe.model.RelicRewards;
 import com.owobot.modules.warframe.model.Reward;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
@@ -144,10 +144,10 @@ public class WarframeDropTableParser {
         return rewards;
     }
 
-    public Set<RelicReward> processRelicDropTable(Elements relicDropTable) {
+    public Set<RelicRewards> processRelicDropTable(Elements relicDropTable) {
         var relicRewardsPerRelic = extractSingleSourceRewards(relicDropTable);
 
-        Set<RelicReward> allRelicRewards = new LinkedHashSet<>();
+        Set<RelicRewards> allRelicRewards = new LinkedHashSet<>();
         relicRewardsPerRelic.forEach(relic -> {
             var reward = processSingleRelic(relic);
             reward.ifPresent(allRelicRewards::add);
@@ -156,31 +156,31 @@ public class WarframeDropTableParser {
         return allRelicRewards;
     }
 
-    private Optional<RelicReward> processSingleRelic(List<Element> relicElements) {
+    private Optional<RelicRewards> processSingleRelic(List<Element> relicElements) {
         Matcher relicMatcher = relicNamePattern.matcher(relicElements.get(0).text());
         if (relicMatcher.find()) {
             var name = relicMatcher.group(1) + " " + relicMatcher.group(2);
-            List<String> commonRewards = new ArrayList<>();
-            List<String> uncommonRewards = new ArrayList<>();
-            String rareReward = "";
+            List<Reward> commonRewards = new ArrayList<>();
+            List<Reward> uncommonRewards = new ArrayList<>();
+            Reward rareReward = new Reward();
 
             for (int i = 1; i < relicElements.size(); i += 2) {
                 var currentElement = relicElements.get(i);
                 var nextElement = relicElements.get(i + 1);
 
                 if (nextElement.text().equals("Uncommon (25.33%)")) {
-                    commonRewards.add(currentElement.text());
+                    commonRewards.add(new Reward(currentElement.text(), "Uncommon", 25.33));
                 }
 
                 if (nextElement.text().equals("Uncommon (11.00%)")) {
-                    uncommonRewards.add(currentElement.text());
+                    uncommonRewards.add(new Reward(currentElement.text(), "Uncommon", 11.00));
                 }
 
                 if (nextElement.text().equals("Rare (2.00%)")) {
-                    rareReward = currentElement.text();
+                    rareReward = new Reward(currentElement.text(), "Uncommon", 25.33);
                 }
             }
-            return Optional.of(new RelicReward(name, commonRewards, uncommonRewards, rareReward));
+            return Optional.of(new RelicRewards(name, commonRewards, uncommonRewards, rareReward));
         } else {
             return Optional.empty();
         }
