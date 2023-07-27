@@ -30,7 +30,8 @@ public class MusicModule extends Reflectional implements Module {
                 new LeaveCommand(),
                 new PauseCommand(),
                 new SearchResultButtonPressedCommand(),
-                new ControlPanelButtonPressCommand()
+                new ControlPanelButtonPressCommand(),
+                new EurobeatCommand()
         ));
     }
 
