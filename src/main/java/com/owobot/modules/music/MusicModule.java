@@ -15,6 +15,8 @@ import java.util.Set;
 
 public class MusicModule extends Reflectional implements Module {
 
+    //Eurobeat kurwa https://www.youtube.com/watch?v=ZqV2h2Nb3To&list=PL20VXGg6LmYRLK9OFcpa8SvVsyN-nZj0L&index=1
+
     private final Set<CommandListener> commandListeners;
     private final Set<Command> commands;
 

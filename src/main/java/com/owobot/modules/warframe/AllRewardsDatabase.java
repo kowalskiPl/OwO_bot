@@ -46,17 +46,16 @@ public class AllRewardsDatabase {
         return FuzzySearch.extractTop(query, allRewardNames, limit);
     }
 
-    public Set<RelicRewards> getRewardFromRelic(String rewardName) {
-        Set<RelicRewards> relicRewards = new LinkedHashSet<>();
+    private Set<RewardSearchResult> getRewardFromRelic(String rewardName) {
+        Set<RewardSearchResult> relicRewards = new LinkedHashSet<>();
         allRelicsWithRewards.forEach(reward -> {
-            if (reward.containsReward(rewardName)){
-                relicRewards.add(reward);
-            }
+            var possibleReward = reward.searchReward(rewardName);
+            possibleReward.ifPresent(relicRewards::add);
         });
         return relicRewards;
     }
 
-    public Set<RewardSearchResult> getRewardsFromMissions(String rewardName) {
+    private Set<RewardSearchResult> getRewardsFromMissions(String rewardName) {
         Set<RewardSearchResult> missionRewards = new LinkedHashSet<>();
         allMissionRewards.forEach(reward -> {
             Optional<RewardSearchResult> searchResult = reward.searchReward(rewardName);
@@ -65,7 +64,14 @@ public class AllRewardsDatabase {
         return missionRewards;
     }
 
-    public void getRewardsFromAllLocations() {
+    public Set<RewardSearchResult> getReward(String rewardName) {
+        Set<RewardSearchResult> totalResults = new HashSet<>();
+        totalResults.addAll(getRewardsFromMissions(rewardName));
+        totalResults.addAll(getRewardFromRelic(rewardName));
+        return totalResults;
+    }
+
+    public void getRewardsFromAllLocations(String rewardName) {
 
     }
 }

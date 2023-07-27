@@ -177,7 +177,7 @@ public class WarframeDropTableParser {
                 }
 
                 if (nextElement.text().equals("Rare (2.00%)")) {
-                    rareReward = new Reward(currentElement.text(), "Uncommon", 25.33);
+                    rareReward = new Reward(currentElement.text(), "Uncommon", 2.00);
                 }
             }
             return Optional.of(new RelicRewards(name, commonRewards, uncommonRewards, rareReward));
