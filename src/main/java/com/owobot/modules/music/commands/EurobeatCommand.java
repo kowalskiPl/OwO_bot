@@ -11,6 +11,7 @@ public class EurobeatCommand extends PlayCommand {
 
     public EurobeatCommand() {
         name = "Eurobeat";
+        triggers.clear();
         triggers.add("Eurobeat");
         triggers.add("EurobeatKurwa");
     }
