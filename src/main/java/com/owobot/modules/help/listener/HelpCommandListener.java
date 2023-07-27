@@ -62,12 +62,12 @@ public class HelpCommandListener extends Reflectional implements CommandListener
 
                     builder.setFooter("This message and command will self-destruct in 60 seconds");
                     getHelpCommand.getCommandMessage().getMessage().getChannel().sendMessageEmbeds(builder.build()).delay(Duration.ofSeconds(60)).
-                            queue(message -> message.delete().queue(leMessage -> getHelpCommand.getCommandMessage().getMessage().delete().queue()));
+                            queue(message -> message.delete().queue(leMessage -> getHelpCommand.getCommandMessage().getMessage().delete().queue(null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE))));
                 } else {
                     builder.setAuthor("It seems like the module you provided doesn't exist or is inactive. Try 'help' to get a list of enabled modules");
                     builder.setFooter("This message and command will self-destruct in 20 seconds");
                     getHelpCommand.getCommandMessage().getMessage().getChannel().sendMessageEmbeds(builder.build()).delay(Duration.ofSeconds(20)).
-                            queue(message -> message.delete().queue(leMessage -> getHelpCommand.getCommandMessage().getMessage().delete().queue()));
+                            queue(message -> message.delete().queue(leMessage -> getHelpCommand.getCommandMessage().getMessage().delete().queue(null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE))));
                 }
             }
             return true;
