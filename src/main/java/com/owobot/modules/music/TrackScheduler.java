@@ -10,20 +10,24 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.exceptions.ErrorHandler;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class TrackScheduler extends AudioEventAdapter {
     private final AudioPlayer player;
     private final BlockingQueue<AudioTrackRequest> queue;
     private AudioTrackRequest currentMusic;
-    private long currentEmbedMessageId;
-    private TextChannel currentEmbedLocation;
     private final long guildId;
     private final PlayerControlPanel controlPanel;
 
@@ -34,28 +38,6 @@ public class TrackScheduler extends AudioEventAdapter {
         this.queue = new LinkedBlockingQueue<>();
         this.guildId = guildId;
         controlPanel = new PlayerControlPanel(this);
-    }
-
-    public synchronized TrackScheduler setCurrentEmbedMessageId(long embedMessage) {
-        this.currentEmbedMessageId = embedMessage;
-        return this;
-    }
-
-    public long getCurrentEmbedMessageId() {
-        return currentEmbedMessageId;
-    }
-
-    public long getGuildId() {
-        return guildId;
-    }
-
-    public synchronized TrackScheduler setCurrentEmbedLocation(TextChannel currentEmbedLocation) {
-        this.currentEmbedLocation = currentEmbedLocation;
-        return this;
-    }
-
-    public TextChannel getCurrentEmbedLocation() {
-        return currentEmbedLocation;
     }
 
     public void enqueue(AudioTrackRequest audioTrackRequest) {
@@ -69,21 +51,22 @@ public class TrackScheduler extends AudioEventAdapter {
     }
 
     public void enqueue(List<AudioTrack> tracks, String name, TextChannel channel, Member member) {
+        log.info("Loading playlist!");
         if (!player.startTrack(tracks.get(0), true)) {
             tracks.forEach(track -> {
                 var thumbnailUrl = getThumbnailUrl(track);
                 queue.offer(new AudioTrackRequest(track, channel, member, thumbnailUrl));
             });
-            controlPanel.updateControlPanel(currentMusic, queue.peek());
         } else {
             String firstThumbnailUrl = getThumbnailUrl(tracks.get(0));
+            currentMusic = new AudioTrackRequest(tracks.get(0), channel, member, firstThumbnailUrl);
+            controlPanel.startNewControlPanel(currentMusic, queue.peek());
             for (int i = 1; i < tracks.size(); i++) {
                 var thumbnailUrl = getThumbnailUrl(tracks.get(i));
                 queue.offer(new AudioTrackRequest(tracks.get(i), channel, member, thumbnailUrl));
             }
-            currentMusic = new AudioTrackRequest(tracks.get(0), channel, member, firstThumbnailUrl);
-            controlPanel.startNewControlPanel(currentMusic, queue.peek());
         }
+        controlPanel.updateControlPanel(currentMusic, queue.peek());
     }
 
     private String getThumbnailUrl(AudioTrack track) {
@@ -105,8 +88,6 @@ public class TrackScheduler extends AudioEventAdapter {
 
         if (track == null) {
             currentMusic = null;
-            currentEmbedLocation = null;
-            currentEmbedMessageId = 0;
             controlPanel.setPlayingNothing();
         }
     }
@@ -123,8 +104,6 @@ public class TrackScheduler extends AudioEventAdapter {
         player.stopTrack();
         queue.clear();
         player.setPaused(false);
-        currentEmbedLocation = null;
-        currentEmbedMessageId = 0;
         currentMusic = null;
         controlPanel.setPlayingNothing();
     }
@@ -133,10 +112,20 @@ public class TrackScheduler extends AudioEventAdapter {
         player.stopTrack();
         queue.clear();
         player.setPaused(false);
-        currentEmbedLocation = null;
-        currentEmbedMessageId = 0;
         currentMusic = null;
         controlPanel.leave();
+    }
+
+    public synchronized void shuffle(MessageChannel channel) {
+        if (!queue.isEmpty()) {
+            var queueButList = new ArrayList<>(queue.stream().toList());
+            Collections.shuffle(queueButList);
+            queue.clear();
+            queue.addAll(queueButList);
+            controlPanel.updateControlPanel(currentMusic, queue.peek());
+        } else {
+            channel.sendMessage("Shuffle your mother not me!").queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS), new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
+        }
     }
 
     public AudioTrack getCurrentTrack() {

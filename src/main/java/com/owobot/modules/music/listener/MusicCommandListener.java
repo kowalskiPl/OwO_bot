@@ -44,6 +44,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class MusicCommandListener extends Reflectional implements CommandListener {
     private static final Logger log = LoggerFactory.getLogger(MusicCommandListener.class);
@@ -123,8 +124,9 @@ public class MusicCommandListener extends Reflectional implements CommandListene
 
     private boolean handlePlayCommand(PlayCommand command) {
         if (!isUserInVoiceChat(command)) {
-            command.getCommandMessage().getMessage().reply("You have to be in a voice channel!").queue();
-            return false;
+            command.getCommandMessage().getMessage().reply("You have to be in a voice channel!")
+                    .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS), new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
+            return true;
         }
 
         GuildMusicManager musicManager = getGuildAudioPlayer(command.getCommandMessage().getGuild());
@@ -272,6 +274,15 @@ public class MusicCommandListener extends Reflectional implements CommandListene
             }
             GuildMusicManager musicManager = getGuildAudioPlayer(command.getCommandMessage().getGuild());
             musicManager.scheduler.leave();
+            handled = true;
+        }
+
+        if ("shuffle".equals(id)){
+            if (audioManager.isConnected()) {
+                GuildMusicManager musicManager = getGuildAudioPlayer(command.getCommandMessage().getGuild());
+                var msgChannel = command.getCommandMessage().getMessageChannel();
+                musicManager.scheduler.shuffle(msgChannel);
+            }
             handled = true;
         }
 

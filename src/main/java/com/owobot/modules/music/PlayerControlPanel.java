@@ -40,6 +40,7 @@ public class PlayerControlPanel {
         ids.add("suspend");
         ids.add("next");
         ids.add("halt");
+        ids.add("shuffle");
         ids.add("exit");
         return ids;
     }
@@ -58,7 +59,8 @@ public class PlayerControlPanel {
                                     ActionRow.of(Button.secondary(controlPanelButtonsIds.get(0), "Pause"),
                                             Button.secondary(controlPanelButtonsIds.get(1), "Next"),
                                             Button.secondary(controlPanelButtonsIds.get(2), "Stop"),
-                                            Button.danger(controlPanelButtonsIds.get(3), "Leave"))
+                                            Button.secondary(controlPanelButtonsIds.get(3), "Shuffle playlist"),
+                                            Button.danger(controlPanelButtonsIds.get(4), "Leave"))
                             )
                             .queue(), new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
         }
@@ -71,14 +73,15 @@ public class PlayerControlPanel {
                 .queue(message -> message.editMessageEmbeds(message.getEmbeds().get(0)).setComponents(ActionRow.of(Button.secondary(controlPanelButtonsIds.get(0), pause),
                         Button.secondary(controlPanelButtonsIds.get(1), "Next"),
                         Button.secondary(controlPanelButtonsIds.get(2), "Stop"),
-                        Button.danger(controlPanelButtonsIds.get(3), "Leave"))).queue());
+                        Button.secondary(controlPanelButtonsIds.get(3), "Shuffle playlist"),
+                        Button.danger(controlPanelButtonsIds.get(4), "Leave"))).queue());
     }
 
     public void setPlayingNothing() {
         var builder = constructEmbedPlayerMessage(null, null);
         currentPlayerLocation.retrieveMessageById(currentPlayerMessageID)
                 .queue(message -> message.editMessageEmbeds(builder.build()).setComponents(ActionRow.of(
-                        Button.danger(controlPanelButtonsIds.get(3), "Leave")
+                        Button.danger(controlPanelButtonsIds.get(4), "Leave")
                 )).queue(null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE)));
         notPlayingExists = true;
     }
@@ -119,7 +122,8 @@ public class PlayerControlPanel {
                         ActionRow.of(Button.secondary(controlPanelButtonsIds.get(0), "Pause"),
                                 Button.secondary(controlPanelButtonsIds.get(1), "Next"),
                                 Button.secondary(controlPanelButtonsIds.get(2), "Stop"),
-                                Button.danger(controlPanelButtonsIds.get(3), "Leave"))
+                                Button.secondary(controlPanelButtonsIds.get(3), "Shuffle playlist"),
+                                Button.danger(controlPanelButtonsIds.get(4), "Leave"))
                 )
                 .queue(message -> {
                     setCurrentPlayerMessageID(message.getIdLong());
