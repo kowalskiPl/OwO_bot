@@ -26,6 +26,7 @@ public class AddMusicChannelCommand extends Command {
     public List<String> getMiddlewares() {
         List<String> middlewares = new ArrayList<>();
         middlewares.add("require:user," + Permissions.ADMINISTRATOR.getNode());
+        middlewares.add("guildChannel");
         return middlewares;
     }
 
