@@ -30,9 +30,10 @@ public class MainMessageListener extends MessageListener {
         CommandMessage commandMessage = new CommandMessage(event.getMessage());
         var command = resolver.resolve(commandMessage);
 
-        if (command.getName().equals("")){
+        if (command.getName().isEmpty()){
             return;
         }
+
         MiddlewareStack stack = new MiddlewareStack();
         stack.buildMiddlewares(command, owoBot.getMiddlewareHandler());
         if (!stack.next())
