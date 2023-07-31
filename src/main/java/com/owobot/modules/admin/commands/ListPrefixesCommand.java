@@ -2,7 +2,9 @@ package com.owobot.modules.admin.commands;
 
 import com.owobot.commands.Command;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 public class ListPrefixesCommand extends Command {
@@ -22,6 +24,13 @@ public class ListPrefixesCommand extends Command {
     @Override
     public Command clone() {
         return new ListPrefixesCommand(this);
+    }
+
+    @Override
+    public List<String> getMiddlewares() {
+        List<String> middlewares = new ArrayList<>();
+        middlewares.add("guildChannel");
+        return middlewares;
     }
 
     @Override

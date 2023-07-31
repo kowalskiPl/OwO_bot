@@ -24,7 +24,28 @@ public class CommandResolver extends Reflectional {
     }
 
     public Command resolve(CommandMessage commandMessage) {
-        if (commandMessage.getAuthor().isBot())
+        if (commandMessage.isGuildMessage())
+            return resolveGuildMessage(commandMessage);
+        return resolveDirectMessage(commandMessage);
+    }
+
+    private Command resolveDirectMessage(CommandMessage commandMessage) {
+        if (commandMessage.getUser().isBot())
+            return new EmptyCommand();
+
+        Matcher matcher = commandRecognitionPattern.matcher(commandMessage.getMessage().getContentRaw());
+
+        if (matcher.find()){
+            var command = processDirectMessage(commandMessage, matcher);
+            if (command != null)
+                return command;
+        }
+
+        return new EmptyCommand();
+    }
+
+    private Command resolveGuildMessage(CommandMessage commandMessage) {
+        if (commandMessage.getUser().isBot())
             return new EmptyCommand();
 
         Matcher matcher = commandRecognitionPattern.matcher(commandMessage.getMessage().getContentRaw());
@@ -75,6 +96,20 @@ public class CommandResolver extends Reflectional {
                 log.info("Processed command: " + command);
                 return command;
             }
+        }
+        return null;
+    }
+
+    @Nullable
+    private Command processDirectMessage(CommandMessage commandMessage, Matcher matcher) {
+        var trigger = matcher.group(1) + matcher.group(2);
+        var command = owoBot.getCommandCache().getCommand(trigger);
+        if (command != null) {
+            command.setCommandMessage(commandMessage);
+            if (matcher.group(3) != null)
+                command.setParameters(matcher.group(3));
+            log.info("Processed command: " + command);
+            return command;
         }
         return null;
     }

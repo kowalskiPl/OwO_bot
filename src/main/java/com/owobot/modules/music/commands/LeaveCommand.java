@@ -21,6 +21,7 @@ public class LeaveCommand extends Command {
     public List<String> getMiddlewares() {
         List<String> middlewares = new ArrayList<>();
         middlewares.add("musicChannel");
+        middlewares.add("guildChannel");
         return middlewares;
     }
 
