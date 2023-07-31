@@ -96,4 +96,9 @@ public class HelpCommandListener extends Reflectional implements CommandListener
         }
         return false;
     }
+
+    @Override
+    public void shutdown() {
+
+    }
 }

@@ -25,13 +25,13 @@ public class MusicModule extends Reflectional implements Module {
         ));
 
         commands = new LinkedHashSet<>(Set.of(
-                new PlayCommand(),
-                new StopCommand(),
-                new LeaveCommand(),
-                new PauseCommand(),
-                new SearchResultButtonPressedCommand(),
-                new ControlPanelButtonPressCommand(),
-                new EurobeatCommand()
+                new PlayCommand(this.getName()),
+                new StopCommand(this.getName()),
+                new LeaveCommand(this.getName()),
+                new PauseCommand(this.getName()),
+                new SearchResultButtonPressedCommand(this.getName()),
+                new ControlPanelButtonPressCommand(this.getName()),
+                new EurobeatCommand(this.getName())
         ));
     }
 

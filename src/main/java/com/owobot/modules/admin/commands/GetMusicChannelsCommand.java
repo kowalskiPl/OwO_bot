@@ -9,7 +9,8 @@ import java.util.Set;
 
 public class GetMusicChannelsCommand extends Command {
 
-    public GetMusicChannelsCommand() {
+    public GetMusicChannelsCommand(String parentModule) {
+        super(parentModule);
         this.name = "getMusicChannels";
         this.triggers = new LinkedHashSet<>(
                 Set.of(

@@ -7,7 +7,8 @@ import java.util.LinkedHashMap;
 
 public class EurobeatCommand extends PlayCommand {
 
-    public EurobeatCommand() {
+    public EurobeatCommand(String parentModule) {
+        super(parentModule);
         name = "Eurobeat";
         triggers.clear();
         triggers.add("Eurobeat");

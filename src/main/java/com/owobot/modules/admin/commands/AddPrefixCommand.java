@@ -12,7 +12,8 @@ import java.util.List;
 @SuppressWarnings("CopyConstructorMissesField")
 public class AddPrefixCommand extends Command {
 
-    public AddPrefixCommand() {
+    public AddPrefixCommand(String parentModule) {
+        super(parentModule);
         name = "addPrefix";
         triggers = new LinkedHashSet<>();
         triggers.add("addPrefix");

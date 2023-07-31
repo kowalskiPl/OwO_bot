@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.Set;
 
 public class ListPrefixesCommand extends Command {
-    public ListPrefixesCommand() {
+    public ListPrefixesCommand(String parentModule) {
+        super(parentModule);
         name = "listPrefixes";
         triggers = new LinkedHashSet<>(Set.of(
                 "listPrefixes",

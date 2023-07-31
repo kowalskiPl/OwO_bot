@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.Set;
 
 public class PauseCommand extends Command {
-    public PauseCommand() {
+    public PauseCommand(String parentModule) {
+        super(parentModule);
         name = "pause";
         triggers = new LinkedHashSet<>(Set.of("pause"));
     }

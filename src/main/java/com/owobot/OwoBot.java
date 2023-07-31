@@ -8,6 +8,7 @@ import com.owobot.database.MongoDbContext;
 import com.owobot.messagelisteners.MainMessageListener;
 import com.owobot.middleware.*;
 import com.owobot.modules.admin.AdminModule;
+import com.owobot.modules.botadmin.BotAdminModule;
 import com.owobot.modules.help.HelpModule;
 import com.owobot.modules.music.MusicModule;
 import com.owobot.utilities.Config;
@@ -43,7 +44,7 @@ public class OwoBot {
         botAdmins = new BotAdmin(this, config.getBotAdmins());
 
         log.info("Setting up DB connection");
-        mongoDbContext = new MongoDbContext(config.getConnectionString(), 3, config.getMongoDb());
+        mongoDbContext = new MongoDbContext(config.getConnectionString(), 3, config.getTestMongoDb());
 
         log.info("Creating command cache");
         commandCache = new CommandCache(this);
@@ -64,6 +65,7 @@ public class OwoBot {
         moduleManager.loadModule(new MusicModule(owoBot));
         moduleManager.loadModule(new AdminModule(owoBot));
         moduleManager.loadModule(new HelpModule(owoBot));
+        moduleManager.loadModule(new BotAdminModule(owoBot));
 
         shardManager = createShardManager();
     }
@@ -85,7 +87,7 @@ public class OwoBot {
                 .setEnableShutdownHook(true)
                 .setAutoReconnect(true)
                 .setContextEnabled(true)
-                .setShardsTotal(3);
+                .setShardsTotal(config.getShards());
 
         builder.addEventListeners(new MainMessageListener(this));
 
@@ -93,9 +95,19 @@ public class OwoBot {
     }
 
     public void shutdown() {
-        shardManager.shutdown();
-        commandListenerStack.shutdown();
-        mongoDbContext.shutdown();
+        try {
+            log.info("Shutting down mongo connections");
+            mongoDbContext.shutdown();
+            Thread.sleep(1000);
+            log.info("Shutting down command listeners");
+            commandListenerStack.shutdown();
+            Thread.sleep(1000);
+            log.info("Shutting down shard manager");
+            shardManager.shutdown();
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public ShardManager getShardManager() {
@@ -132,5 +144,9 @@ public class OwoBot {
 
     public BotAdmin getBotAdmins() {
         return botAdmins;
+    }
+
+    public void acceptNewCommands(boolean acceptNewNonAdminCommands){
+        commandListenerStack.setAcceptNewNonAdminCommands(acceptNewNonAdminCommands);
     }
 }

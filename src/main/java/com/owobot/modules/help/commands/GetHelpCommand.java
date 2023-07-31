@@ -9,7 +9,8 @@ import java.util.Set;
 
 public class GetHelpCommand extends Command {
 
-    public GetHelpCommand() {
+    public GetHelpCommand(String parentModule) {
+        super(parentModule);
         name = "getHelp";
         triggers = new LinkedHashSet<>(Set.of("help"));
     }

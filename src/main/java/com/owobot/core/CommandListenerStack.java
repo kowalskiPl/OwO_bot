@@ -3,6 +3,7 @@ package com.owobot.core;
 import com.owobot.async.NamedThreadFactory;
 import com.owobot.commands.Command;
 import com.owobot.commands.CommandListener;
+import com.owobot.modules.botadmin.BotAdminModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,14 +17,17 @@ public class CommandListenerStack {
     private static final Logger log = LoggerFactory.getLogger(CommandListenerStack.class);
     private final ExecutorService threadPool;
     private final Set<CommandListener> eventListeners;
+    private boolean acceptNewNonAdminCommands;
 
     public CommandListenerStack(int poolSize) {
         var factory = new NamedThreadFactory("Command-Listener-Executor");
         threadPool = Executors.newFixedThreadPool(poolSize, factory);
         eventListeners = new LinkedHashSet<>();
+        acceptNewNonAdminCommands = true;
     }
 
     public void shutdown() {
+        eventListeners.forEach(CommandListener::shutdown);
         threadPool.shutdown();
     }
 
@@ -42,6 +46,10 @@ public class CommandListenerStack {
     public void onCommand(Command command) {
         Runnable task = () -> {
             boolean result = false;
+            if (!acceptNewNonAdminCommands && !command.getParentModule().equals(BotAdminModule.class.getName())) {
+                log.warn("Unhandled command: " + command.getName());
+                return;
+            }
             for (CommandListener listener : eventListeners) {
                 result = listener.onCommand(command);
                 if (result){
@@ -53,5 +61,9 @@ public class CommandListenerStack {
                 log.warn("Unhandled command: " + command.getName());
         };
         threadPool.submit(task);
+    }
+
+    public void setAcceptNewNonAdminCommands(boolean acceptNewNonAdminCommands) {
+        this.acceptNewNonAdminCommands = acceptNewNonAdminCommands;
     }
 }

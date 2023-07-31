@@ -9,7 +9,8 @@ import java.util.LinkedHashSet;
 
 public class SearchResultButtonPressedCommand extends Command {
 
-    public SearchResultButtonPressedCommand() {
+    public SearchResultButtonPressedCommand(String parentModule) {
+        super(parentModule);
         name = "searchResultButtonPressed";
         triggers = new LinkedHashSet<>();
         var buttonIdMap = MusicCommandListener.trackButtonsIds;

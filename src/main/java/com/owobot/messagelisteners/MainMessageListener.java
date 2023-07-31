@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 public class MainMessageListener extends MessageListener {
     private final Logger log = LoggerFactory.getLogger(MainMessageListener.class);
-    CommandResolver resolver;
+    private final CommandResolver resolver;
 
     public MainMessageListener(OwoBot owoBot) {
         super(owoBot);

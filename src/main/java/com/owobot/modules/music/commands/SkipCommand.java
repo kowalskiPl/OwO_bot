@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.Set;
 
 public class SkipCommand extends Command {
-    public SkipCommand() {
+    public SkipCommand(String parentModule) {
+        super(parentModule);
         name = "skip";
         triggers = new LinkedHashSet<>(Set.of("skip"));
     }
