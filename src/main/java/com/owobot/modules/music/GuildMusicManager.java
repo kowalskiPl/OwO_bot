@@ -18,11 +18,11 @@ public class GuildMusicManager extends Reflectional {
 
     public final Map<Integer, YouTubeVideo> recentSearchResults;
 
-    public GuildMusicManager(OwoBot owoBot, AudioPlayerManager manager, long guildId) {
+    public GuildMusicManager(OwoBot owoBot, AudioPlayerManager manager) {
         super(owoBot);
         player = manager.createPlayer();
         player.setFrameBufferDuration(owoBot.getConfig().getFrameBufferDuration());
-        scheduler = new TrackScheduler(player, guildId);
+        scheduler = new TrackScheduler(player);
         player.addListener(scheduler);
         recentSearchResults = new LinkedHashMap<>();
     }

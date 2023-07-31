@@ -28,16 +28,14 @@ public class TrackScheduler extends AudioEventAdapter {
     private final AudioPlayer player;
     private final BlockingQueue<AudioTrackRequest> queue;
     private AudioTrackRequest currentMusic;
-    private final long guildId;
     private final PlayerControlPanel controlPanel;
 
     private static final Logger log = LoggerFactory.getLogger(TrackScheduler.class);
 
-    public TrackScheduler(AudioPlayer player, long guildId) {
+    public TrackScheduler(AudioPlayer player) {
         this.player = player;
         this.queue = new LinkedBlockingQueue<>();
-        this.guildId = guildId;
-        controlPanel = new PlayerControlPanel(this);
+        controlPanel = new PlayerControlPanel();
     }
 
     public void enqueue(AudioTrackRequest audioTrackRequest) {
@@ -124,6 +122,7 @@ public class TrackScheduler extends AudioEventAdapter {
             queue.addAll(queueButList);
             controlPanel.updateControlPanel(currentMusic, queue.peek());
         } else {
+            //TODO: move it somewhere else later
             channel.sendMessage("Shuffle your mother not me!").queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS), new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
         }
     }

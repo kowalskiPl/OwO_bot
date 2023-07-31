@@ -74,7 +74,7 @@ public class MusicCommandListener extends Reflectional implements CommandListene
         var musicManager = guildMusicManagers.get(guildId);
 
         if (musicManager == null) {
-            musicManager = new GuildMusicManager(owoBot, playerManager, guildId);
+            musicManager = new GuildMusicManager(owoBot, playerManager);
             guildMusicManagers.put(guildId, musicManager);
         }
 

@@ -15,15 +15,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class PlayerControlPanel {
-    private TrackScheduler trackScheduler;
     private MessageChannel currentPlayerLocation;
     private long currentPlayerMessageID;
-
     private boolean notPlayingExists = false;
     public static final List<String> controlPanelButtonsIds = Collections.unmodifiableList(prepareButtonIds());
 
-    public PlayerControlPanel(TrackScheduler trackScheduler) {
-        this.trackScheduler = trackScheduler;
+    public PlayerControlPanel() {
+
     }
 
     public void startNewControlPanel(AudioTrackRequest currentTrack, AudioTrackRequest nextTrack) {
