@@ -17,6 +17,8 @@ import java.util.regex.Pattern;
 
 public class CommandResolver extends Reflectional {
     private static final Pattern commandRecognitionPattern = Pattern.compile("^(.)(\\w*)\s*(.*)$");
+
+    private static final Pattern dmCommandRecognitionPattern = Pattern.compile("^\\W*(\\w*)\s*(.*)$");
     private static final Logger log = LoggerFactory.getLogger(CommandResolver.class);
 
     public CommandResolver(OwoBot owoBot) {
@@ -24,8 +26,25 @@ public class CommandResolver extends Reflectional {
     }
 
     public Command resolve(CommandMessage commandMessage) {
-        if (commandMessage.getAuthor().isBot())
-            return new EmptyCommand();
+        if (commandMessage.isGuildMessage())
+            return resolveGuildMessage(commandMessage);
+        return resolveDirectMessage(commandMessage);
+    }
+
+    private Command resolveDirectMessage(CommandMessage commandMessage) {
+
+        Matcher matcher = dmCommandRecognitionPattern.matcher(commandMessage.getMessage().getContentRaw());
+
+        if (matcher.find()){
+            var command = processDirectMessage(commandMessage, matcher);
+            if (command != null)
+                return command;
+        }
+
+        return new EmptyCommand();
+    }
+
+    private Command resolveGuildMessage(CommandMessage commandMessage) {
 
         Matcher matcher = commandRecognitionPattern.matcher(commandMessage.getMessage().getContentRaw());
 
@@ -75,6 +94,20 @@ public class CommandResolver extends Reflectional {
                 log.info("Processed command: " + command);
                 return command;
             }
+        }
+        return null;
+    }
+
+    @Nullable
+    private Command processDirectMessage(CommandMessage commandMessage, Matcher matcher) {
+        var trigger = matcher.group(1);
+        var command = owoBot.getCommandCache().getCommand(trigger);
+        if (command != null) {
+            command.setCommandMessage(commandMessage);
+            if (matcher.group(2) != null)
+                command.setParameters(matcher.group(2));
+            log.info("Processed command: " + command);
+            return command;
         }
         return null;
     }

@@ -6,10 +6,7 @@ import com.owobot.core.CommandListenerStack;
 import com.owobot.core.ModuleManager;
 import com.owobot.database.MongoDbContext;
 import com.owobot.messagelisteners.MainMessageListener;
-import com.owobot.middleware.BotAdminMiddleware;
-import com.owobot.middleware.MiddlewareHandler;
-import com.owobot.middleware.MusicChannelMiddleware;
-import com.owobot.middleware.RequirePermissionMiddleware;
+import com.owobot.middleware.*;
 import com.owobot.modules.admin.AdminModule;
 import com.owobot.modules.help.HelpModule;
 import com.owobot.modules.music.MusicModule;
@@ -56,6 +53,7 @@ public class OwoBot {
         middlewareHandler.registerMiddleware("require", new RequirePermissionMiddleware(this));
         middlewareHandler.registerMiddleware("botAdmin", new BotAdminMiddleware(this));
         middlewareHandler.registerMiddleware("musicChannel", new MusicChannelMiddleware(this));
+        middlewareHandler.registerMiddleware("guildChannel", new GuildCommandMiddleware(this));
 
         log.info("Creating module manager");
         moduleManager = new ModuleManager(this);

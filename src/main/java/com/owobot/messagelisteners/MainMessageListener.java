@@ -23,20 +23,27 @@ public class MainMessageListener extends MessageListener {
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
+        CommandMessage commandMessage = new CommandMessage(event.getMessage());
 
-        if (!event.isFromGuild())
+        if (commandMessage.getUser().isBot())
             return;
 
-        CommandMessage commandMessage = new CommandMessage(event.getMessage());
         var command = resolver.resolve(commandMessage);
 
-        if (command.getName().equals("")){
+        if (command.getName().isEmpty()){
+            if (!commandMessage.isGuildMessage()){
+                commandMessage.getUser().openPrivateChannel().flatMap(privateChannel -> privateChannel.sendMessage("Unrecognized command :(")).queue();
+            }
             return;
         }
+
         MiddlewareStack stack = new MiddlewareStack();
         stack.buildMiddlewares(command, owoBot.getMiddlewareHandler());
-        if (!stack.next())
+        if (!stack.next()){
+            log.info("Command {} rejected due to middleware check failure", command.getName());
             return;
+        }
+
         owoBot.getCommandListenerStack().onCommand(command);
     }
 
