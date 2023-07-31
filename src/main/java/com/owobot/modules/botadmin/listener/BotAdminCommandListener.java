@@ -1,6 +1,7 @@
 package com.owobot.modules.botadmin.listener;
 
 import com.owobot.OwoBot;
+import com.owobot.async.NamedThreadFactory;
 import com.owobot.commands.Command;
 import com.owobot.commands.CommandListener;
 import com.owobot.modules.botadmin.BotAdminCommandParameters;
@@ -22,7 +23,8 @@ public class BotAdminCommandListener extends Reflectional implements CommandList
 
     public BotAdminCommandListener(OwoBot owoBot) {
         super(owoBot);
-        scheduledExecutorService = Executors.newScheduledThreadPool(1);
+        var factory = new NamedThreadFactory("Shutdown-Worker");
+        scheduledExecutorService = Executors.newScheduledThreadPool(1, factory);
     }
 
     @Override
