@@ -10,8 +10,9 @@ import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 public interface CommandContext {
     Guild getGuild();
     Member getMember();
-    User getAuthor();
+    User getUser();
     TextChannel getTextChannel();
     MessageChannel getMessageChannel();
     Message getMessage();
+    boolean isGuildMessage();
 }
