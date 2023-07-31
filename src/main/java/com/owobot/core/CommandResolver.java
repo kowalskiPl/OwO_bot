@@ -17,6 +17,8 @@ import java.util.regex.Pattern;
 
 public class CommandResolver extends Reflectional {
     private static final Pattern commandRecognitionPattern = Pattern.compile("^(.)(\\w*)\s*(.*)$");
+
+    private static final Pattern dmCommandRecognitionPattern = Pattern.compile("^\\W*(\\w*)\s*(.*)$");
     private static final Logger log = LoggerFactory.getLogger(CommandResolver.class);
 
     public CommandResolver(OwoBot owoBot) {
@@ -30,10 +32,8 @@ public class CommandResolver extends Reflectional {
     }
 
     private Command resolveDirectMessage(CommandMessage commandMessage) {
-        if (commandMessage.getUser().isBot())
-            return new EmptyCommand();
 
-        Matcher matcher = commandRecognitionPattern.matcher(commandMessage.getMessage().getContentRaw());
+        Matcher matcher = dmCommandRecognitionPattern.matcher(commandMessage.getMessage().getContentRaw());
 
         if (matcher.find()){
             var command = processDirectMessage(commandMessage, matcher);
@@ -45,8 +45,6 @@ public class CommandResolver extends Reflectional {
     }
 
     private Command resolveGuildMessage(CommandMessage commandMessage) {
-        if (commandMessage.getUser().isBot())
-            return new EmptyCommand();
 
         Matcher matcher = commandRecognitionPattern.matcher(commandMessage.getMessage().getContentRaw());
 
@@ -102,12 +100,12 @@ public class CommandResolver extends Reflectional {
 
     @Nullable
     private Command processDirectMessage(CommandMessage commandMessage, Matcher matcher) {
-        var trigger = matcher.group(1) + matcher.group(2);
+        var trigger = matcher.group(1);
         var command = owoBot.getCommandCache().getCommand(trigger);
         if (command != null) {
             command.setCommandMessage(commandMessage);
-            if (matcher.group(3) != null)
-                command.setParameters(matcher.group(3));
+            if (matcher.group(2) != null)
+                command.setParameters(matcher.group(2));
             log.info("Processed command: " + command);
             return command;
         }

@@ -24,9 +24,16 @@ public class MainMessageListener extends MessageListener {
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         CommandMessage commandMessage = new CommandMessage(event.getMessage());
+
+        if (commandMessage.getUser().isBot())
+            return;
+
         var command = resolver.resolve(commandMessage);
 
         if (command.getName().isEmpty()){
+            if (!commandMessage.isGuildMessage()){
+                commandMessage.getUser().openPrivateChannel().flatMap(privateChannel -> privateChannel.sendMessage("Unrecognized command :(")).queue();
+            }
             return;
         }
 
