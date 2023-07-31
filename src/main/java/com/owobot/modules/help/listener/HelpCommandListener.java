@@ -23,6 +23,7 @@ public class HelpCommandListener extends Reflectional implements CommandListener
 
         if (command instanceof GetHelpCommand getHelpCommand) {
             var moduleNames = owoBot.getModuleManager().getModuleNames();
+            var isGuildMessage = getHelpCommand.getCommandMessage().isGuildMessage();
             if (getHelpCommand.getParameterMap().isEmpty()) {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setAuthor("Here is the list of loaded modules. Use <prefix>help with module name to get more info");
@@ -32,16 +33,25 @@ public class HelpCommandListener extends Reflectional implements CommandListener
                 builder.addField("Active modules:", sb.toString(), false);
 
                 builder.setColor(Color.BLUE);
-                builder.setFooter("This message and command will self-destruct in 30 seconds");
 
-                getHelpCommand.getCommandMessage()
-                        .getMessage()
-                        .getChannel()
-                        .sendMessageEmbeds(builder.build())
-                        .delay(Duration.ofSeconds(30))
-                        .queue(message -> message.delete().queue(msg -> getHelpCommand.getCommandMessage().getMessage().delete().queue()),
-                                new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
+                if (isGuildMessage){
+                    builder.setFooter("This message and command will self-destruct in 30 seconds");
+                    getHelpCommand.getCommandMessage()
+                            .getMessage()
+                            .getChannel()
+                            .sendMessageEmbeds(builder.build())
+                            .delay(Duration.ofSeconds(30))
+                            .queue(message -> message.delete().queue(msg -> getHelpCommand.getCommandMessage().getMessage().delete().queue()),
+                                    new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
+                } else {
+                    getHelpCommand.getCommandMessage()
+                            .getMessage()
+                            .getChannel()
+                            .sendMessageEmbeds(builder.build())
+                            .queue();
+                }
                 return true;
+
             } else {
                 var moduleName = getHelpCommand.getParameterMap().get(HelpCommandParameters.HELP_PARAMETER_MODULE_NAME.getName());
                 var modules = owoBot.getModuleManager().getModules();
@@ -60,14 +70,26 @@ public class HelpCommandListener extends Reflectional implements CommandListener
                             builder.addField(processedCommand.getName(), processedCommand.getHelp(), false);
                     }
 
-                    builder.setFooter("This message and command will self-destruct in 60 seconds");
-                    getHelpCommand.getCommandMessage().getMessage().getChannel().sendMessageEmbeds(builder.build()).delay(Duration.ofSeconds(60)).
-                            queue(message -> message.delete().queue(leMessage -> getHelpCommand.getCommandMessage().getMessage().delete().queue(null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE))));
+                    if (isGuildMessage) {
+                        builder.setFooter("This message and command will self-destruct in 60 seconds");
+                        getHelpCommand.getCommandMessage().getMessage().getChannel().sendMessageEmbeds(builder.build()).delay(Duration.ofSeconds(60)).
+                                queue(message -> message.delete().queue(leMessage -> getHelpCommand.getCommandMessage().getMessage().delete().queue(null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE))));
+                    } else {
+                        getHelpCommand.getCommandMessage().getMessage().getChannel().sendMessageEmbeds(builder.build()).queue();
+                    }
+
                 } else {
                     builder.setAuthor("It seems like the module you provided doesn't exist or is inactive. Try 'help' to get a list of enabled modules");
-                    builder.setFooter("This message and command will self-destruct in 20 seconds");
-                    getHelpCommand.getCommandMessage().getMessage().getChannel().sendMessageEmbeds(builder.build()).delay(Duration.ofSeconds(20)).
-                            queue(message -> message.delete().queue(leMessage -> getHelpCommand.getCommandMessage().getMessage().delete().queue(null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE))));
+                    if (isGuildMessage){
+                        builder.setFooter("This message and command will self-destruct in 20 seconds");
+                        getHelpCommand.getCommandMessage().getMessage().getChannel().sendMessageEmbeds(builder.build()).delay(Duration.ofSeconds(20)).
+                                queue(message -> message.delete().queue(leMessage -> getHelpCommand.getCommandMessage().getMessage().delete().queue(null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE))));
+                    } else {
+                        builder.setFooter("This message will self-destruct in 20 seconds");
+                        getHelpCommand.getCommandMessage().getMessage().getChannel().sendMessageEmbeds(builder.build()).delay(Duration.ofSeconds(20)).
+                                queue(message -> message.delete().queue());
+                    }
+
                 }
             }
             return true;
