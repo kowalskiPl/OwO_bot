@@ -9,8 +9,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 public class PlayCommand extends Command {
-    public PlayCommand() {
-        super();
+    public PlayCommand(String parentModule) {
+        super(parentModule);
         name = "play";
         triggers.add("play");
         triggers.add("start");

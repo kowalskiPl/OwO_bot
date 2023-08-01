@@ -1,11 +1,12 @@
-package com.owobot.modules.admin;
+package com.owobot.modules.botadmin;
 
 import com.owobot.OwoBot;
 import com.owobot.commands.Command;
 import com.owobot.commands.CommandListener;
 import com.owobot.modules.Module;
-import com.owobot.modules.admin.commands.*;
-import com.owobot.modules.admin.listener.AdminCommandListener;
+import com.owobot.modules.botadmin.commands.ShutdownCommand;
+import com.owobot.modules.botadmin.commands.StopShutdownCommand;
+import com.owobot.modules.botadmin.listener.BotAdminCommandListener;
 import com.owobot.utilities.Reflectional;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,21 +14,15 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public class AdminModule extends Reflectional implements Module {
+public class BotAdminModule extends Reflectional implements Module {
     private final Set<CommandListener> commandListeners;
     private final Set<Command> commands;
-
-    public AdminModule(OwoBot owoBot) {
+    public BotAdminModule(OwoBot owoBot) {
         super(owoBot);
-        commandListeners = new LinkedHashSet<>(Set.of(new AdminCommandListener(owoBot)));
+        commandListeners = new LinkedHashSet<>(Set.of(new BotAdminCommandListener(owoBot)));
         commands = new LinkedHashSet<>(Set.of(
-                new AddPrefixCommand(this.getName()),
-                new RemovePrefixCommand(this.getName()),
-                new ListPrefixesCommand(this.getName()),
-                new EnableMusicChannelCommand(this.getName()),
-                new AddMusicChannelCommand(this.getName()),
-                new RemoveMusicChannelCommand(this.getName()),
-                new GetMusicChannelsCommand(this.getName())
+                new ShutdownCommand(this.getName()),
+                new StopShutdownCommand(this.getName())
         ));
     }
 
@@ -48,7 +43,7 @@ public class AdminModule extends Reflectional implements Module {
 
     @Override
     public String getNameUserFriendly() {
-        return "Admin";
+        return "BotAdmin";
     }
 
     @Override

@@ -122,6 +122,12 @@ public class MusicCommandListener extends Reflectional implements CommandListene
         return result;
     }
 
+    @Override
+    public void shutdown() {
+        guildMusicManagers.forEach((k, player) -> player.scheduler.leave());
+        playerManager.shutdown();
+    }
+
     private boolean handlePlayCommand(PlayCommand command) {
         if (!isUserInVoiceChat(command)) {
             command.getCommandMessage().getMessage().reply("You have to be in a voice channel!")

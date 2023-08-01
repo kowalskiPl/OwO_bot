@@ -76,10 +76,6 @@ public class Main {
 
         log.info("Startup complete");
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            log.info("Preparing to shutdown");
-            owoBot.shutdown();
-        }));
     }
 
     private static Config loadConfig(boolean secrets) {

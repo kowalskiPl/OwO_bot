@@ -12,12 +12,7 @@ public class BotAdminMiddleware extends Middleware {
 
     @Override
     public boolean handle(Command command, MiddlewareStack stack, String... args) {
-        var message = command.getCommandMessage();
-        if (!message.getMessageChannel().getType().isGuild()) {
-            return false;
-        }
-
-        var userId = command.getCommandMessage().getMember().getIdLong();
+        var userId = command.getCommandMessage().getUser().getIdLong();
 
         if (owoBot.getBotAdmins().getUserByID(userId).getUserId() == 0) {
             command.getCommandMessage().getMessageChannel().sendMessage("You have to be a bot administrator to use this command!")

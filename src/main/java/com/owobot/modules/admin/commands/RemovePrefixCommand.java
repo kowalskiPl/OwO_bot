@@ -7,7 +7,8 @@ import com.owobot.modules.admin.AdminParameterNames;
 import java.util.*;
 
 public class RemovePrefixCommand extends Command {
-    public RemovePrefixCommand() {
+    public RemovePrefixCommand(String parentModule) {
+        super(parentModule);
         name = "removePrefix";
         triggers = new LinkedHashSet<>(Set.of(
                 "removePrefix",
