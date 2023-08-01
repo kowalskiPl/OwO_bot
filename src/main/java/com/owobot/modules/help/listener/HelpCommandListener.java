@@ -12,7 +12,6 @@ import net.dv8tion.jda.api.requests.ErrorResponse;
 
 import java.awt.*;
 import java.time.Duration;
-import java.util.stream.Collectors;
 
 public class HelpCommandListener extends Reflectional implements CommandListener {
     public HelpCommandListener(OwoBot owoBot) {
@@ -23,17 +22,11 @@ public class HelpCommandListener extends Reflectional implements CommandListener
     public boolean onCommand(Command command) {
 
         if (command instanceof GetHelpCommand getHelpCommand) {
-            var adminUser = owoBot.getBotAdmins().getUserByID(command.getCommandMessage().getUser().getIdLong()).getUserId() != 0;
             var moduleNames = owoBot.getModuleManager().getModuleNames();
             var isGuildMessage = getHelpCommand.getCommandMessage().isGuildMessage();
             if (getHelpCommand.getParameterMap().isEmpty()) {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setAuthor("Here is the list of loaded modules. Use <prefix>help with module name to get more info");
-
-                if (!adminUser) {
-                    moduleNames = moduleNames.stream().filter(module -> !module.equals("BotAdmin")).collect(Collectors.toSet());
-                }
-
                 StringBuilder sb = new StringBuilder();
                 moduleNames.forEach(module -> sb.append("\n").append("--").append(module));
                 builder.addField("Active modules:", sb.toString(), false);
@@ -65,12 +58,6 @@ public class HelpCommandListener extends Reflectional implements CommandListener
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.BLUE);
                 if (moduleInQuestion.isPresent()) {
-
-                    if (!adminUser && "BotAdmin".equalsIgnoreCase(moduleInQuestion.get().getNameUserFriendly())) {
-                        command.getCommandMessage().getMessage().getChannel().sendMessage("You do not have required permissions to check this module's commands!").queue();
-                        return true;
-                    }
-
                     var loadedModule = moduleInQuestion.get();
                     builder.setAuthor("Commands for module:");
                     builder.setTitle(loadedModule.getNameUserFriendly());
