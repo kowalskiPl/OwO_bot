@@ -42,6 +42,6 @@ public class ShutdownCommand extends Command {
 
     @Override
     protected String getInfo() {
-        return "Turns off the bot, minimum delay is 10s. Takes time in seconds as parameter or defaults to 60s";
+        return "Turns off the bot, minimum delay is 20s. Takes time in seconds as parameter or defaults to 60s";
     }
 }

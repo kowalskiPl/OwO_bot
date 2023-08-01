@@ -48,8 +48,8 @@ public class BotAdminCommandListener extends Reflectional implements CommandList
         if (!shutdownInitiated.get()) {
             var timeToShutdown = Long.parseLong(command.getParameterMap().get(BotAdminCommandParameters.BOT_ADMIN_TIME_TO_SHUTDOWN.getName()));
             owoBot.acceptNewCommands(false);
-            if (timeToShutdown < 10) {
-                timeToShutdown = 10L;
+            if (timeToShutdown < 20) {
+                timeToShutdown = 20L;
             }
             command.getCommandMessage().getMessage().getChannel().sendMessage("Shutting down in " + timeToShutdown + " seconds").queue();
             shutdownInitiated.set(true);
