@@ -3,14 +3,14 @@ package com.owobot.modules.music.commands;
 import com.owobot.commands.Command;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 public class LeaveCommand extends Command {
-    public LeaveCommand() {
+    public LeaveCommand(String parentModule) {
+        super(parentModule);
         name = "leave";
-        triggers = new LinkedHashSet<>(Set.of("leave"));
+        triggers.add("leave");
+        triggers.add("fuckOff");
     }
 
     public LeaveCommand(LeaveCommand command) {
@@ -21,6 +21,7 @@ public class LeaveCommand extends Command {
     public List<String> getMiddlewares() {
         List<String> middlewares = new ArrayList<>();
         middlewares.add("musicChannel");
+        middlewares.add("guildChannel");
         return middlewares;
     }
 

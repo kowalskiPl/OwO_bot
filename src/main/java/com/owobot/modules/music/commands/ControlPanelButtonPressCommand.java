@@ -9,7 +9,8 @@ import java.util.LinkedHashSet;
 
 public class ControlPanelButtonPressCommand extends Command {
 
-    public ControlPanelButtonPressCommand() {
+    public ControlPanelButtonPressCommand(String parentModule) {
+        super(parentModule);
         name = "controlPanelButtonPress";
         triggers = new LinkedHashSet<>();
         var ids = PlayerControlPanel.controlPanelButtonsIds;

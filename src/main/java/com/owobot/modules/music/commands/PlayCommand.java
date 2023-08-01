@@ -9,8 +9,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 public class PlayCommand extends Command {
-    public PlayCommand() {
-        super();
+    public PlayCommand(String parentModule) {
+        super(parentModule);
         name = "play";
         triggers.add("play");
         triggers.add("start");
@@ -36,6 +36,7 @@ public class PlayCommand extends Command {
     public List<String> getMiddlewares() {
         List<String> middlewares = new ArrayList<>();
         middlewares.add("musicChannel");
+        middlewares.add("guildChannel");
         return middlewares;
     }
 

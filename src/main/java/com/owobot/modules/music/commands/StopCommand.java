@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.Set;
 
 public class StopCommand extends Command {
-    public StopCommand() {
+    public StopCommand(String parentModule) {
+        super(parentModule);
         name = "stop";
         triggers = new LinkedHashSet<>(Set.of("stop"));
     }
@@ -21,6 +22,7 @@ public class StopCommand extends Command {
     public List<String> getMiddlewares() {
         List<String> middlewares = new ArrayList<>();
         middlewares.add("musicChannel");
+        middlewares.add("guildChannel");
         return middlewares;
     }
 

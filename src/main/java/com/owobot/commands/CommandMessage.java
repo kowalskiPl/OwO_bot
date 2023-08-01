@@ -10,18 +10,30 @@ import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 
+import java.util.Objects;
+
 public class CommandMessage implements CommandContext {
     private final Guild guild;
-    private final Member member;
+    private Member member;
+    private User author;
     private final TextChannel textChannel;
     private final Message message;
+    private final boolean guildMessage;
 
     public CommandMessage(Message message) {
         this.message = message;
+        this.guildMessage = message.isFromGuild();
 
-        this.guild = message.isFromGuild() ? message.getGuild() : null;
-        this.member = message.isFromGuild() ? message.getMember() : null;
-        this.textChannel = message.isFromGuild() ? message.getChannel().asTextChannel() : null;
+        if (this.guildMessage){
+            this.member = message.getMember();
+            this.author = Objects.requireNonNull(message.getMember()).getUser();
+            this.textChannel = message.getChannel().asTextChannel();
+            this.guild = message.getGuild();
+        } else {
+            this.author = message.getAuthor();
+            this.textChannel = null;
+            this.guild = null;
+        }
     }
 
     public CommandMessage(ButtonInteractionEvent event) {
@@ -29,6 +41,7 @@ public class CommandMessage implements CommandContext {
         this.guild = event.isFromGuild() ? event.getGuild() : null;
         this.member = event.isFromGuild() ? event.getMember() : null;
         this.textChannel = event.isFromGuild() ? event.getChannel().asTextChannel() : null;
+        this.guildMessage = event.isFromGuild();
     }
 
     public JDA getJDA() {
@@ -50,8 +63,8 @@ public class CommandMessage implements CommandContext {
     }
 
     @Override
-    public User getAuthor() {
-        return member.getUser();
+    public User getUser() {
+        return author;
     }
 
     @Override
@@ -67,5 +80,10 @@ public class CommandMessage implements CommandContext {
     @Override
     public Message getMessage() {
         return message;
+    }
+
+    @Override
+    public boolean isGuildMessage() {
+        return guildMessage;
     }
 }

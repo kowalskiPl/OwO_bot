@@ -7,7 +7,8 @@ import com.owobot.modules.admin.AdminParameterNames;
 import java.util.*;
 
 public class RemovePrefixCommand extends Command {
-    public RemovePrefixCommand() {
+    public RemovePrefixCommand(String parentModule) {
+        super(parentModule);
         name = "removePrefix";
         triggers = new LinkedHashSet<>(Set.of(
                 "removePrefix",
@@ -41,6 +42,7 @@ public class RemovePrefixCommand extends Command {
     public List<String> getMiddlewares() {
         List<String> middlewares = new ArrayList<>();
         middlewares.add("require:user," + Permissions.ADMINISTRATOR.getNode());
+        middlewares.add("guildChannel");
         return middlewares;
     }
 

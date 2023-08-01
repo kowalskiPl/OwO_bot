@@ -12,7 +12,8 @@ import java.util.List;
 @SuppressWarnings("CopyConstructorMissesField")
 public class AddPrefixCommand extends Command {
 
-    public AddPrefixCommand() {
+    public AddPrefixCommand(String parentModule) {
+        super(parentModule);
         name = "addPrefix";
         triggers = new LinkedHashSet<>();
         triggers.add("addPrefix");
@@ -45,6 +46,7 @@ public class AddPrefixCommand extends Command {
     public List<String> getMiddlewares() {
         List<String> middlewares = new ArrayList<>();
         middlewares.add("require:user," + Permissions.ADMINISTRATOR.getNode());
+        middlewares.add("guildChannel");
         return middlewares;
     }
 

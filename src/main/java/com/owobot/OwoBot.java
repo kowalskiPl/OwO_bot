@@ -6,11 +6,9 @@ import com.owobot.core.CommandListenerStack;
 import com.owobot.core.ModuleManager;
 import com.owobot.database.MongoDbContext;
 import com.owobot.messagelisteners.MainMessageListener;
-import com.owobot.middleware.BotAdminMiddleware;
-import com.owobot.middleware.MiddlewareHandler;
-import com.owobot.middleware.MusicChannelMiddleware;
-import com.owobot.middleware.RequirePermissionMiddleware;
+import com.owobot.middleware.*;
 import com.owobot.modules.admin.AdminModule;
+import com.owobot.modules.botadmin.BotAdminModule;
 import com.owobot.modules.help.HelpModule;
 import com.owobot.modules.music.MusicModule;
 import com.owobot.modules.warframe.WarframeModule;
@@ -57,6 +55,7 @@ public class OwoBot {
         middlewareHandler.registerMiddleware("require", new RequirePermissionMiddleware(this));
         middlewareHandler.registerMiddleware("botAdmin", new BotAdminMiddleware(this));
         middlewareHandler.registerMiddleware("musicChannel", new MusicChannelMiddleware(this));
+        middlewareHandler.registerMiddleware("guildChannel", new GuildCommandMiddleware(this));
 
         log.info("Creating module manager");
         moduleManager = new ModuleManager(this);
@@ -67,7 +66,9 @@ public class OwoBot {
         moduleManager.loadModule(new MusicModule(owoBot));
         moduleManager.loadModule(new AdminModule(owoBot));
         moduleManager.loadModule(new HelpModule(owoBot));
+        moduleManager.loadModule(new BotAdminModule(owoBot));
         moduleManager.loadModule(new WarframeModule(owoBot));
+
 
         shardManager = createShardManager();
     }
@@ -89,7 +90,7 @@ public class OwoBot {
                 .setEnableShutdownHook(true)
                 .setAutoReconnect(true)
                 .setContextEnabled(true)
-                .setShardsTotal(3);
+                .setShardsTotal(config.getShards());
 
         builder.addEventListeners(new MainMessageListener(this));
 
@@ -97,9 +98,19 @@ public class OwoBot {
     }
 
     public void shutdown() {
-        shardManager.shutdown();
-        commandListenerStack.shutdown();
-        mongoDbContext.shutdown();
+        try {
+            log.info("Shutting down mongo connections");
+            mongoDbContext.shutdown();
+            Thread.sleep(1000);
+            log.info("Shutting down command listeners");
+            commandListenerStack.shutdown();
+            Thread.sleep(1000);
+            log.info("Shutting down shard manager");
+            shardManager.shutdown();
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public ShardManager getShardManager() {
@@ -136,5 +147,9 @@ public class OwoBot {
 
     public BotAdmin getBotAdmins() {
         return botAdmins;
+    }
+
+    public void acceptNewCommands(boolean acceptNewNonAdminCommands){
+        commandListenerStack.setAcceptNewNonAdminCommands(acceptNewNonAdminCommands);
     }
 }

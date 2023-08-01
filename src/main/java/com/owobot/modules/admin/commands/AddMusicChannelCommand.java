@@ -10,7 +10,8 @@ import java.util.Set;
 
 public class AddMusicChannelCommand extends Command {
 
-    public AddMusicChannelCommand() {
+    public AddMusicChannelCommand(String parentModule) {
+        super(parentModule);
         this.name = "addMusicChannel";
         this.triggers = new LinkedHashSet<>(Set.of(
                 "addMusicChannel",
@@ -26,6 +27,7 @@ public class AddMusicChannelCommand extends Command {
     public List<String> getMiddlewares() {
         List<String> middlewares = new ArrayList<>();
         middlewares.add("require:user," + Permissions.ADMINISTRATOR.getNode());
+        middlewares.add("guildChannel");
         return middlewares;
     }
 

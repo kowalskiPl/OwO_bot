@@ -8,7 +8,8 @@ import java.util.*;
 
 public class EnableMusicChannelCommand extends Command {
 
-    public EnableMusicChannelCommand() {
+    public EnableMusicChannelCommand(String parentModule) {
+        super(parentModule);
         this.name = "enableMusic";
         this.triggers = new LinkedHashSet<>(
                 Set.of(
@@ -39,6 +40,7 @@ public class EnableMusicChannelCommand extends Command {
     public List<String> getMiddlewares() {
         List<String> middlewares = new ArrayList<>();
         middlewares.add("require:user," + Permissions.ADMINISTRATOR.getNode());
+        middlewares.add("guildChannel");
         return middlewares;
     }
 

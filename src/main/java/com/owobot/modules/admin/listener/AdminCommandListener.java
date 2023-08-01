@@ -55,6 +55,11 @@ public class AdminCommandListener extends Reflectional implements CommandListene
         return false;
     }
 
+    @Override
+    public void shutdown() {
+
+    }
+
     private boolean handleGetMusicChannelsCommand(Command musicChannelCommand) {
         if (!owoBot.getConfig().isUseDB()) {
             musicChannelCommand.getCommandMessage().getMessage().reply("Database is disabled and this command will fail!").queue();
