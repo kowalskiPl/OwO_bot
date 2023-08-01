@@ -20,7 +20,7 @@ public class HelpModule extends Reflectional implements Module {
     public HelpModule(OwoBot owoBot) {
         super(owoBot);
         commandListeners = new LinkedHashSet<>(Set.of(new HelpCommandListener(owoBot)));
-        commands = new LinkedHashSet<>(Set.of(new GetHelpCommand()));
+        commands = new LinkedHashSet<>(Set.of(new GetHelpCommand(this.getName())));
     }
 
     @Override

@@ -3,7 +3,7 @@ package com.owobot.commands;
 public class EmptyCommand extends Command {
 
     public EmptyCommand() {
-        super();
+        super("Nothing");
     }
 
     @Override

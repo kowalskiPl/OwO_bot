@@ -7,13 +7,16 @@ public abstract class Command{
     protected Set<String> triggers; //all have to be unique
     protected CommandMessage commandMessage;
     protected Map<String, String> parameterMap;
+    protected String parentModule;
     protected boolean isButtonCommand;
 
-    protected Command() {
+    protected Command(String parentModule) {
         name = "";
         triggers = new LinkedHashSet<>();
         commandMessage = null;
         isButtonCommand = false;
+        parameterMap = new LinkedHashMap<>();
+        this.parentModule = parentModule;
     }
 
     protected Command(Command command){
@@ -21,6 +24,8 @@ public abstract class Command{
         this.triggers = command.getTriggers();
         this.commandMessage = command.commandMessage;
         this.isButtonCommand = command.isButtonCommand;
+        this.parameterMap = new LinkedHashMap<>();
+        this.parentModule = command.parentModule;
     }
 
     public String getName() {
@@ -48,6 +53,10 @@ public abstract class Command{
 
     public boolean isButtonCommand() {
         return isButtonCommand;
+    }
+
+    public String getParentModule() {
+        return parentModule;
     }
 
     @Override

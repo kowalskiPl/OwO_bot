@@ -10,7 +10,8 @@ import java.util.Set;
 
 public class RemoveMusicChannelCommand extends Command {
 
-    public RemoveMusicChannelCommand() {
+    public RemoveMusicChannelCommand(String parentModule) {
+        super(parentModule);
         this.name = "removeMusicChannel";
         this.triggers = new LinkedHashSet<>(
                 Set.of(

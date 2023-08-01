@@ -27,7 +27,6 @@ public class HelpCommandListener extends Reflectional implements CommandListener
             if (getHelpCommand.getParameterMap().isEmpty()) {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setAuthor("Here is the list of loaded modules. Use <prefix>help with module name to get more info");
-
                 StringBuilder sb = new StringBuilder();
                 moduleNames.forEach(module -> sb.append("\n").append("--").append(module));
                 builder.addField("Active modules:", sb.toString(), false);
@@ -58,7 +57,7 @@ public class HelpCommandListener extends Reflectional implements CommandListener
                 var moduleInQuestion = modules.stream().filter(module -> module.getNameUserFriendly().equalsIgnoreCase(moduleName)).findFirst();
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.BLUE);
-                if (moduleInQuestion.isPresent()){
+                if (moduleInQuestion.isPresent()) {
                     var loadedModule = moduleInQuestion.get();
                     builder.setAuthor("Commands for module:");
                     builder.setTitle(loadedModule.getNameUserFriendly());
@@ -95,5 +94,10 @@ public class HelpCommandListener extends Reflectional implements CommandListener
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void shutdown() {
+
     }
 }

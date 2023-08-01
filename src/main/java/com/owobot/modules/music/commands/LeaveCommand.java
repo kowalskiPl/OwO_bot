@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LeaveCommand extends Command {
-    public LeaveCommand() {
-        super();
+    public LeaveCommand(String parentModule) {
+        super(parentModule);
         name = "leave";
         triggers.add("leave");
         triggers.add("fuckOff");
