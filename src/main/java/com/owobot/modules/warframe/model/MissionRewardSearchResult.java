@@ -18,7 +18,7 @@ public class MissionRewardSearchResult extends RewardSearchResult {
     @Override
     public String getRewardText() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Planet: ").append(planet).append(", Mission: ").append(missionType).append(" Type: ").append(missionType);
+        sb.append("Planet: ").append(planet).append(", Mission: ").append(missionName).append(", Type: ").append(missionType);
         if (justReward != null){
             sb.append(", Drop chance: ").append(justReward.getDropChance()).append("%");
         } else {
