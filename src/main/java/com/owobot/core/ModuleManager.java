@@ -20,6 +20,7 @@ public class ModuleManager extends Reflectional {
         modules.add(module);
         owoBot.getCommandCache().loadCommandSet(module.getName(), module.getCommands());
         owoBot.getCommandListenerStack().registerListener(module.getCommandListeners());
+        owoBot.getLog().info("Loaded module: {}", module.getNameUserFriendly());
     }
 
     public boolean isModuleLoaded(Module module) {

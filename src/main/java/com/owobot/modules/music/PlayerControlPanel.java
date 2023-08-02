@@ -85,7 +85,7 @@ public class PlayerControlPanel {
     }
 
     public void leave() {
-        currentPlayerLocation.deleteMessageById(currentPlayerMessageID).queue();
+        currentPlayerLocation.deleteMessageById(currentPlayerMessageID).queue(null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
         notPlayingExists = false;
     }
 
