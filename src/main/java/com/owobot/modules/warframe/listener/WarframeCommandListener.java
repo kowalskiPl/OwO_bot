@@ -1,6 +1,7 @@
 package com.owobot.modules.warframe.listener;
 
 import com.owobot.OwoBot;
+import com.owobot.async.NamedThreadFactory;
 import com.owobot.commands.Command;
 import com.owobot.commands.CommandListener;
 import com.owobot.modules.warframe.AllRewardsDatabase;
@@ -15,16 +16,19 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class WarframeCommandListener extends Reflectional implements CommandListener {
     private final AllRewardsDatabase rewardsDatabase;
-    private final int searchCutOffPercentage = 50;
+    private final int searchCutOffPercentage = 89;
     private final Logger log = LoggerFactory.getLogger(WarframeCommandListener.class);
     private final Map<Long, Map<String, String>> userSearchResults;
     private final WarframeEmbedMessagesManager embedMessagesManager;
+    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("Warframe-Drop-Table-Updater"));
 
 
     public WarframeCommandListener(OwoBot owoBot) {
@@ -36,6 +40,15 @@ public class WarframeCommandListener extends Reflectional implements CommandList
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        executorService.scheduleAtFixedRate(() -> {
+            try {
+                log.info("Refreshing Warframe drop table");
+                rewardsDatabase.reloadDropTables();
+            } catch (IOException e) {
+                log.error("There was an error during Warframe drop table refresh: {}", e.getMessage());
+            }
+        }, 1, 1, TimeUnit.HOURS);
     }
 
     private synchronized void updateSearchResults(Long userId, Map<String, String> newResults) {
@@ -72,6 +85,7 @@ public class WarframeCommandListener extends Reflectional implements CommandList
     @Override
     public void shutdown() {
         embedMessagesManager.killLongLivingEmbeds();
+        executorService.shutdown();
     }
 
     private boolean handleMissionRewardSearchCommand(SearchMissionRewardCommand command) {
@@ -116,8 +130,7 @@ public class WarframeCommandListener extends Reflectional implements CommandList
         }
 
         if (!searchResults.isEmpty() && directMatch.isPresent()) {
-            log.info("This thing is bullshit: " + directMatch.get().getScore());
-            if (directMatch.get().getScore() < 89) {
+            if (directMatch.get().getScore() < searchCutOffPercentage) {
                 var msg = command.getCommandMessage()
                         .getMessage()
                         .getChannel()

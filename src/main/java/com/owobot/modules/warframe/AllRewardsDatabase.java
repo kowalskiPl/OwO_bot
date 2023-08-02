@@ -17,6 +17,17 @@ public class AllRewardsDatabase {
     private Set<String> allRewardNames;
 
     public AllRewardsDatabase() throws IOException {
+        allRewardNames = new LinkedHashSet<>();
+        allMissionRewards = new LinkedHashSet<>();
+        allRelicsWithRewards = new LinkedHashSet<>();
+        reloadDropTables();
+    }
+
+    public synchronized void reloadDropTables() throws IOException {
+        allRewardNames.clear();
+        allMissionRewards.clear();
+        allRelicsWithRewards.clear();
+
         WarframeDropTableParser tableParser = new WarframeDropTableParser(dataURL);
         tableParser.loadHTML();
         var allTheRewards = tableParser.gatherRewardsFromTables();
