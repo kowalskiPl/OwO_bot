@@ -25,8 +25,8 @@ public class WarframeModule extends Reflectional implements Module {
         super(owoBot);
         commandListeners = new LinkedHashSet<>(Set.of(new WarframeCommandListener(owoBot)));
         commands = new LinkedHashSet<>(Set.of(
-                new SearchMissionRewardCommand(),
-                new WarframeSearchButtonPressCommand()
+                new SearchMissionRewardCommand(this.getName()),
+                new WarframeSearchButtonPressCommand(this.getName())
         ));
     }
 

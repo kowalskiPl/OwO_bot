@@ -40,6 +40,7 @@ public class CommandMessage implements CommandContext {
         this.message = event.getMessage();
         this.guild = event.isFromGuild() ? event.getGuild() : null;
         this.member = event.isFromGuild() ? event.getMember() : null;
+        this.author = event.getUser();
         this.textChannel = event.isFromGuild() ? event.getChannel().asTextChannel() : null;
         this.guildMessage = event.isFromGuild();
     }

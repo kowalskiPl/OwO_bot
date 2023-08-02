@@ -34,8 +34,8 @@ public class MissionRewards {
         return Objects.hash(missionName, missionType, planet, rotationARewards, rotationBRewards, rotationCRewards);
     }
 
-    public Optional<RewardSearchResult> searchReward(String rewardName) {
-        RewardSearchResult result = new RewardSearchResult();
+    public Optional<MissionRewardSearchResult> searchReward(String rewardName) {
+        MissionRewardSearchResult result = new MissionRewardSearchResult();
         Optional<Reward> rewardA = rotationARewards.stream().filter(reward -> StringUtils.containsIgnoreCase(reward.getName(), rewardName)).findFirst();
         Optional<Reward> rewardB = rotationBRewards.stream().filter(reward -> StringUtils.containsIgnoreCase(reward.getName(), rewardName)).findFirst();
         Optional<Reward> rewardC = rotationCRewards.stream().filter(reward -> StringUtils.containsIgnoreCase(reward.getName(), rewardName)).findFirst();

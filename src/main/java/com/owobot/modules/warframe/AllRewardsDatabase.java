@@ -1,15 +1,13 @@
 package com.owobot.modules.warframe;
 
-import com.owobot.modules.warframe.model.MissionRewards;
-import com.owobot.modules.warframe.model.RelicRewards;
-import com.owobot.modules.warframe.model.Reward;
-import com.owobot.modules.warframe.model.RewardSearchResult;
+import com.owobot.modules.warframe.model.*;
 import lombok.Getter;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
 import me.xdrop.fuzzywuzzy.model.ExtractedResult;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
 public class AllRewardsDatabase {
@@ -36,6 +34,10 @@ public class AllRewardsDatabase {
             reward.getJustRewards().forEach(justReward -> allRewardNames.add(justReward.getName()));
         });
 
+        var allRelicNames = allRelicsWithRewards.stream().map(RelicRewards::getRelicName).collect(Collectors.toSet());
+        var kek = allRelicNames.stream().filter(relic -> allRewardNames.contains(relic)).collect(Collectors.toSet());
+
+        allRelicsWithRewards = allRelicsWithRewards.stream().filter(relic -> kek.contains(relic.getRelicName())).collect(Collectors.toSet());
         allRelicsWithRewards.forEach(relic ->{
             allRewardNames.addAll(relic.getCommonRewards().stream().map(Reward::getName).toList());
             allRewardNames.addAll(relic.getUncommonRewards().stream().map(Reward::getName).toList());
@@ -46,8 +48,8 @@ public class AllRewardsDatabase {
         return FuzzySearch.extractTop(query, allRewardNames, limit);
     }
 
-    private Set<RewardSearchResult> getRewardFromRelic(String rewardName) {
-        Set<RewardSearchResult> relicRewards = new LinkedHashSet<>();
+    private Set<RelicRewardSearchResult> getRewardFromRelic(String rewardName) {
+        Set<RelicRewardSearchResult> relicRewards = new LinkedHashSet<>();
         allRelicsWithRewards.forEach(reward -> {
             var possibleReward = reward.searchReward(rewardName);
             possibleReward.ifPresent(relicRewards::add);
@@ -55,10 +57,10 @@ public class AllRewardsDatabase {
         return relicRewards;
     }
 
-    private Set<RewardSearchResult> getRewardsFromMissions(String rewardName) {
-        Set<RewardSearchResult> missionRewards = new LinkedHashSet<>();
+    private Set<MissionRewardSearchResult> getRewardsFromMissions(String rewardName) {
+        Set<MissionRewardSearchResult> missionRewards = new LinkedHashSet<>();
         allMissionRewards.forEach(reward -> {
-            Optional<RewardSearchResult> searchResult = reward.searchReward(rewardName);
+            var searchResult = reward.searchReward(rewardName);
             searchResult.ifPresent(missionRewards::add);
         });
         return missionRewards;

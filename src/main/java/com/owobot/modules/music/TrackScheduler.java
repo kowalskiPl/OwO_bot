@@ -144,7 +144,12 @@ public class TrackScheduler extends AudioEventAdapter {
         if (queue.isEmpty()){
             stop();
         }
+    }
 
-        super.onTrackException(player, track, exception);
+    @Override
+    public void onTrackStuck(AudioPlayer player, AudioTrack track, long thresholdMs) {
+        if (thresholdMs > 5000) {
+            nextTrack();
+        }
     }
 }

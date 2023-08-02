@@ -1,7 +1,7 @@
 package com.owobot.modules.warframe.commands;
 
 import com.owobot.commands.Command;
-import com.owobot.modules.warframe.WarframeEmbedMessagesHelper;
+import com.owobot.modules.warframe.WarframeEmbedMessagesManager;
 import com.owobot.modules.warframe.WarframeParameterNames;
 
 import java.util.LinkedHashMap;
@@ -9,10 +9,11 @@ import java.util.LinkedHashSet;
 
 public class WarframeSearchButtonPressCommand extends Command {
 
-    public WarframeSearchButtonPressCommand() {
+    public WarframeSearchButtonPressCommand(String parentModule) {
+        super(parentModule);
         name = "warframeSearchButtonPress";
         triggers = new LinkedHashSet<>();
-        var ids = WarframeEmbedMessagesHelper.searchPanelButtonsIds;
+        var ids = WarframeEmbedMessagesManager.searchPanelButtonsIds;
         triggers.addAll(ids);
         isButtonCommand = true;
     }

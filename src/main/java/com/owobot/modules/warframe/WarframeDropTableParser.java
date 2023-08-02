@@ -129,6 +129,14 @@ public class WarframeDropTableParser {
                 if (rarityChanceMatcher.find()) {
                     rarity = rarityChanceMatcher.group(1);
                     chance = Double.parseDouble(rarityChanceMatcher.group(2));
+                    if (name.contains("Radiant") || name.contains("Flawless")) { // filter out non-intact relics
+                        continue;
+                    }
+
+                    if (name.contains("Relic")) {
+                        name = name.replace("Relic", "");
+                        name = name.trim();
+                    }
                     Reward reward = new Reward(name, rarity, chance);
                     tmpRewardsList.add(reward);
                 }
@@ -169,7 +177,7 @@ public class WarframeDropTableParser {
                 var nextElement = relicElements.get(i + 1);
 
                 if (nextElement.text().equals("Uncommon (25.33%)")) {
-                    commonRewards.add(new Reward(currentElement.text(), "Uncommon", 25.33));
+                    commonRewards.add(new Reward(currentElement.text(), "Common", 25.33));
                 }
 
                 if (nextElement.text().equals("Uncommon (11.00%)")) {
@@ -177,7 +185,7 @@ public class WarframeDropTableParser {
                 }
 
                 if (nextElement.text().equals("Rare (2.00%)")) {
-                    rareReward = new Reward(currentElement.text(), "Uncommon", 2.00);
+                    rareReward = new Reward(currentElement.text(), "Rare", 2.00);
                 }
             }
             return Optional.of(new RelicRewards(name, commonRewards, uncommonRewards, rareReward));

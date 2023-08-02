@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 @AllArgsConstructor
 @EqualsAndHashCode
 @RequiredArgsConstructor
-public class Reward implements Comparable<Reward>{
+public class Reward implements Comparable<Reward> {
     private String name;
     private String rarity;
     private double dropChance;

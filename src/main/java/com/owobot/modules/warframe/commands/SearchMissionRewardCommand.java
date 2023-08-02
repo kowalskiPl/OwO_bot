@@ -8,7 +8,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class SearchMissionRewardCommand extends Command {
-    public SearchMissionRewardCommand() {
+    public SearchMissionRewardCommand(String parentModule) {
+        super(parentModule);
         triggers = new LinkedHashSet<>(Set.of(
                 "searchMissionReward",
                 "getRewardLocations",
