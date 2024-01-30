@@ -11,7 +11,6 @@ import com.owobot.modules.admin.AdminModule;
 import com.owobot.modules.botadmin.BotAdminModule;
 import com.owobot.modules.help.HelpModule;
 import com.owobot.modules.music.MusicModule;
-import com.owobot.modules.warframe.WarframeModule;
 import com.owobot.utilities.Config;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -67,7 +66,7 @@ public class OwoBot {
         moduleManager.loadModule(new AdminModule(owoBot));
         moduleManager.loadModule(new HelpModule(owoBot));
         moduleManager.loadModule(new BotAdminModule(owoBot));
-        moduleManager.loadModule(new WarframeModule(owoBot));
+//        moduleManager.loadModule(new WarframeModule(owoBot));
 
 
         shardManager = createShardManager();
