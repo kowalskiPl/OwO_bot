@@ -8,6 +8,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
@@ -29,6 +31,8 @@ public class WarframeDropTableParser {
     private final String ROTATION_A = "Rotation A";
     private final String ROTATION_B = "Rotation B";
     private final String ROTATION_C = "Rotation C";
+
+    private final Logger log = LoggerFactory.getLogger(WarframeDropTableParser.class);
 
     public void loadHTML() throws IOException {
         document = Jsoup.connect(url).get();
@@ -74,7 +78,7 @@ public class WarframeDropTableParser {
             try {
                 standardMissionRewards.add(processSingleMission(mission));
             } catch (WarframeRewardProcessingException e) {
-                throw new RuntimeException(e);
+                log.error(e.getMessage());
             }
         });
         return standardMissionRewards;
