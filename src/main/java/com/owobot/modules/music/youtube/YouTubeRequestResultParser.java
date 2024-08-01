@@ -7,6 +7,8 @@ import com.owobot.modules.music.SongRequestProcessingException;
 import com.owobot.modules.music.model.YouTubeVideo;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,13 +18,15 @@ import java.util.stream.Collectors;
 
 public class YouTubeRequestResultParser {
 
-    private static final Pattern searchContentJsonPattern = Pattern.compile("(ytInitialData) = (\\{.*})");
+    private static final Pattern searchContentJsonPattern = Pattern.compile("(ytInitialData) = (\\{.*});");
     private static final Pattern searchThumbnailUrl = Pattern.compile("<link itemprop=\"thumbnailUrl\" href=\"(.*?)\">");
+
+    private static final Logger log = LoggerFactory.getLogger(YouTubeRequestResultParser.class);
 
     public static List<YouTubeVideo> getVideoUrlFromSearch(Document document) throws SongRequestProcessingException {
         Element body = document.body();
-        String html = body.html();
-        Matcher m = searchContentJsonPattern.matcher(html);
+        String html = body.html(); // TODO: to fix possibly
+        Matcher m = searchContentJsonPattern.matcher(document.toString());
         List<YouTubeVideo> videoResults = new ArrayList<>();
         if (m.find()) {
             String json = m.group(2);
@@ -53,6 +57,8 @@ public class YouTubeRequestResultParser {
                         throw new SongRequestProcessingException("Failed to acquire some song results!");
                 }
             }
+        } else {
+            log.warn("Failed to acquire video results!");
         }
         return videoResults.stream().limit(10).collect(Collectors.toList());
     }
