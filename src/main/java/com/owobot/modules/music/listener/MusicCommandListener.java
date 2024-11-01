@@ -59,6 +59,10 @@ public class MusicCommandListener extends Reflectional implements CommandListene
         playerManager = new DefaultAudioPlayerManager();
 
         YoutubeAudioSourceManager youtubeAudioSourceManager = new YoutubeAudioSourceManager(true);
+
+        // get the youtube refresh token so it kinda actually works
+        youtubeAudioSourceManager.useOauth2(owoBot.getConfig().getYoutubeRefreshToken(), false);
+
         playerManager.registerSourceManager(youtubeAudioSourceManager);
 
         AudioSourceManagers.registerRemoteSources(playerManager);
