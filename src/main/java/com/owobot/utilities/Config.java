@@ -12,7 +12,6 @@ public class Config {
     private int frameBufferDuration;
     private int eventThreadPoolSize;
     private String mongoDb;
-    private String testMongoDb;
     private String connectionString;
     private String discordToken;
     private boolean useDB;
@@ -39,10 +38,6 @@ public class Config {
 
     public String getMongoDb() {
         return mongoDb;
-    }
-
-    public String getTestMongoDb() {
-        return testMongoDb;
     }
 
     public String getConnectionString() {
@@ -76,8 +71,6 @@ public class Config {
             config.prefixes = Arrays.stream(standardProperties.getProperty("app.commands.prefixes", "!").split(",")).collect(Collectors.toSet());
             config.eventThreadPoolSize = Integer.parseInt(standardProperties.getProperty("app.event.threadPoolSize", "1"));
             config.frameBufferDuration = Integer.parseInt(standardProperties.getProperty("app.music.framebufferDuration", "5000"));
-            config.mongoDb = standardProperties.getProperty("app.mongo.database", "OwO_bot_db");
-            config.testMongoDb = standardProperties.getProperty("app.mongo.database.test", "OwO_bot_db_test");
             config.useDB = Boolean.parseBoolean(standardProperties.getProperty("app.mongo.use.database", "false"));
             return config;
         }
@@ -87,6 +80,7 @@ public class Config {
             config.discordToken = secrets.getProperty("app.discord.token");
             config.connectionString = secrets.getProperty("app.database.connection.string");
             config.botAdmins = new LinkedHashSet<>(Arrays.asList(secrets.getProperty("app.bot.admins", "0").split(",")));
+            config.mongoDb = secrets.getProperty("app.database.name", "OwO_bot_db");
             return config;
         }
     }
