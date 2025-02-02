@@ -16,6 +16,7 @@ public class Config {
     private String discordToken;
     private boolean useDB;
     private Set<String> botAdmins;
+    private String youtubeRefreshToken;
 
     public Config() {
     }
@@ -64,6 +65,10 @@ public class Config {
         return botAdmins;
     }
 
+    public String getYoutubeRefreshToken() {
+        return youtubeRefreshToken;
+    }
+
     public static class ConfigBuilder {
         public static Config build(Properties standardProperties) {
             Config config = new Config();
@@ -81,6 +86,7 @@ public class Config {
             config.connectionString = secrets.getProperty("app.database.connection.string");
             config.botAdmins = new LinkedHashSet<>(Arrays.asList(secrets.getProperty("app.bot.admins", "0").split(",")));
             config.mongoDb = secrets.getProperty("app.database.name", "OwO_bot_db");
+            config.youtubeRefreshToken = secrets.getProperty("app.music.token", null);
             return config;
         }
     }
