@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 @Getter
 public class AllRewardsDatabase {
-    private static final String dataURL = "https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html";
+    private static final String dataURL = "https://www.warframe.com/droptables";
     private Set<RelicRewards> allRelicsWithRewards;
     private Set<MissionRewards> allMissionRewards;
     private Set<String> allRewardNames;

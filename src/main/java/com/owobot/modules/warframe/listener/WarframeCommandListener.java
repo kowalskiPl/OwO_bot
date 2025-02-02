@@ -125,6 +125,7 @@ public class WarframeCommandListener extends Reflectional implements CommandList
                 Collections.sort(rewardSearchResults);
                 Collections.reverse(rewardSearchResults);
                 embedMessagesManager.createAndSendRewardsEmbed(rewardSearchResults, directMatch.get().getString(), command);
+                removeSearchResults(command.getCommandMessage().getUser().getIdLong());
                 return true;
             }
         }

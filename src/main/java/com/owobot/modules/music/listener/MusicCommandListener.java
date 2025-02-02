@@ -22,6 +22,7 @@ import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
@@ -56,6 +57,14 @@ public class MusicCommandListener extends Reflectional implements CommandListene
         super(owoBot);
         guildMusicManagers = new HashMap<>();
         playerManager = new DefaultAudioPlayerManager();
+
+        YoutubeAudioSourceManager youtubeAudioSourceManager = new YoutubeAudioSourceManager(true);
+
+        // get the youtube refresh token so it kinda actually works
+        youtubeAudioSourceManager.useOauth2(owoBot.getConfig().getYoutubeRefreshToken(), false);
+
+        playerManager.registerSourceManager(youtubeAudioSourceManager);
+
         AudioSourceManagers.registerRemoteSources(playerManager);
         AudioSourceManagers.registerLocalSource(playerManager);
     }
