@@ -68,9 +68,8 @@ public class AdminCommandListener extends Reflectional implements CommandListene
             if (currentConfig.getMusicChannelIds().isEmpty()) {
                 musicChannelCommand.getCommandMessage()
                         .getMessage()
-                        .getChannel()
-                        .sendMessage("No music channel has been specified.")
-                        .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                        .reply("No music channel has been specified.")
+                        .queue();
                 return true;
             }
 
@@ -79,9 +78,8 @@ public class AdminCommandListener extends Reflectional implements CommandListene
 
             musicChannelCommand.getCommandMessage()
                     .getMessage()
-                    .getChannel()
-                    .sendMessage("Currently available music channels: " + channels.toString())
-                    .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                    .reply("Currently available music channels: " + channels.toString())
+                    .queue();
         }
         return true;
     }
@@ -94,9 +92,8 @@ public class AdminCommandListener extends Reflectional implements CommandListene
             if (mentions.isEmpty()) {
                 musicChannelCommand.getCommandMessage()
                         .getMessage()
-                        .getChannel()
-                        .sendMessage("No channel has been specified! Please specify a channel to delete from music channels.")
-                        .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                        .reply("No channel has been specified! Please specify a channel to delete from music channels.")
+                        .queue();
                 return true;
             }
             var currentConfig = owoBot.getMongoDbContext().getGuildSettingsByGuildID(musicChannelCommand.getCommandMessage().getGuild().getIdLong());
@@ -106,25 +103,22 @@ public class AdminCommandListener extends Reflectional implements CommandListene
             if (currentConfig.getMusicChannelIds().isEmpty()) {
                 musicChannelCommand.getCommandMessage()
                         .getMessage()
-                        .getChannel()
-                        .sendMessage("There is no music channel defined. Users will be able to use music commands in any channel now!")
-                        .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                        .reply("There is no music channel defined. Users will be able to use music commands in any channel now!")
+                        .queue();
             }
 
             if (result) {
                 String removedChannels = mentions.stream().map(Channel::getName).collect(Collectors.joining(", "));
                 musicChannelCommand.getCommandMessage()
                         .getMessage()
-                        .getChannel()
-                        .sendMessage("Removed following channel(s) as music channels: " + removedChannels)
-                        .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                        .reply("Removed following channel(s) as music channels: " + removedChannels)
+                        .queue();
                 return true;
             } else {
                 musicChannelCommand.getCommandMessage()
                         .getMessage()
-                        .getChannel()
-                        .sendMessage("Given channel is invalid. Make sure it is a valid music channel!")
-                        .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                        .reply("Given channel is invalid. Make sure it is a valid music channel!")
+                        .queue();
             }
         }
         return true;
@@ -138,9 +132,8 @@ public class AdminCommandListener extends Reflectional implements CommandListene
             if (mentions.isEmpty()) {
                 musicChannelCommand.getCommandMessage()
                         .getMessage()
-                        .getChannel()
-                        .sendMessage("No channel has been specified! Please specify a channel to set as music channel.")
-                        .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                        .reply("No channel has been specified! Please specify a channel to set as music channel.")
+                        .queue();
                 return true;
             }
             var currentConfig = owoBot.getMongoDbContext().getGuildSettingsByGuildID(musicChannelCommand.getCommandMessage().getGuild().getIdLong());
@@ -150,9 +143,8 @@ public class AdminCommandListener extends Reflectional implements CommandListene
             String addedChannels = mentions.stream().map(Channel::getName).collect(Collectors.joining(", "));
             musicChannelCommand.getCommandMessage()
                     .getMessage()
-                    .getChannel()
-                    .sendMessage("Added following channel(s) as music channels: " + addedChannels)
-                    .queue(message -> message.delete().queueAfter(30, TimeUnit.SECONDS));
+                    .reply("Added following channel(s) as music channels: " + addedChannels)
+                    .queue();
             return true;
         }
 
