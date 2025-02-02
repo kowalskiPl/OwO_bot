@@ -265,7 +265,7 @@ public class AdminCommandListener extends Reflectional implements CommandListene
                 defaults.setGuildId(addPrefixCommand.getCommandMessage().getGuild().getIdLong());
                 defaults.getPrefixes().add(addPrefixCommand.getParameterMap().get(AdminParameterNames.ADMIN_PARAMETER_PREFIX.getName()));
 
-                owoBot.getMongoDbContext().saveNewGuildSettings(defaults);`
+                owoBot.getMongoDbContext().saveNewGuildSettings(defaults);
                 log.info("Added new prefix and settings for guild: " + defaults.getGuildId());
             } else {
                 currentSettings.getPrefixes().add(addPrefixCommand.getParameterMap().get(AdminParameterNames.ADMIN_PARAMETER_PREFIX.getName()));
