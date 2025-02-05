@@ -11,6 +11,7 @@ import com.owobot.modules.warframe.commands.SearchMissionRewardCommand;
 import com.owobot.modules.warframe.commands.WarframeSearchButtonPressCommand;
 import com.owobot.utilities.Reflectional;
 import me.xdrop.fuzzywuzzy.model.ExtractedResult;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,6 +80,11 @@ public class WarframeCommandListener extends Reflectional implements CommandList
             return handleSearchButtonPressCommand(searchCommand);
         }
 
+        return false;
+    }
+
+    @Override
+    public boolean onSlashCommand(SlashCommandInteractionEvent event) {
         return false;
     }
 

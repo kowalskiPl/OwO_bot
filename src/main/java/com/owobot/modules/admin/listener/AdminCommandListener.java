@@ -9,6 +9,7 @@ import com.owobot.modules.admin.commands.*;
 import com.owobot.utilities.Reflectional;
 import net.dv8tion.jda.api.entities.ISnowflake;
 import net.dv8tion.jda.api.entities.channel.Channel;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +57,11 @@ public class AdminCommandListener extends Reflectional implements CommandListene
         if (command instanceof RefreshSlashCommandsCommand refreshSlashCommandsCommand) {
             return handleRefreshSlashCommandsCommand(refreshSlashCommandsCommand);
         }
+        return false;
+    }
+
+    @Override
+    public boolean onSlashCommand(SlashCommandInteractionEvent event) {
         return false;
     }
 

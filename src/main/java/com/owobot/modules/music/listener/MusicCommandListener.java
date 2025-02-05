@@ -31,6 +31,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -129,6 +130,11 @@ public class MusicCommandListener extends Reflectional implements CommandListene
         }
 
         return result;
+    }
+
+    @Override
+    public boolean onSlashCommand(SlashCommandInteractionEvent event) {
+        return false;
     }
 
     @Override
