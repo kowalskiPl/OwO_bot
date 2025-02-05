@@ -8,6 +8,7 @@ import com.owobot.modules.warframe.commands.SearchMissionRewardCommand;
 import com.owobot.modules.warframe.commands.WarframeSearchButtonPressCommand;
 import com.owobot.modules.warframe.listener.WarframeCommandListener;
 import com.owobot.utilities.Reflectional;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashSet;
@@ -38,6 +39,16 @@ public class WarframeModule extends Reflectional implements Module {
     @Override
     public Set<Command> getCommands() {
         return commands;
+    }
+
+    @Override
+    public Set<SlashCommandData> getGlobalSlashCommands() {
+        return Set.of();
+    }
+
+    @Override
+    public Set<SlashCommandData> getGuildSlashCommands() {
+        return Set.of();
     }
 
     @Override

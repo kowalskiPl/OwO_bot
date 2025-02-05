@@ -4,6 +4,7 @@ import com.owobot.OwoBot;
 import com.owobot.commands.CommandMessage;
 import com.owobot.core.CommandResolver;
 import com.owobot.middleware.MiddlewareStack;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
@@ -55,5 +56,10 @@ public class MainMessageListener extends MessageListener {
         owoBot.getCommandListenerStack().onCommand(command);
         log.info("Processed command: " + command);
         event.deferEdit().queue(null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
+    }
+
+    @Override
+    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
+        super.onSlashCommandInteraction(event);
     }
 }

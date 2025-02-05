@@ -12,18 +12,19 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CommandListenerStack {
     private static final Logger log = LoggerFactory.getLogger(CommandListenerStack.class);
     private final ExecutorService threadPool;
     private final Set<CommandListener> eventListeners;
-    private boolean acceptNewNonAdminCommands;
+    private final AtomicBoolean acceptNewNonAdminCommands = new AtomicBoolean();
 
     public CommandListenerStack(int poolSize) {
         var factory = new NamedThreadFactory("Command-Listener-Executor");
         threadPool = Executors.newFixedThreadPool(poolSize, factory);
         eventListeners = new LinkedHashSet<>();
-        acceptNewNonAdminCommands = true;
+        acceptNewNonAdminCommands.set(true);
     }
 
     public void shutdown() {
@@ -46,7 +47,7 @@ public class CommandListenerStack {
     public void onCommand(Command command) {
         Runnable task = () -> {
             boolean result = false;
-            if (!acceptNewNonAdminCommands && !command.getParentModule().equals(BotAdminModule.class.getName())) {
+            if (!acceptNewNonAdminCommands.get() && !command.getParentModule().equals(BotAdminModule.class.getName())) {
                 log.warn("Unhandled command: " + command.getName());
                 return;
             }
@@ -64,6 +65,6 @@ public class CommandListenerStack {
     }
 
     public void setAcceptNewNonAdminCommands(boolean acceptNewNonAdminCommands) {
-        this.acceptNewNonAdminCommands = acceptNewNonAdminCommands;
+        this.acceptNewNonAdminCommands.set(acceptNewNonAdminCommands);
     }
 }

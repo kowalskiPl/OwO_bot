@@ -4,6 +4,7 @@ import com.owobot.admin.BotAdmin;
 import com.owobot.core.CommandCache;
 import com.owobot.core.CommandListenerStack;
 import com.owobot.core.ModuleManager;
+import com.owobot.core.SlashCommandsManager;
 import com.owobot.database.MongoDbContext;
 import com.owobot.messagelisteners.MainMessageListener;
 import com.owobot.middleware.*;
@@ -36,6 +37,7 @@ public class OwoBot {
     private final CommandListenerStack commandListenerStack;
     private final MiddlewareHandler middlewareHandler;
     private final BotAdmin botAdmins;
+    private final SlashCommandsManager slashCommandsManager;
 
     public OwoBot(Config config) {
         OwoBot.owoBot = this;
@@ -69,8 +71,11 @@ public class OwoBot {
         moduleManager.loadModule(new BotAdminModule(owoBot));
         moduleManager.loadModule(new WarframeModule(owoBot));
 
-
+        log.info("Creating shard manager");
         shardManager = createShardManager();
+
+        log.info("Preparing slash commands");
+        slashCommandsManager = new SlashCommandsManager(this);
     }
 
     private ShardManager createShardManager() {
@@ -98,19 +103,14 @@ public class OwoBot {
     }
 
     public void shutdown() {
-        try {
-            log.info("Shutting down mongo connections");
-            mongoDbContext.shutdown();
-            Thread.sleep(1000);
-            log.info("Shutting down command listeners");
-            commandListenerStack.shutdown();
-            Thread.sleep(1000);
-            log.info("Shutting down shard manager");
-            shardManager.shutdown();
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        log.info("Shutting down shard manager");
+        shardManager.shutdown();
+
+        log.info("Shutting down command listeners");
+        commandListenerStack.shutdown();
+
+        log.info("Shutting down mongo connections");
+        mongoDbContext.shutdown();
     }
 
     public ShardManager getShardManager() {
@@ -149,7 +149,11 @@ public class OwoBot {
         return botAdmins;
     }
 
-    public void acceptNewCommands(boolean acceptNewNonAdminCommands){
+    public SlashCommandsManager getSlashCommandsManager() {
+        return slashCommandsManager;
+    }
+
+    public void acceptNewCommands(boolean acceptNewNonAdminCommands) {
         commandListenerStack.setAcceptNewNonAdminCommands(acceptNewNonAdminCommands);
     }
 }
