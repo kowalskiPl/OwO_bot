@@ -8,6 +8,7 @@ import com.owobot.modules.botadmin.commands.ShutdownCommand;
 import com.owobot.modules.botadmin.commands.StopShutdownCommand;
 import com.owobot.modules.botadmin.listener.BotAdminCommandListener;
 import com.owobot.utilities.Reflectional;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashSet;
@@ -39,6 +40,16 @@ public class BotAdminModule extends Reflectional implements Module {
     @Override
     public Set<Command> getCommands() {
         return commands;
+    }
+
+    @Override
+    public Set<SlashCommandData> getGlobalSlashCommands() {
+        return Set.of();
+    }
+
+    @Override
+    public Set<SlashCommandData> getGuildSlashCommands() {
+        return Set.of();
     }
 
     @Override

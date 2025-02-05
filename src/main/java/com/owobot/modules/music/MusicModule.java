@@ -7,6 +7,7 @@ import com.owobot.modules.Module;
 import com.owobot.modules.music.commands.*;
 import com.owobot.modules.music.listener.MusicCommandListener;
 import com.owobot.utilities.Reflectional;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashSet;
@@ -51,6 +52,16 @@ public class MusicModule extends Reflectional implements Module {
     @Override
     public Set<Command> getCommands() {
         return commands;
+    }
+
+    @Override
+    public Set<SlashCommandData> getGlobalSlashCommands() {
+        return Set.of();
+    }
+
+    @Override
+    public Set<SlashCommandData> getGuildSlashCommands() {
+        return Set.of();
     }
 
     @Override
