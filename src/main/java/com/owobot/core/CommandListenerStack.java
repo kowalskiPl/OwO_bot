@@ -4,6 +4,7 @@ import com.owobot.async.NamedThreadFactory;
 import com.owobot.commands.Command;
 import com.owobot.commands.CommandListener;
 import com.owobot.modules.botadmin.BotAdminModule;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +61,26 @@ public class CommandListenerStack {
             }
             if (!result)
                 log.warn("Unhandled command: " + command.getName());
+        };
+        threadPool.submit(task);
+    }
+
+    public void onSlashCommand(SlashCommandInteractionEvent event){
+        Runnable task = () -> {
+            boolean result = false;
+            if (!acceptNewNonAdminCommands.get()) {
+                log.warn("Unhandled command: " + event.getName());
+                return;
+            }
+            for (CommandListener listener : eventListeners) {
+                result = listener.onSlashCommand(event);
+                if (result){
+                    log.info("Handled command: " + event.getName());
+                    break;
+                }
+            }
+            if (!result)
+                log.warn("Unhandled command: " + event.getName());
         };
         threadPool.submit(task);
     }

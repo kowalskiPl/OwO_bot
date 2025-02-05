@@ -7,6 +7,7 @@ import com.owobot.modules.help.HelpCommandParameters;
 import com.owobot.modules.help.commands.GetHelpCommand;
 import com.owobot.utilities.Reflectional;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.requests.ErrorResponse;
 
@@ -91,6 +92,15 @@ public class HelpCommandListener extends Reflectional implements CommandListener
 
                 }
             }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onSlashCommand(SlashCommandInteractionEvent event) {
+        if (event.getName().equals("testguildcommand")){
+            event.reply("This is a very test guild command and it succeeded").queue();
             return true;
         }
         return false;
