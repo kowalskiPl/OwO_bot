@@ -28,8 +28,6 @@ public class HelpSlashCommands extends Reflectional {
     public Set<SlashCommandData> getGuildCommands() {
         Set<SlashCommandData> guildCommands = new HashSet<>();
 
-        guildCommands.add(Commands.slash("testguildcommand", "A guild test command for help module"));
-
         var helpCommand = Commands.slash(HelpSlashCommandNames.GET_HELP_SLASH_COMMAND_NAME.getName(), "Fetches information about bot and available commands");
 
         var activeModules = new HashSet<>(owoBot.getModuleManager().getModules());

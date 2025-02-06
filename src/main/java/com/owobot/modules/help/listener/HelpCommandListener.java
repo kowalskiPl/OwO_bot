@@ -97,11 +97,6 @@ public class HelpCommandListener extends Reflectional implements CommandListener
 
     @Override
     public boolean onSlashCommand(SlashCommandInteractionEvent event) {
-        if (event.getName().equals("testguildcommand")) {
-            event.reply("This is a very test guild command and it succeeded").queue();
-            return true;
-        }
-
         if (event.getName().equals(HelpSlashCommandNames.GET_HELP_SLASH_COMMAND_NAME.getName())) {
             return handleSlashHelpCommand(event);
         }
