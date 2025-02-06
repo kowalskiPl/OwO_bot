@@ -1,6 +1,7 @@
 package com.owobot.modules.help.commands;
 
 import com.owobot.OwoBot;
+import com.owobot.commands.ModuleSlashCommands;
 import com.owobot.utilities.Reflectional;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -11,12 +12,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class HelpSlashCommands extends Reflectional {
+public class HelpSlashCommands extends Reflectional implements ModuleSlashCommands {
 
     public HelpSlashCommands(OwoBot owoBot) {
         super(owoBot);
     }
 
+    @Override
     public Set<SlashCommandData> getGlobalCommands() {
         Set<SlashCommandData> globalCommands = new HashSet<>();
 
@@ -25,6 +27,7 @@ public class HelpSlashCommands extends Reflectional {
         return globalCommands;
     }
 
+    @Override
     public Set<SlashCommandData> getGuildCommands() {
         Set<SlashCommandData> guildCommands = new HashSet<>();
 

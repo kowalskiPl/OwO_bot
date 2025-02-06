@@ -17,6 +17,7 @@ import java.util.Set;
 public class AdminModule extends Reflectional implements Module {
     private final Set<CommandListener> commandListeners;
     private final Set<Command> commands;
+    private final AdminSlashCommands adminSlashCommands;
 
     public AdminModule(OwoBot owoBot) {
         super(owoBot);
@@ -31,6 +32,7 @@ public class AdminModule extends Reflectional implements Module {
                 new GetMusicChannelsCommand(this.getName()),
                 new RefreshSlashCommandsCommand(this.getName())
         ));
+        adminSlashCommands = new AdminSlashCommands(owoBot);
     }
 
     @Override
@@ -50,12 +52,12 @@ public class AdminModule extends Reflectional implements Module {
 
     @Override
     public Set<SlashCommandData> getGlobalSlashCommands() {
-        return Set.of();
+        return adminSlashCommands.getGlobalCommands();
     }
 
     @Override
     public Set<SlashCommandData> getGuildSlashCommands() {
-        return Set.of();
+        return adminSlashCommands.getGuildCommands();
     }
 
     @Override
