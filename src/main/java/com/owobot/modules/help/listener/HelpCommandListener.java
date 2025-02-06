@@ -3,8 +3,10 @@ package com.owobot.modules.help.listener;
 import com.owobot.OwoBot;
 import com.owobot.commands.Command;
 import com.owobot.commands.CommandListener;
+import com.owobot.modules.Module;
 import com.owobot.modules.help.HelpCommandParameters;
 import com.owobot.modules.help.commands.GetHelpCommand;
+import com.owobot.modules.help.commands.HelpSlashCommandNames;
 import com.owobot.utilities.Reflectional;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -13,6 +15,7 @@ import net.dv8tion.jda.api.requests.ErrorResponse;
 
 import java.awt.*;
 import java.time.Duration;
+import java.util.stream.Collectors;
 
 public class HelpCommandListener extends Reflectional implements CommandListener {
     public HelpCommandListener(OwoBot owoBot) {
@@ -23,18 +26,10 @@ public class HelpCommandListener extends Reflectional implements CommandListener
     public boolean onCommand(Command command) {
 
         if (command instanceof GetHelpCommand getHelpCommand) {
-            var moduleNames = owoBot.getModuleManager().getModuleNames();
             var isGuildMessage = getHelpCommand.getCommandMessage().isGuildMessage();
             if (getHelpCommand.getParameterMap().isEmpty()) {
-                EmbedBuilder builder = new EmbedBuilder();
-                builder.setAuthor("Here is the list of loaded modules. Use <prefix>help with module name to get more info");
-                StringBuilder sb = new StringBuilder();
-                moduleNames.forEach(module -> sb.append("\n").append("--").append(module));
-                builder.addField("Active modules:", sb.toString(), false);
-
-                builder.setColor(Color.BLUE);
-
-                if (isGuildMessage){
+                EmbedBuilder builder = getBaseEmbedBuilder(false);
+                if (isGuildMessage) {
                     builder.setFooter("This message and command will self-destruct in 30 seconds");
                     getHelpCommand.getCommandMessage()
                             .getMessage()
@@ -56,31 +51,34 @@ public class HelpCommandListener extends Reflectional implements CommandListener
                 var moduleName = getHelpCommand.getParameterMap().get(HelpCommandParameters.HELP_PARAMETER_MODULE_NAME.getName());
                 var modules = owoBot.getModuleManager().getModules();
                 var moduleInQuestion = modules.stream().filter(module -> module.getNameUserFriendly().equalsIgnoreCase(moduleName)).findFirst();
-                EmbedBuilder builder = new EmbedBuilder();
-                builder.setColor(Color.BLUE);
+
                 if (moduleInQuestion.isPresent()) {
-                    var loadedModule = moduleInQuestion.get();
-                    builder.setAuthor("Commands for module:");
-                    builder.setTitle(loadedModule.getNameUserFriendly());
-
-                    var commands = loadedModule.getCommands();
-
-                    for (Command processedCommand : commands) {
-                        if (!processedCommand.isButtonCommand())
-                            builder.addField(processedCommand.getName(), processedCommand.getHelp(), false);
-                    }
+                    EmbedBuilder builder = getModuleSpecificEmbedBuilder(moduleInQuestion.get());
 
                     if (isGuildMessage) {
                         builder.setFooter("This message and command will self-destruct in 60 seconds");
-                        getHelpCommand.getCommandMessage().getMessage().getChannel().sendMessageEmbeds(builder.build()).delay(Duration.ofSeconds(60)).
-                                queue(message -> message.delete().queue(leMessage -> getHelpCommand.getCommandMessage().getMessage().delete().queue(null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE))));
+                        getHelpCommand.getCommandMessage()
+                                .getMessage()
+                                .getChannel()
+                                .sendMessageEmbeds(builder.build())
+                                .delay(Duration.ofSeconds(60))
+                                .queue(message -> message.delete()
+                                        .queue(leMessage -> getHelpCommand.getCommandMessage().getMessage()
+                                                .delete()
+                                                .queue(null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE))));
                     } else {
-                        getHelpCommand.getCommandMessage().getMessage().getChannel().sendMessageEmbeds(builder.build()).queue();
+                        getHelpCommand.getCommandMessage()
+                                .getMessage()
+                                .getChannel()
+                                .sendMessageEmbeds(builder.build())
+                                .queue();
                     }
 
                 } else {
+                    EmbedBuilder builder = new EmbedBuilder();
+                    builder.setColor(Color.BLUE);
                     builder.setAuthor("It seems like the module you provided doesn't exist or is inactive. Try 'help' to get a list of enabled modules");
-                    if (isGuildMessage){
+                    if (isGuildMessage) {
                         builder.setFooter("This message and command will self-destruct in 20 seconds");
                         getHelpCommand.getCommandMessage().getMessage().getChannel().sendMessageEmbeds(builder.build()).delay(Duration.ofSeconds(20)).
                                 queue(message -> message.delete().queue(leMessage -> getHelpCommand.getCommandMessage().getMessage().delete().queue(null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE))));
@@ -99,9 +97,13 @@ public class HelpCommandListener extends Reflectional implements CommandListener
 
     @Override
     public boolean onSlashCommand(SlashCommandInteractionEvent event) {
-        if (event.getName().equals("testguildcommand")){
+        if (event.getName().equals("testguildcommand")) {
             event.reply("This is a very test guild command and it succeeded").queue();
             return true;
+        }
+
+        if (event.getName().equals(HelpSlashCommandNames.GET_HELP_SLASH_COMMAND_NAME.getName())) {
+            return handleSlashHelpCommand(event);
         }
         return false;
     }
@@ -109,5 +111,58 @@ public class HelpCommandListener extends Reflectional implements CommandListener
     @Override
     public void shutdown() {
 
+    }
+
+    private boolean handleSlashHelpCommand(SlashCommandInteractionEvent event) {
+        var selectedModule = event.getOption("module");
+        if (selectedModule != null) {
+            var moduleName = selectedModule.getAsString();
+            var modules = owoBot.getModuleManager().getModules();
+            var moduleInQuestion = modules.stream().filter(module -> module.getNameUserFriendly().equalsIgnoreCase(moduleName)).findFirst();
+            if (moduleInQuestion.isPresent()) {
+                EmbedBuilder builder = getModuleSpecificEmbedBuilder(moduleInQuestion.get());
+                event.replyEmbeds(builder.build()).queue();
+            } else {
+                event.reply("something went wrong, module not found").queue();
+            }
+
+        } else {
+            var embed = getBaseEmbedBuilder(true);
+            event.replyEmbeds(embed.build()).queue();
+        }
+        return true;
+    }
+
+    private EmbedBuilder getBaseEmbedBuilder(boolean fromSlashCommand) {
+        var moduleNames = owoBot.getModuleManager().getModuleNames();
+
+        //always get rid of botAdmin module in slash command from server, no one needs to know from there that this module exists
+        if (fromSlashCommand) {
+            moduleNames = moduleNames.stream().filter(module -> !module.equalsIgnoreCase("botadmin")).collect(Collectors.toSet());
+        }
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setAuthor("Here is the list of loaded modules. Use help command with module name to get more info");
+        StringBuilder sb = new StringBuilder();
+        moduleNames.forEach(module -> sb.append("\n").append("--").append(module));
+        builder.addField("Active modules:", sb.toString(), false);
+        builder.setColor(Color.BLUE);
+
+        return builder;
+    }
+
+    private EmbedBuilder getModuleSpecificEmbedBuilder(Module module) {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(Color.BLUE);
+        builder.setAuthor("Commands for module:");
+        builder.setTitle(module.getNameUserFriendly());
+
+        var commands = module.getCommands();
+
+        for (Command processedCommand : commands) {
+            if (!processedCommand.isButtonCommand())
+                builder.addField(processedCommand.getName(), processedCommand.getHelp(), false);
+        }
+
+        return builder;
     }
 }

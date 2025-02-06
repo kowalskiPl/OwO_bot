@@ -50,7 +50,7 @@ public class AdminCommandListener extends Reflectional implements CommandListene
             return handleRemoveMusicChannelCommand(musicChannelCommand);
         }
 
-        if (command instanceof GetMusicChannelsCommand musicChannelCommand){
+        if (command instanceof GetMusicChannelsCommand musicChannelCommand) {
             return handleGetMusicChannelsCommand(musicChannelCommand);
         }
 
@@ -293,7 +293,7 @@ public class AdminCommandListener extends Reflectional implements CommandListene
 
     private boolean handleRefreshSlashCommandsCommand(RefreshSlashCommandsCommand refreshSlashCommandsCommand) {
         var guild = refreshSlashCommandsCommand.getCommandMessage().getGuild();
-        owoBot.getSlashCommandsManager().loadBotCommandsForGuild(guild);
+        owoBot.getSlashCommandsManager().loadBotCommandsForGuild(guild, true);
         refreshSlashCommandsCommand.getCommandMessage().getMessage().reply("Reloading slash commands for guild: " + guild.getName()).queue();
         return true;
     }

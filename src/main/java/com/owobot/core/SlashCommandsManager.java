@@ -62,6 +62,11 @@ public class SlashCommandsManager extends Reflectional {
         }
     }
 
+    public synchronized void loadBotCommandsForGuild(Guild guild, boolean explicitResetCommands) {
+        guild.updateCommands().complete();
+        guild.updateCommands().addCommands(desiredGuildCommands).queue();
+    }
+
     public synchronized void loadBotCommandsForGuild(Guild guild) {
         guild.updateCommands().addCommands(desiredGuildCommands).queue();
     }

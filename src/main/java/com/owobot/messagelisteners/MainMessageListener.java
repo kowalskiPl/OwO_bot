@@ -61,5 +61,6 @@ public class MainMessageListener extends MessageListener {
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         owoBot.getCommandListenerStack().onSlashCommand(event);
+        log.info("Processed Slash command: " + event.getName());
     }
 }

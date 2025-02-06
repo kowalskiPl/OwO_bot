@@ -24,7 +24,7 @@ public class HelpModule extends Reflectional implements Module {
         super(owoBot);
         commandListeners = new LinkedHashSet<>(Set.of(new HelpCommandListener(owoBot)));
         commands = new LinkedHashSet<>(Set.of(new GetHelpCommand(this.getName())));
-        slashCommands = new HelpSlashCommands();
+        slashCommands = new HelpSlashCommands(owoBot);
     }
 
     @Override
