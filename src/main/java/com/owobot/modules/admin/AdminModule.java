@@ -7,6 +7,7 @@ import com.owobot.modules.Module;
 import com.owobot.modules.admin.commands.*;
 import com.owobot.modules.admin.listener.AdminCommandListener;
 import com.owobot.utilities.Reflectional;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashSet;
@@ -27,7 +28,8 @@ public class AdminModule extends Reflectional implements Module {
                 new EnableMusicChannelCommand(this.getName()),
                 new AddMusicChannelCommand(this.getName()),
                 new RemoveMusicChannelCommand(this.getName()),
-                new GetMusicChannelsCommand(this.getName())
+                new GetMusicChannelsCommand(this.getName()),
+                new RefreshSlashCommandsCommand(this.getName())
         ));
     }
 
@@ -44,6 +46,16 @@ public class AdminModule extends Reflectional implements Module {
     @Override
     public Set<Command> getCommands() {
         return commands;
+    }
+
+    @Override
+    public Set<SlashCommandData> getGlobalSlashCommands() {
+        return Set.of();
+    }
+
+    @Override
+    public Set<SlashCommandData> getGuildSlashCommands() {
+        return Set.of();
     }
 
     @Override

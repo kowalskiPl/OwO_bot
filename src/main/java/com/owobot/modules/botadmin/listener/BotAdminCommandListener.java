@@ -8,6 +8,7 @@ import com.owobot.modules.botadmin.BotAdminCommandParameters;
 import com.owobot.modules.botadmin.commands.ShutdownCommand;
 import com.owobot.modules.botadmin.commands.StopShutdownCommand;
 import com.owobot.utilities.Reflectional;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -36,6 +37,11 @@ public class BotAdminCommandListener extends Reflectional implements CommandList
         if (command instanceof StopShutdownCommand stopShutdownCommand){
             return handleStopShutdownCommand(stopShutdownCommand);
         }
+        return false;
+    }
+
+    @Override
+    public boolean onSlashCommand(SlashCommandInteractionEvent event) {
         return false;
     }
 
