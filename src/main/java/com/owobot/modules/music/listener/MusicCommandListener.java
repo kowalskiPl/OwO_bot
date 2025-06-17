@@ -157,7 +157,7 @@ public class MusicCommandListener extends Reflectional implements CommandListene
                 command.getCommandMessage().getMessage().reply("Failed to acquire video: " + songName).queue();
                 return false;
             }
-            processUrlPlayRequest(command.getCommandMessage().getMember(), command.getCommandMessage().getGuild(), songName, musicManager, command.getCommandMessage().getTextChannel(), thumbnailUrl);
+            processUrlPlayRequest(command.getCommandMessage().getMember(), command.getCommandMessage().getGuild(), songName, musicManager, command.getCommandMessage().getTextChannel(), thumbnailUrl, false);
         } else {
             processSearchPlayRequest(songName, musicManager, channel, command);
         }
@@ -214,7 +214,7 @@ public class MusicCommandListener extends Reflectional implements CommandListene
         musicManager.addSearchResults(results);
     }
 
-    private void processUrlPlayRequest(Member member, Guild guild, String songName, GuildMusicManager musicManager, TextChannel channel, String thumbnailUrl) {
+    private void processUrlPlayRequest(Member member, Guild guild, String songName, GuildMusicManager musicManager, TextChannel channel, String thumbnailUrl, boolean fromSearch) {
         playerManager.loadItemOrdered(musicManager, songName, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
@@ -228,12 +228,22 @@ public class MusicCommandListener extends Reflectional implements CommandListene
 
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
-                String name = playlist.getName();
-                try {
-                    play(member, guild, musicManager, playlist.getTracks(), name, channel);
-                } catch (UserNotInVoiceChannelException e) {
-                    log.warn("Failed to acquire user channel");
-                    channel.sendMessage("Are you in the voice channel?").delay(Duration.ofSeconds(20)).flatMap(Message::delete).queue();
+                if (fromSearch){
+                    try {
+                        play(member, guild, musicManager, playlist.getTracks().get(0), channel, thumbnailUrl);
+                        log.debug("Loaded a a song from search from a playlist, stripped other songs");
+                    } catch (UserNotInVoiceChannelException e) {
+                        log.warn("Failed to acquire user channel");
+                        channel.sendMessage("Are you in the voice channel?").delay(Duration.ofSeconds(20)).flatMap(Message::delete).queue();
+                    }
+                } else {
+                    String name = playlist.getName();
+                    try {
+                        play(member, guild, musicManager, playlist.getTracks(), name, channel);
+                    } catch (UserNotInVoiceChannelException e) {
+                        log.warn("Failed to acquire user channel");
+                        channel.sendMessage("Are you in the voice channel?").delay(Duration.ofSeconds(20)).flatMap(Message::delete).queue();
+                    }
                 }
             }
 
@@ -256,7 +266,7 @@ public class MusicCommandListener extends Reflectional implements CommandListene
         if (!button.equals("Cancel")) {
             var video = musicManager.getVideoAndClearSearchResults(Integer.parseInt(button));
             var url = "https://www.youtube.com" + video.watchUrl;
-            processUrlPlayRequest(command.getCommandMessage().getMember(), command.getCommandMessage().getGuild(), url, musicManager, command.getCommandMessage().getTextChannel(), video.thumbnailUrl);
+            processUrlPlayRequest(command.getCommandMessage().getMember(), command.getCommandMessage().getGuild(), url, musicManager, command.getCommandMessage().getTextChannel(), video.thumbnailUrl, true);
         }
         command.getCommandMessage().getMessage().delete().queue();
         return true;
