@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -76,7 +77,7 @@ public class CommandResolver extends Reflectional {
     }
 
     public Command resolveButtonPress(ButtonInteractionEvent event) {
-        var buttonId = event.getButton().getId();
+        var buttonId = event.getButton().getCustomId();
         var command = owoBot.getCommandCache().getCommand(buttonId);
         command.setParameters(buttonId);
         return command;
