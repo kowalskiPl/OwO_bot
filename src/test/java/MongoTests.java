@@ -26,8 +26,8 @@ public class MongoTests {
 
     @Test
     public void connectionPoolTests(){
-        System.out.println(config.getTestMongoDb());
-        MongoDbContext context = new MongoDbContext("", 3, config.getTestMongoDb());
+        System.out.println(config.getMongoDb());
+        MongoDbContext context = new MongoDbContext("", 3, config.getMongoDb());
         Set<Long> aa = new HashSet<>();
         aa.add(123123L);
         GuildSettings settings = new GuildSettings(123123123L, aa, 100);
